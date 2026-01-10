@@ -116,38 +116,51 @@ jobs:
 
           echo ""
           echo "=== Testing installed tools ==="
+          echo "Note: Using entrypoint script which initializes all environments"
 
           echo ""
           echo "Testing Node.js..."
-          docker run --rm sandbox-test bash -c "source ~/.bashrc && node --version" || echo "Node.js test failed"
+          docker run --rm sandbox-test node --version || echo "Node.js test failed"
 
           echo ""
           echo "Testing Python..."
-          docker run --rm sandbox-test bash -c "source ~/.bashrc && python --version" || echo "Python test failed"
+          docker run --rm sandbox-test python --version || echo "Python test failed"
 
           echo ""
           echo "Testing Go..."
-          docker run --rm sandbox-test bash -c "source ~/.bashrc && go version" || echo "Go test failed"
+          docker run --rm sandbox-test go version || echo "Go test failed"
 
           echo ""
           echo "Testing Rust..."
-          docker run --rm sandbox-test bash -c "source ~/.bashrc && rustc --version" || echo "Rust test failed"
+          docker run --rm sandbox-test rustc --version || echo "Rust test failed"
 
           echo ""
           echo "Testing Java..."
-          docker run --rm sandbox-test bash -c "source ~/.bashrc && java -version" || echo "Java test failed"
+          docker run --rm sandbox-test java -version || echo "Java test failed"
 
           echo ""
           echo "Testing Bun..."
-          docker run --rm sandbox-test bash -c "source ~/.bashrc && bun --version" || echo "Bun test failed"
+          docker run --rm sandbox-test bun --version || echo "Bun test failed"
 
           echo ""
           echo "Testing Deno..."
-          docker run --rm sandbox-test bash -c "source ~/.bashrc && deno --version" || echo "Deno test failed"
+          docker run --rm sandbox-test deno --version || echo "Deno test failed"
 
           echo ""
           echo "Testing GitHub CLI..."
-          docker run --rm sandbox-test bash -c "gh --version" || echo "GitHub CLI test failed"
+          docker run --rm sandbox-test gh --version || echo "GitHub CLI test failed"
+
+          echo ""
+          echo "Testing Lean..."
+          docker run --rm sandbox-test lean --version || echo "Lean test failed"
+
+          echo ""
+          echo "Testing Perl..."
+          docker run --rm sandbox-test perl --version || echo "Perl test failed"
+
+          echo ""
+          echo "Testing PHP..."
+          docker run --rm sandbox-test php --version || echo "PHP test failed"
 
           echo ""
           echo "=== All tests completed ==="
