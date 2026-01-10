@@ -1,0 +1,441 @@
+{
+  "source": "Stack Overflow Developer Survey",
+  "sourceUrl": "https://survey.stackoverflow.co/2025/",
+  "technologyUrl": "https://survey.stackoverflow.co/2025/technology",
+  "description": "Annual Stack Overflow Developer Survey - usage statistics from professional developers",
+  "methodology": "Self-reported survey of professional developers. Usage represents percentage of respondents who reported using each language in the past year.",
+  "updateFrequency": "yearly",
+  "dataOrigin": "Stack Overflow Developer Survey",
+  "fetchedAt": "2026-01-10T15:00:13.499Z",
+  "surveyYear": 2025,
+  "respondents": 49000,
+  "countries": 177,
+  "totalLanguages": 43,
+  "rankings": [
+    {
+      "rank": 1,
+      "name": "JavaScript",
+      "usage": 66.2,
+      "usagePercent": "66.2%",
+      "share": 0.662,
+      "desireRank": 2,
+      "desireScore": 12.1
+    },
+    {
+      "rank": 2,
+      "name": "HTML/CSS",
+      "usage": 56.5,
+      "usagePercent": "56.5%",
+      "share": 0.565
+    },
+    {
+      "rank": 3,
+      "name": "Python",
+      "usage": 54.8,
+      "usagePercent": "54.8%",
+      "share": 0.5479999999999999,
+      "admirationRank": 9,
+      "admirationScore": 56.8,
+      "desireRank": 1,
+      "desireScore": 18.2
+    },
+    {
+      "rank": 4,
+      "name": "SQL",
+      "usage": 49.3,
+      "usagePercent": "49.3%",
+      "share": 0.493
+    },
+    {
+      "rank": 5,
+      "name": "TypeScript",
+      "usage": 43.2,
+      "usagePercent": "43.2%",
+      "share": 0.43200000000000005,
+      "admirationRank": 7,
+      "admirationScore": 58.9,
+      "desireRank": 5,
+      "desireScore": 10.9
+    },
+    {
+      "rank": 6,
+      "name": "Bash/Shell",
+      "usage": 34.1,
+      "usagePercent": "34.1%",
+      "share": 0.341
+    },
+    {
+      "rank": 7,
+      "name": "Java",
+      "usage": 30.5,
+      "usagePercent": "30.5%",
+      "share": 0.305,
+      "desireRank": 8,
+      "desireScore": 5.4
+    },
+    {
+      "rank": 8,
+      "name": "C#",
+      "usage": 27.4,
+      "usagePercent": "27.4%",
+      "share": 0.27399999999999997,
+      "desireRank": 9,
+      "desireScore": 4.9
+    },
+    {
+      "rank": 9,
+      "name": "C++",
+      "usage": 20.1,
+      "usagePercent": "20.1%",
+      "share": 0.201,
+      "desireRank": 7,
+      "desireScore": 5.8
+    },
+    {
+      "rank": 10,
+      "name": "C",
+      "usage": 18.7,
+      "usagePercent": "18.7%",
+      "share": 0.187
+    },
+    {
+      "rank": 11,
+      "name": "PHP",
+      "usage": 17.4,
+      "usagePercent": "17.4%",
+      "share": 0.174
+    },
+    {
+      "rank": 12,
+      "name": "Go",
+      "usage": 14.2,
+      "usagePercent": "14.2%",
+      "share": 0.142,
+      "admirationRank": 6,
+      "admirationScore": 60.5,
+      "desireRank": 3,
+      "desireScore": 11.8
+    },
+    {
+      "rank": 13,
+      "name": "Rust",
+      "usage": 12.8,
+      "usagePercent": "12.8%",
+      "share": 0.128,
+      "admirationRank": 1,
+      "admirationScore": 72.1,
+      "desireRank": 4,
+      "desireScore": 11.5
+    },
+    {
+      "rank": 14,
+      "name": "PowerShell",
+      "usage": 11.2,
+      "usagePercent": "11.2%",
+      "share": 0.11199999999999999
+    },
+    {
+      "rank": 15,
+      "name": "Kotlin",
+      "usage": 9.7,
+      "usagePercent": "9.7%",
+      "share": 0.09699999999999999,
+      "admirationRank": 8,
+      "admirationScore": 57.2,
+      "desireRank": 6,
+      "desireScore": 6.2
+    },
+    {
+      "rank": 16,
+      "name": "Ruby",
+      "usage": 6.2,
+      "usagePercent": "6.2%",
+      "share": 0.062
+    },
+    {
+      "rank": 17,
+      "name": "Swift",
+      "usage": 5.8,
+      "usagePercent": "5.8%",
+      "share": 0.057999999999999996,
+      "admirationRank": 10,
+      "admirationScore": 54.1,
+      "desireRank": 10,
+      "desireScore": 4.2
+    },
+    {
+      "rank": 18,
+      "name": "Lua",
+      "usage": 5.3,
+      "usagePercent": "5.3%",
+      "share": 0.053
+    },
+    {
+      "rank": 19,
+      "name": "R",
+      "usage": 5.1,
+      "usagePercent": "5.1%",
+      "share": 0.051
+    },
+    {
+      "rank": 20,
+      "name": "Dart",
+      "usage": 4.9,
+      "usagePercent": "4.9%",
+      "share": 0.049
+    },
+    {
+      "rank": 21,
+      "name": "Assembly",
+      "usage": 4.2,
+      "usagePercent": "4.2%",
+      "share": 0.042
+    },
+    {
+      "rank": 22,
+      "name": "MATLAB",
+      "usage": 3.8,
+      "usagePercent": "3.8%",
+      "share": 0.038
+    },
+    {
+      "rank": 23,
+      "name": "VBA",
+      "usage": 3.2,
+      "usagePercent": "3.2%",
+      "share": 0.032
+    },
+    {
+      "rank": 24,
+      "name": "Perl",
+      "usage": 2.9,
+      "usagePercent": "2.9%",
+      "share": 0.028999999999999998
+    },
+    {
+      "rank": 25,
+      "name": "Scala",
+      "usage": 2.8,
+      "usagePercent": "2.8%",
+      "share": 0.027999999999999997
+    },
+    {
+      "rank": 26,
+      "name": "Elixir",
+      "usage": 2.5,
+      "usagePercent": "2.5%",
+      "share": 0.025,
+      "admirationRank": 3,
+      "admirationScore": 66.4
+    },
+    {
+      "rank": 27,
+      "name": "Objective-C",
+      "usage": 2.4,
+      "usagePercent": "2.4%",
+      "share": 0.024
+    },
+    {
+      "rank": 28,
+      "name": "Groovy",
+      "usage": 2.1,
+      "usagePercent": "2.1%",
+      "share": 0.021
+    },
+    {
+      "rank": 29,
+      "name": "Delphi",
+      "usage": 1.9,
+      "usagePercent": "1.9%",
+      "share": 0.019
+    },
+    {
+      "rank": 30,
+      "name": "Fortran",
+      "usage": 1.8,
+      "usagePercent": "1.8%",
+      "share": 0.018000000000000002
+    },
+    {
+      "rank": 31,
+      "name": "Clojure",
+      "usage": 1.6,
+      "usagePercent": "1.6%",
+      "share": 0.016,
+      "admirationRank": 5,
+      "admirationScore": 61.8
+    },
+    {
+      "rank": 32,
+      "name": "Zig",
+      "usage": 1.5,
+      "usagePercent": "1.5%",
+      "share": 0.015,
+      "admirationRank": 4,
+      "admirationScore": 64.2
+    },
+    {
+      "rank": 33,
+      "name": "Haskell",
+      "usage": 1.4,
+      "usagePercent": "1.4%",
+      "share": 0.013999999999999999
+    },
+    {
+      "rank": 34,
+      "name": "Julia",
+      "usage": 1.2,
+      "usagePercent": "1.2%",
+      "share": 0.012
+    },
+    {
+      "rank": 35,
+      "name": "F#",
+      "usage": 1.1,
+      "usagePercent": "1.1%",
+      "share": 0.011000000000000001
+    },
+    {
+      "rank": 36,
+      "name": "Erlang",
+      "usage": 0.9,
+      "usagePercent": "0.9%",
+      "share": 0.009000000000000001
+    },
+    {
+      "rank": 37,
+      "name": "COBOL",
+      "usage": 0.8,
+      "usagePercent": "0.8%",
+      "share": 0.008
+    },
+    {
+      "rank": 38,
+      "name": "Lisp",
+      "usage": 0.7,
+      "usagePercent": "0.7%",
+      "share": 0.006999999999999999
+    },
+    {
+      "rank": 39,
+      "name": "OCaml",
+      "usage": 0.6,
+      "usagePercent": "0.6%",
+      "share": 0.006
+    },
+    {
+      "rank": 40,
+      "name": "Ada",
+      "usage": 0.5,
+      "usagePercent": "0.5%",
+      "share": 0.005
+    },
+    {
+      "rank": 41,
+      "name": "Nim",
+      "usage": 0.4,
+      "usagePercent": "0.4%",
+      "share": 0.004
+    },
+    {
+      "rank": 42,
+      "name": "Prolog",
+      "usage": 0.4,
+      "usagePercent": "0.4%",
+      "share": 0.004
+    },
+    {
+      "rank": 43,
+      "name": "Crystal",
+      "usage": 0.3,
+      "usagePercent": "0.3%",
+      "share": 0.003
+    }
+  ],
+  "sentiment": {
+    "mostAdmired": [
+      {
+        "name": "Rust",
+        "admiration": 72.1
+      },
+      {
+        "name": "Gleam",
+        "admiration": 70
+      },
+      {
+        "name": "Elixir",
+        "admiration": 66.4
+      },
+      {
+        "name": "Zig",
+        "admiration": 64.2
+      },
+      {
+        "name": "Clojure",
+        "admiration": 61.8
+      },
+      {
+        "name": "Go",
+        "admiration": 60.5
+      },
+      {
+        "name": "TypeScript",
+        "admiration": 58.9
+      },
+      {
+        "name": "Kotlin",
+        "admiration": 57.2
+      },
+      {
+        "name": "Python",
+        "admiration": 56.8
+      },
+      {
+        "name": "Swift",
+        "admiration": 54.1
+      }
+    ],
+    "mostDesired": [
+      {
+        "name": "Python",
+        "desire": 18.2
+      },
+      {
+        "name": "JavaScript",
+        "desire": 12.1
+      },
+      {
+        "name": "Go",
+        "desire": 11.8
+      },
+      {
+        "name": "Rust",
+        "desire": 11.5
+      },
+      {
+        "name": "TypeScript",
+        "desire": 10.9
+      },
+      {
+        "name": "Kotlin",
+        "desire": 6.2
+      },
+      {
+        "name": "C++",
+        "desire": 5.8
+      },
+      {
+        "name": "Java",
+        "desire": 5.4
+      },
+      {
+        "name": "C#",
+        "desire": 4.9
+      },
+      {
+        "name": "Swift",
+        "desire": 4.2
+      }
+    ]
+  }
+}
