@@ -30,16 +30,18 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '../../data');
 
 // Try to import lino-objects-codec, fallback to JSON if not available
-let encode, decode;
+let encode, decode, jsonToLino;
 try {
   const codec = await import('lino-objects-codec');
   encode = codec.encode;
   decode = codec.decode;
+  jsonToLino = codec.jsonToLino;
   console.log('Using lino-objects-codec for output encoding');
 } catch (e) {
   console.log('lino-objects-codec not available, using JSON output only');
   encode = null;
   decode = null;
+  jsonToLino = null;
 }
 
 /**
@@ -349,15 +351,15 @@ async function main() {
     writeFileSync(jsonPath, JSON.stringify(data, null, 2));
     console.log(`\nJSON data saved to: ${jsonPath}`);
 
-    // Save as lino-objects-codec format if available
-    if (encode) {
+    // Save as lino format if available (using jsonToLino for readable output)
+    if (jsonToLino) {
       try {
-        const encoded = encode(data);
+        const linoData = jsonToLino({ json: data });
         const linoPath = join(DATA_DIR, 'aggregated.lino');
-        writeFileSync(linoPath, encoded);
-        console.log(`Lino-encoded data saved to: ${linoPath}`);
+        writeFileSync(linoPath, linoData);
+        console.log(`Lino data saved to: ${linoPath}`);
       } catch (e) {
-        console.warn('Could not encode with lino-objects-codec:', e.message);
+        console.warn('Could not convert to lino format:', e.message);
       }
     }
 
