@@ -1,1 +1,1200 @@
-((meta ((title 'Aggregated Programming Language Rankings') (description 'Scientifically weighted ranking of programming languages based on multiple independent data sources') (generatedAt '2026-01-10T20:52:43.753Z') (version 1.0.0))) (methodology ((description 'Languages are scored using a weighted combination of multiple data sources. Each source measures a different aspect of language popularity (learning intent, actual usage, community activity).') (weights ((githut ((weight 0.35) (normalizedWeight 35.0%) (description 'GitHub Activity (Pull Requests, Pushes, Stars, Issues)'))) (tiobe ((weight 0.25) (normalizedWeight 25.0%) (description 'Search Engine Query Analysis'))) (pypl ((weight 0.2) (normalizedWeight 20.0%) (description 'Google Trends Tutorial Searches'))) (stackoverflow ((weight 0.2) (normalizedWeight 20.0%) (description 'Stack Overflow Developer Survey'))))) (totalWeight 1.00) (normalizedWeightSum 100%))) (sources ((githut ((weight 0.35) (description 'GitHub Activity (Pull Requests, Pushes, Stars, Issues)') (updateFrequency quarterly) (dataSize 'very large (all GitHub repos)') (methodology 'Direct measurement of code activity') (strengths ('Actual code commits' 'Large sample size' 'Real project activity')) (weaknesses ('Biased toward open source' 'Over-represents web technologies')) (languageCount 50) (fetchedAt '2026-01-10T15:00:09.608Z') (latestDataDate 2024-Q1) (dataOrigin 'GitHub Archive (BigQuery)'))) (tiobe ((weight 0.25) (description 'Search Engine Query Analysis') (updateFrequency monthly) (dataSize 'very large (global search queries)') (methodology 'Search engine mentions and tutorials') (strengths ('Long history (since 2001)' 'Global coverage' 'Independent of GitHub')) (weaknesses ('Measures interest, not usage' 'Can be gamed')) (languageCount 32) (fetchedAt '2026-01-10T15:00:52.745Z') (latestDataDate 'Jan 1, 2026') (dataOrigin 'Search engines (Google, Bing, Yahoo, Wikipedia, Amazon, YouTube, Baidu)'))) (pypl ((weight 0.2) (description 'Google Trends Tutorial Searches') (updateFrequency monthly) (dataSize 'large (Google search data)') (methodology 'Tutorial search frequency on Google') (strengths ('Learning intent indicator' 'Good for emerging languages')) (weaknesses ('Only measures learning intent' 'Regional bias')) (languageCount 30) (fetchedAt '2026-01-10T15:00:00.245Z') (latestDataDate 2026-01) (dataOrigin 'Google Trends'))) (stackoverflow ((weight 0.2) (description 'Stack Overflow Developer Survey') (updateFrequency yearly) (dataSize 'medium (~50,000 respondents)') (methodology 'Self-reported usage survey') (strengths ('Direct developer feedback' 'Includes sentiment data')) (weaknesses ('Selection bias' 'Less frequent updates' 'English-speaking bias')) (languageCount 43) (fetchedAt '2026-01-10T15:00:13.499Z') (latestDataDate 2025) (dataOrigin 'Stack Overflow Developer Survey'))))) (summary ((totalLanguages 65) (sourcesUsed 4) (topLanguage Python) (top10 (Python SQL HTML/CSS JavaScript C/C++ TypeScript Java Shell C++ C)))) (rankings (((rank 1) (name Python) (score 0.27831384510381424) (scorePercent 27.83%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 1) (score 0.16116812886804074) (rawValue 16.12%))) (tiobe ((rank 1) (score 0.2261) (rawValue 0.2261))) (pypl ((rank 1) (score 0.2789) (rawValue 0.2789))) (stackoverflow ((rank 3) (score 0.5479999999999999) (rawValue 0.5479999999999999)))))) ((rank 2) (name SQL) (score 0.23172222222222222) (scorePercent 23.17%) (confidence 0.5) (sourceCount 2) (sources ((tiobe ((rank 8) (score 0.0227) (rawValue 0.0227))) (stackoverflow ((rank 4) (score 0.493) (rawValue 0.493)))))) ((rank 3) (name HTML/CSS) (score 0.21881703258123236) (scorePercent 21.88%) (confidence 0.5) (sourceCount 2) (sources ((githut ((rank 12) (score 0.02099819405622232) (rawValue 2.10%))) (stackoverflow ((rank 2) (score 0.565) (rawValue 0.565)))))) ((rank 4) (name JavaScript) (score 0.18745866279632306) (scorePercent 18.75%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 3) (score 0.10572475084663728) (rawValue 10.57%))) (tiobe ((rank 6) (score 0.030299999999999997) (rawValue 0.030299999999999997))) (pypl ((rank 5) (score 0.0524) (rawValue 0.0524))) (stackoverflow ((rank 1) (score 0.662) (rawValue 0.662)))))) ((rank 5) (name C/C++) (score 0.16169999999999998) (scorePercent 16.17%) (confidence 0.25) (sourceCount 1) (sources ((pypl ((rank 2) (score 0.1617) (rawValue 0.1617)))))) ((rank 6) (name TypeScript) (score 0.1550937975826068) (scorePercent 15.51%) (confidence 0.75) (sourceCount 3) (sources ((githut ((rank 6) (score 0.07497242339130021) (rawValue 7.50%))) (pypl ((rank 12) (score 0.0184) (rawValue 0.0184))) (stackoverflow ((rank 5) (score 0.43200000000000005) (rawValue 0.43200000000000005)))))) ((rank 7) (name Java) (score 0.14366752742476985) (scorePercent 14.37%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 2) (score 0.1068929354993424) (rawValue 10.69%))) (tiobe ((rank 3) (score 0.08710000000000001) (rawValue 0.08710000000000001))) (pypl ((rank 3) (score 0.1174) (rawValue 0.1174))) (stackoverflow ((rank 7) (score 0.305) (rawValue 0.305)))))) ((rank 8) (name Shell) (score 0.1384995285578414) (scorePercent 13.85%) (confidence 0.5) (sourceCount 2) (sources ((githut ((rank 11) (score 0.022784973448036486) (rawValue 2.28%))) (stackoverflow ((rank 6) (score 0.341) (rawValue 0.341)))))) ((rank 9) (name C++) (score 0.11855072848699734) (scorePercent 11.86%) (confidence 0.75) (sourceCount 3) (sources ((githut ((rank 4) (score 0.09418737939885106) (rawValue 9.42%))) (tiobe ((rank 4) (score 0.0867) (rawValue 0.0867))) (stackoverflow ((rank 9) (score 0.201) (rawValue 0.201)))))) ((rank 10) (name C) (score 0.1022968200094674) (scorePercent 10.23%) (confidence 0.75) (sourceCount 3) (sources ((githut ((rank 8) (score 0.04846416002163975) (rawValue 4.85%))) (tiobe ((rank 2) (score 0.1099) (rawValue 0.1099))) (stackoverflow ((rank 10) (score 0.187) (rawValue 0.187)))))) ((rank 11) (name C#) (score 0.09198821965965848) (scorePercent 9.20%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 10) (score 0.03563777045616709) (rawValue 3.56%))) (tiobe ((rank 5) (score 0.0739) (rawValue 0.0739))) (pypl ((rank 8) (score 0.0312) (rawValue 0.0312))) (stackoverflow ((rank 8) (score 0.27399999999999997) (rawValue 0.27399999999999997)))))) ((rank 12) (name PHP) (score 0.06502213450778219) (scorePercent 6.50%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 7) (score 0.05734895573652054) (rawValue 5.73%))) (tiobe ((rank 15) (score 0.0138) (rawValue 0.0138))) (pypl ((rank 7) (score 0.0335) (rawValue 0.0335))) (stackoverflow ((rank 11) (score 0.174) (rawValue 0.174)))))) ((rank 13) (name Go) (score 0.06425182597399219) (scorePercent 6.43%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 5) (score 0.0896909313542634) (rawValue 8.97%))) (tiobe ((rank 16) (score 0.0124) (rawValue 0.0124))) (pypl ((rank 21) (score 0.0068) (rawValue 0.0068))) (stackoverflow ((rank 12) (score 0.142) (rawValue 0.142)))))) ((rank 14) (name Rust) (score 0.04166053777591888) (scorePercent 4.17%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 13) (score 0.018244393645482512) (rawValue 1.82%))) (tiobe ((rank 13) (score 0.0151) (rawValue 0.0151))) (pypl ((rank 10) (score 0.0295) (rawValue 0.0295))) (stackoverflow ((rank 13) (score 0.128) (rawValue 0.128)))))) ((rank 15) (name PowerShell) (score 0.03397855080971719) (scorePercent 3.40%) (confidence 0.75) (sourceCount 3) (sources ((githut ((rank 34) (score 0.0015540374493939835) (rawValue 0.16%))) (pypl ((rank 14) (score 0.0127) (rawValue 0.0127))) (stackoverflow ((rank 14) (score 0.11199999999999999) (rawValue 0.11199999999999999)))))) ((rank 16) (name R) (score 0.029251512523397565) (scorePercent 2.93%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 37) (score 0.001432892923993032) (rawValue 0.14%))) (tiobe ((rank 10) (score 0.0182) (rawValue 0.0182))) (pypl ((rank 4) (score 0.07) (rawValue 0.07))) (stackoverflow ((rank 19) (score 0.051) (rawValue 0.051)))))) ((rank 17) (name Ruby) (score 0.028836839371401506) (scorePercent 2.88%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 9) (score 0.036533826775432876) (rawValue 3.65%))) (tiobe ((rank 26) (score 0.0058) (rawValue 0.0058))) (pypl ((rank 16) (score 0.011) (rawValue 0.011))) (stackoverflow ((rank 16) (score 0.062) (rawValue 0.062)))))) ((rank 18) (name Kotlin) (score 0.028600601381858895) (scorePercent 2.86%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 15) (score 0.01347314680531113) (rawValue 1.35%))) (tiobe ((rank 20) (score 0.0097) (rawValue 0.0097))) (pypl ((rank 17) (score 0.0103) (rawValue 0.0103))) (stackoverflow ((rank 15) (score 0.09699999999999999) (rawValue 0.09699999999999999)))))) ((rank 19) (name Swift) (score 0.026175572976968202) (scorePercent 2.62%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 17) (score 0.011201637077052011) (rawValue 1.12%))) (tiobe ((rank 22) (score 0.0091) (rawValue 0.0091))) (pypl ((rank 6) (score 0.0419) (rawValue 0.0419))) (stackoverflow ((rank 17) (score 0.057999999999999996) (rawValue 0.057999999999999996)))))) ((rank 20) (name Assembly) (score 0.024611111111111115) (scorePercent 2.46%) (confidence 0.5) (sourceCount 2) (sources ((tiobe ((rank 19) (score 0.010700000000000001) (rawValue 0.010700000000000001))) (stackoverflow ((rank 21) (score 0.042) (rawValue 0.042)))))) ((rank 21) (name MATLAB) (score 0.02196923076923077) (scorePercent 2.20%) (confidence 0.75) (sourceCount 3) (sources ((tiobe ((rank 14) (score 0.013999999999999999) (rawValue 0.013999999999999999))) (pypl ((rank 13) (score 0.0159) (rawValue 0.0159))) (stackoverflow ((rank 22) (score 0.038) (rawValue 0.038)))))) ((rank 22) (name VBA) (score 0.0206) (scorePercent 2.06%) (confidence 0.5) (sourceCount 2) (sources ((pypl ((rank 19) (score 0.0092) (rawValue 0.0092))) (stackoverflow ((rank 23) (score 0.032) (rawValue 0.032)))))) ((rank 23) (name Fortran) (score 0.016944444444444446) (scorePercent 1.69%) (confidence 0.5) (sourceCount 2) (sources ((tiobe ((rank 12) (score 0.0161) (rawValue 0.0161))) (stackoverflow ((rank 30) (score 0.018000000000000002) (rawValue 0.018000000000000002)))))) ((rank 24) (name Dart) (score 0.01643972997166681) (scorePercent 1.64%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 18) (score 0.007842085633333737) (rawValue 0.78%))) (tiobe ((rank 25) (score 0.0063) (rawValue 0.0063))) (pypl ((rank 15) (score 0.0116) (rawValue 0.0116))) (stackoverflow ((rank 20) (score 0.049) (rawValue 0.049)))))) ((rank 25) (name Ada) (score 0.015376923076923076) (scorePercent 1.54%) (confidence 0.75) (sourceCount 3) (sources ((tiobe ((rank 18) (score 0.011899999999999999) (rawValue 0.011899999999999999))) (pypl ((rank 9) (score 0.0301) (rawValue 0.0301))) (stackoverflow ((rank 40) (score 0.005) (rawValue 0.005)))))) ((rank 26) (name Lua) (score 0.015203964004249355) (scorePercent 1.52%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 21) (score 0.004368468583569588) (rawValue 0.44%))) (tiobe ((rank 29) (score 0.0043) (rawValue 0.0043))) (pypl ((rank 18) (score 0.01) (rawValue 0.01))) (stackoverflow ((rank 18) (score 0.053) (rawValue 0.053)))))) ((rank 27) (name Nix) (score 0.014737786140207291) (scorePercent 1.47%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 14) (score 0.014737786140207293) (rawValue 1.47%)))))) ((rank 28) (name Delphi/Pascal) (score 0.014446153846153845) (scorePercent 1.44%) (confidence 0.75) (sourceCount 3) (sources ((tiobe ((rank 9) (score 0.019799999999999998) (rawValue 0.019799999999999998))) (pypl ((rank 24) (score 0.0032) (rawValue 0.0032))) (stackoverflow ((rank 29) (score 0.019) (rawValue 0.019)))))) ((rank 29) (name Scala) (score 0.013940143581274456) (scorePercent 1.39%) (confidence 0.75) (sourceCount 3) (sources ((githut ((rank 16) (score 0.011586021959873833) (rawValue 1.16%))) (pypl ((rank 22) (score 0.004) (rawValue 0.004))) (stackoverflow ((rank 25) (score 0.027999999999999997) (rawValue 0.027999999999999997)))))) ((rank 30) (name Scratch) (score 0.0124) (scorePercent 1.24%) (confidence 0.25) (sourceCount 1) (sources ((tiobe ((rank 17) (score 0.0124) (rawValue 0.0124)))))) ((rank 31) (name 'Visual Basic') (score 0.012092857142857145) (scorePercent 1.21%) (confidence 0.75) (sourceCount 3) (sources ((tiobe ((rank 24) (score 0.008) (rawValue 0.008))) (pypl ((rank 26) (score 0.0022) (rawValue 0.0022)))))) ((rank 32) (name Perl) (score 0.01145081014806305) (scorePercent 1.15%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 22) (score 0.004216600423037286) (rawValue 0.42%))) (tiobe ((rank 11) (score 0.0163) (rawValue 0.0163))) (pypl ((rank 30) (score 0.0005) (rawValue 0.0005))) (stackoverflow ((rank 24) (score 0.028999999999999998) (rawValue 0.028999999999999998)))))) ((rank 33) (name Objective-C) (score 0.01090262182813192) (scorePercent 1.09%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 24) (score 0.003293205223234055) (rawValue 0.33%))) (tiobe ((rank 28) (score 0.0046) (rawValue 0.0046))) (pypl ((rank 11) (score 0.019) (rawValue 0.019))) (stackoverflow ((rank 27) (score 0.024) (rawValue 0.024)))))) ((rank 34) (name Elixir) (score 0.010551192759846034) (scorePercent 1.06%) (confidence 0.5) (sourceCount 2) (sources ((githut ((rank 27) (score 0.0022947314797580505) (rawValue 0.23%))) (stackoverflow ((rank 26) (score 0.025) (rawValue 0.025)))))) ((rank 35) (name Zig) (score 0.00885) (scorePercent 0.89%) (confidence 0.5) (sourceCount 2) (sources ((pypl ((rank 25) (score 0.0027) (rawValue 0.0027))) (stackoverflow ((rank 32) (score 0.015) (rawValue 0.015)))))) ((rank 36) (name 'Jupyter Notebook') (score 0.0073651688621322155) (scorePercent 0.74%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 19) (score 0.0073651688621322155) (rawValue 0.74%)))))) ((rank 37) (name Lisp) (score 0.006999999999999999) (scorePercent 0.70%) (confidence 0.25) (sourceCount 1) (sources ((stackoverflow ((rank 38) (score 0.006999999999999999) (rawValue 0.006999999999999999)))))) ((rank 38) (name Prolog) (score 0.00661111111111111) (scorePercent 0.66%) (confidence 0.5) (sourceCount 2) (sources ((tiobe ((rank 23) (score 0.0087) (rawValue 0.0087))) (stackoverflow ((rank 42) (score 0.004) (rawValue 0.004)))))) ((rank 39) (name COBOL) (score 0.00633076923076923) (scorePercent 0.63%) (confidence 0.75) (sourceCount 3) (sources ((tiobe ((rank 21) (score 0.0095) (rawValue 0.0095))) (pypl ((rank 29) (score 0.0007) (rawValue 0.0007))) (stackoverflow ((rank 37) (score 0.008) (rawValue 0.008)))))) ((rank 40) (name Clojure) (score 0.006305739726348684) (scorePercent 0.63%) (confidence 0.5) (sourceCount 2) (sources ((githut ((rank 45) (score 0.0007661624271193606) (rawValue 0.08%))) (stackoverflow ((rank 31) (score 0.016) (rawValue 0.016)))))) ((rank 41) (name Groovy) (score 0.006071225096468515) (scorePercent 0.61%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 23) (score 0.0036463574184814706) (rawValue 0.36%))) (tiobe ((rank 31) (score 0.0015) (rawValue 0.0015))) (pypl ((rank 28) (score 0.0011) (rawValue 0.0011))) (stackoverflow ((rank 28) (score 0.021) (rawValue 0.021)))))) ((rank 42) (name Julia) (score 0.005843912559659574) (scorePercent 0.58%) (confidence 1) (sourceCount 4) (sources ((githut ((rank 49) (score 0.0006826073133130674) (rawValue 0.07%))) (tiobe ((rank 27) (score 0.005699999999999999) (rawValue 0.005699999999999999))) (pypl ((rank 20) (score 0.0089) (rawValue 0.0089))) (stackoverflow ((rank 34) (score 0.012) (rawValue 0.012)))))) ((rank 43) (name Haskell) (score 0.005048533175550772) (scorePercent 0.50%) (confidence 0.75) (sourceCount 3) (sources ((githut ((rank 30) (score 0.0019039996618945114) (rawValue 0.19%))) (pypl ((rank 27) (score 0.0016) (rawValue 0.0016))) (stackoverflow ((rank 33) (score 0.013999999999999999) (rawValue 0.013999999999999999)))))) ((rank 44) (name F#) (score 0.0044454073730041226) (scorePercent 0.44%) (confidence 0.5) (sourceCount 2) (sources ((githut ((rank 47) (score 0.0006999258718636213) (rawValue 0.07%))) (stackoverflow ((rank 35) (score 0.011000000000000001) (rawValue 0.011000000000000001)))))) ((rank 45) (name CSS) (score 0.004421472997716858) (scorePercent 0.44%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 20) (score 0.004421472997716858) (rawValue 0.44%)))))) ((rank 46) (name Erlang) (score 0.004095815132234578) (scorePercent 0.41%) (confidence 0.5) (sourceCount 2) (sources ((githut ((rank 40) (score 0.0012934237792257665) (rawValue 0.13%))) (stackoverflow ((rank 36) (score 0.009000000000000001) (rawValue 0.009000000000000001)))))) ((rank 47) (name Nim) (score 0.004) (scorePercent 0.40%) (confidence 0.25) (sourceCount 1) (sources ((stackoverflow ((rank 41) (score 0.004) (rawValue 0.004)))))) ((rank 48) (name Abap) (score 0.0037) (scorePercent 0.37%) (confidence 0.25) (sourceCount 1) (sources ((pypl ((rank 23) (score 0.0037) (rawValue 0.0037)))))) ((rank 49) (name OCaml) (score 0.003242601220460462) (scorePercent 0.32%) (confidence 0.5) (sourceCount 2) (sources ((githut ((rank 32) (score 0.0016669447750092981) (rawValue 0.17%))) (stackoverflow ((rank 39) (score 0.006) (rawValue 0.006)))))) ((rank 50) (name PL/SQL) (score 0.0032) (scorePercent 0.32%) (confidence 0.25) (sourceCount 1) (sources ((tiobe ((rank 30) (score 0.0032) (rawValue 0.0032)))))) ((rank 51) (name Crystal) (score 0.003) (scorePercent 0.30%) (confidence 0.25) (sourceCount 1) (sources ((stackoverflow ((rank 43) (score 0.003) (rawValue 0.003)))))) ((rank 52) (name SCSS) (score 0.0025550303020237444) (scorePercent 0.26%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 25) (score 0.0025550303020237444) (rawValue 0.26%)))))) ((rank 53) (name Makefile) (score 0.0025487641126021336) (scorePercent 0.25%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 26) (score 0.0025487641126021336) (rawValue 0.25%)))))) ((rank 54) (name DM) (score 0.0020739491425791788) (scorePercent 0.21%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 28) (score 0.0020739491425791788) (rawValue 0.21%)))))) ((rank 55) (name HCL) (score 0.0020051178498371363) (scorePercent 0.20%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 29) (score 0.0020051178498371363) (rawValue 0.20%)))))) ((rank 56) (name 'Emacs Lisp') (score 0.001705688102043901) (scorePercent 0.17%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 31) (score 0.001705688102043901) (rawValue 0.17%)))))) ((rank 57) (name 'Adblock Filter List') (score 0.0015943571590075203) (scorePercent 0.16%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 33) (score 0.0015943571590075205) (rawValue 0.16%)))))) ((rank 58) (name Transact-SQL) (score 0.0015) (scorePercent 0.15%) (confidence 0.25) (sourceCount 1) (sources ((tiobe ((rank 32) (score 0.0015) (rawValue 0.0015)))))) ((rank 59) (name Roff) (score 0.0014879919336521607) (scorePercent 0.15%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 35) (score 0.0014879919336521607) (rawValue 0.15%)))))) ((rank 60) (name SystemVerilog) (score 0.0014828175491635731) (scorePercent 0.15%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 36) (score 0.0014828175491635731) (rawValue 0.15%)))))) ((rank 61) (name Dockerfile) (score 0.001390320156882064) (scorePercent 0.14%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 38) (score 0.001390320156882064) (rawValue 0.14%)))))) ((rank 62) (name Vue) (score 0.0013812905518013755) (scorePercent 0.14%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 39) (score 0.0013812905518013755) (rawValue 0.14%)))))) ((rank 63) (name Starlark) (score 0.001146845261235014) (scorePercent 0.11%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 41) (score 0.001146845261235014) (rawValue 0.11%)))))) ((rank 64) (name Smarty) (score 0.0011240384935396227) (scorePercent 0.11%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 42) (score 0.0011240384935396227) (rawValue 0.11%)))))) ((rank 65) (name 'Vim Script') (score 0.0010622629641192454) (scorePercent 0.11%) (confidence 0.25) (sourceCount 1) (sources ((githut ((rank 43) (score 0.0010622629641192454) (rawValue 0.11%)))))))))
+meta:
+  title "Aggregated Programming Language Rankings"
+  description "Scientifically weighted ranking of programming languages based on multiple independent data sources"
+  generatedAt "2026-01-11T04:31:45.953Z"
+  version 1.0.0
+methodology:
+  description "Languages are scored using a weighted combination of multiple data sources. Each source measures a different aspect of language popularity (learning intent, actual usage, community activity)."
+  weights:
+    githut:
+      weight 0.35
+      normalizedWeight 35.0%
+      description "GitHub Activity (Pull Requests, Pushes, Stars, Issues)"
+    tiobe:
+      weight 0.25
+      normalizedWeight 25.0%
+      description "Search Engine Query Analysis"
+    pypl:
+      weight 0.2
+      normalizedWeight 20.0%
+      description "Google Trends Tutorial Searches"
+    stackoverflow:
+      weight 0.2
+      normalizedWeight 20.0%
+      description "Stack Overflow Developer Survey"
+  totalWeight 1.00
+  normalizedWeightSum 100%
+sources:
+  githut:
+    weight 0.35
+    description "GitHub Activity (Pull Requests, Pushes, Stars, Issues)"
+    updateFrequency quarterly
+    dataSize "very large (all GitHub repos)"
+    methodology "Direct measurement of code activity"
+    strengths "Actual code commits" "Large sample size" "Real project activity"
+    weaknesses "Biased toward open source" "Over-represents web technologies"
+    languageCount 50
+    fetchedAt "2026-01-10T15:00:09.608Z"
+    latestDataDate 2024-Q1
+    dataOrigin "GitHub Archive (BigQuery)"
+  tiobe:
+    weight 0.25
+    description "Search Engine Query Analysis"
+    updateFrequency monthly
+    dataSize "very large (global search queries)"
+    methodology "Search engine mentions and tutorials"
+    strengths "Long history (since 2001)" "Global coverage" "Independent of GitHub"
+    weaknesses "Measures interest, not usage" "Can be gamed"
+    languageCount 32
+    fetchedAt "2026-01-10T15:00:52.745Z"
+    latestDataDate "Jan 1, 2026"
+    dataOrigin "Search engines (Google, Bing, Yahoo, Wikipedia, Amazon, YouTube, Baidu)"
+  pypl:
+    weight 0.2
+    description "Google Trends Tutorial Searches"
+    updateFrequency monthly
+    dataSize "large (Google search data)"
+    methodology "Tutorial search frequency on Google"
+    strengths "Learning intent indicator" "Good for emerging languages"
+    weaknesses "Only measures learning intent" "Regional bias"
+    languageCount 30
+    fetchedAt "2026-01-10T15:00:00.245Z"
+    latestDataDate 2026-01
+    dataOrigin "Google Trends"
+  stackoverflow:
+    weight 0.2
+    description "Stack Overflow Developer Survey"
+    updateFrequency yearly
+    dataSize "medium (~50,000 respondents)"
+    methodology "Self-reported usage survey"
+    strengths "Direct developer feedback" "Includes sentiment data"
+    weaknesses "Selection bias" "Less frequent updates" "English-speaking bias"
+    languageCount 43
+    fetchedAt "2026-01-10T15:00:13.499Z"
+    latestDataDate 2025
+    dataOrigin "Stack Overflow Developer Survey"
+summary:
+  totalLanguages 65
+  sourcesUsed 4
+  topLanguage Python
+  top10 Python SQL HTML/CSS JavaScript C/C++ TypeScript Java Shell C++ C
+rankings:
+  rank 1
+  name Python
+  score 0.27831384510381424
+  scorePercent 27.83%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 1
+      score 0.16116812886804074
+      rawValue 16.12%
+    tiobe:
+      rank 1
+      score 0.2261
+      rawValue 0.2261
+    pypl:
+      rank 1
+      score 0.2789
+      rawValue 0.2789
+    stackoverflow:
+      rank 3
+      score 0.5479999999999999
+      rawValue 0.5479999999999999
+
+  rank 2
+  name SQL
+  score 0.23172222222222222
+  scorePercent 23.17%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    tiobe:
+      rank 8
+      score 0.0227
+      rawValue 0.0227
+    stackoverflow:
+      rank 4
+      score 0.493
+      rawValue 0.493
+
+  rank 3
+  name HTML/CSS
+  score 0.21881703258123236
+  scorePercent 21.88%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    githut:
+      rank 12
+      score 0.02099819405622232
+      rawValue 2.10%
+    stackoverflow:
+      rank 2
+      score 0.565
+      rawValue 0.565
+
+  rank 4
+  name JavaScript
+  score 0.18745866279632306
+  scorePercent 18.75%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 3
+      score 0.10572475084663728
+      rawValue 10.57%
+    tiobe:
+      rank 6
+      score 0.030299999999999997
+      rawValue 0.030299999999999997
+    pypl:
+      rank 5
+      score 0.0524
+      rawValue 0.0524
+    stackoverflow:
+      rank 1
+      score 0.662
+      rawValue 0.662
+
+  rank 5
+  name C/C++
+  score 0.16169999999999998
+  scorePercent 16.17%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    pypl:
+      rank 2
+      score 0.1617
+      rawValue 0.1617
+
+  rank 6
+  name TypeScript
+  score 0.1550937975826068
+  scorePercent 15.51%
+  confidence 0.75
+  sourceCount 3
+  sources:
+    githut:
+      rank 6
+      score 0.07497242339130021
+      rawValue 7.50%
+    pypl:
+      rank 12
+      score 0.0184
+      rawValue 0.0184
+    stackoverflow:
+      rank 5
+      score 0.43200000000000005
+      rawValue 0.43200000000000005
+
+  rank 7
+  name Java
+  score 0.14366752742476985
+  scorePercent 14.37%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 2
+      score 0.1068929354993424
+      rawValue 10.69%
+    tiobe:
+      rank 3
+      score 0.08710000000000001
+      rawValue 0.08710000000000001
+    pypl:
+      rank 3
+      score 0.1174
+      rawValue 0.1174
+    stackoverflow:
+      rank 7
+      score 0.305
+      rawValue 0.305
+
+  rank 8
+  name Shell
+  score 0.1384995285578414
+  scorePercent 13.85%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    githut:
+      rank 11
+      score 0.022784973448036486
+      rawValue 2.28%
+    stackoverflow:
+      rank 6
+      score 0.341
+      rawValue 0.341
+
+  rank 9
+  name C++
+  score 0.11855072848699734
+  scorePercent 11.86%
+  confidence 0.75
+  sourceCount 3
+  sources:
+    githut:
+      rank 4
+      score 0.09418737939885106
+      rawValue 9.42%
+    tiobe:
+      rank 4
+      score 0.0867
+      rawValue 0.0867
+    stackoverflow:
+      rank 9
+      score 0.201
+      rawValue 0.201
+
+  rank 10
+  name C
+  score 0.1022968200094674
+  scorePercent 10.23%
+  confidence 0.75
+  sourceCount 3
+  sources:
+    githut:
+      rank 8
+      score 0.04846416002163975
+      rawValue 4.85%
+    tiobe:
+      rank 2
+      score 0.1099
+      rawValue 0.1099
+    stackoverflow:
+      rank 10
+      score 0.187
+      rawValue 0.187
+
+  rank 11
+  name C#
+  score 0.09198821965965848
+  scorePercent 9.20%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 10
+      score 0.03563777045616709
+      rawValue 3.56%
+    tiobe:
+      rank 5
+      score 0.0739
+      rawValue 0.0739
+    pypl:
+      rank 8
+      score 0.0312
+      rawValue 0.0312
+    stackoverflow:
+      rank 8
+      score 0.27399999999999997
+      rawValue 0.27399999999999997
+
+  rank 12
+  name PHP
+  score 0.06502213450778219
+  scorePercent 6.50%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 7
+      score 0.05734895573652054
+      rawValue 5.73%
+    tiobe:
+      rank 15
+      score 0.0138
+      rawValue 0.0138
+    pypl:
+      rank 7
+      score 0.0335
+      rawValue 0.0335
+    stackoverflow:
+      rank 11
+      score 0.174
+      rawValue 0.174
+
+  rank 13
+  name Go
+  score 0.06425182597399219
+  scorePercent 6.43%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 5
+      score 0.0896909313542634
+      rawValue 8.97%
+    tiobe:
+      rank 16
+      score 0.0124
+      rawValue 0.0124
+    pypl:
+      rank 21
+      score 0.0068
+      rawValue 0.0068
+    stackoverflow:
+      rank 12
+      score 0.142
+      rawValue 0.142
+
+  rank 14
+  name Rust
+  score 0.04166053777591888
+  scorePercent 4.17%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 13
+      score 0.018244393645482512
+      rawValue 1.82%
+    tiobe:
+      rank 13
+      score 0.0151
+      rawValue 0.0151
+    pypl:
+      rank 10
+      score 0.0295
+      rawValue 0.0295
+    stackoverflow:
+      rank 13
+      score 0.128
+      rawValue 0.128
+
+  rank 15
+  name PowerShell
+  score 0.03397855080971719
+  scorePercent 3.40%
+  confidence 0.75
+  sourceCount 3
+  sources:
+    githut:
+      rank 34
+      score 0.0015540374493939835
+      rawValue 0.16%
+    pypl:
+      rank 14
+      score 0.0127
+      rawValue 0.0127
+    stackoverflow:
+      rank 14
+      score 0.11199999999999999
+      rawValue 0.11199999999999999
+
+  rank 16
+  name R
+  score 0.029251512523397565
+  scorePercent 2.93%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 37
+      score 0.001432892923993032
+      rawValue 0.14%
+    tiobe:
+      rank 10
+      score 0.0182
+      rawValue 0.0182
+    pypl:
+      rank 4
+      score 0.07
+      rawValue 0.07
+    stackoverflow:
+      rank 19
+      score 0.051
+      rawValue 0.051
+
+  rank 17
+  name Ruby
+  score 0.028836839371401506
+  scorePercent 2.88%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 9
+      score 0.036533826775432876
+      rawValue 3.65%
+    tiobe:
+      rank 26
+      score 0.0058
+      rawValue 0.0058
+    pypl:
+      rank 16
+      score 0.011
+      rawValue 0.011
+    stackoverflow:
+      rank 16
+      score 0.062
+      rawValue 0.062
+
+  rank 18
+  name Kotlin
+  score 0.028600601381858895
+  scorePercent 2.86%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 15
+      score 0.01347314680531113
+      rawValue 1.35%
+    tiobe:
+      rank 20
+      score 0.0097
+      rawValue 0.0097
+    pypl:
+      rank 17
+      score 0.0103
+      rawValue 0.0103
+    stackoverflow:
+      rank 15
+      score 0.09699999999999999
+      rawValue 0.09699999999999999
+
+  rank 19
+  name Swift
+  score 0.026175572976968202
+  scorePercent 2.62%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 17
+      score 0.011201637077052011
+      rawValue 1.12%
+    tiobe:
+      rank 22
+      score 0.0091
+      rawValue 0.0091
+    pypl:
+      rank 6
+      score 0.0419
+      rawValue 0.0419
+    stackoverflow:
+      rank 17
+      score 0.057999999999999996
+      rawValue 0.057999999999999996
+
+  rank 20
+  name Assembly
+  score 0.024611111111111115
+  scorePercent 2.46%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    tiobe:
+      rank 19
+      score 0.010700000000000001
+      rawValue 0.010700000000000001
+    stackoverflow:
+      rank 21
+      score 0.042
+      rawValue 0.042
+
+  rank 21
+  name MATLAB
+  score 0.02196923076923077
+  scorePercent 2.20%
+  confidence 0.75
+  sourceCount 3
+  sources:
+    tiobe:
+      rank 14
+      score 0.013999999999999999
+      rawValue 0.013999999999999999
+    pypl:
+      rank 13
+      score 0.0159
+      rawValue 0.0159
+    stackoverflow:
+      rank 22
+      score 0.038
+      rawValue 0.038
+
+  rank 22
+  name VBA
+  score 0.0206
+  scorePercent 2.06%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    pypl:
+      rank 19
+      score 0.0092
+      rawValue 0.0092
+    stackoverflow:
+      rank 23
+      score 0.032
+      rawValue 0.032
+
+  rank 23
+  name Fortran
+  score 0.016944444444444446
+  scorePercent 1.69%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    tiobe:
+      rank 12
+      score 0.0161
+      rawValue 0.0161
+    stackoverflow:
+      rank 30
+      score 0.018000000000000002
+      rawValue 0.018000000000000002
+
+  rank 24
+  name Dart
+  score 0.01643972997166681
+  scorePercent 1.64%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 18
+      score 0.007842085633333737
+      rawValue 0.78%
+    tiobe:
+      rank 25
+      score 0.0063
+      rawValue 0.0063
+    pypl:
+      rank 15
+      score 0.0116
+      rawValue 0.0116
+    stackoverflow:
+      rank 20
+      score 0.049
+      rawValue 0.049
+
+  rank 25
+  name Ada
+  score 0.015376923076923076
+  scorePercent 1.54%
+  confidence 0.75
+  sourceCount 3
+  sources:
+    tiobe:
+      rank 18
+      score 0.011899999999999999
+      rawValue 0.011899999999999999
+    pypl:
+      rank 9
+      score 0.0301
+      rawValue 0.0301
+    stackoverflow:
+      rank 40
+      score 0.005
+      rawValue 0.005
+
+  rank 26
+  name Lua
+  score 0.015203964004249355
+  scorePercent 1.52%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 21
+      score 0.004368468583569588
+      rawValue 0.44%
+    tiobe:
+      rank 29
+      score 0.0043
+      rawValue 0.0043
+    pypl:
+      rank 18
+      score 0.01
+      rawValue 0.01
+    stackoverflow:
+      rank 18
+      score 0.053
+      rawValue 0.053
+
+  rank 27
+  name Nix
+  score 0.014737786140207291
+  scorePercent 1.47%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 14
+      score 0.014737786140207293
+      rawValue 1.47%
+
+  rank 28
+  name Delphi/Pascal
+  score 0.014446153846153845
+  scorePercent 1.44%
+  confidence 0.75
+  sourceCount 3
+  sources:
+    tiobe:
+      rank 9
+      score 0.019799999999999998
+      rawValue 0.019799999999999998
+    pypl:
+      rank 24
+      score 0.0032
+      rawValue 0.0032
+    stackoverflow:
+      rank 29
+      score 0.019
+      rawValue 0.019
+
+  rank 29
+  name Scala
+  score 0.013940143581274456
+  scorePercent 1.39%
+  confidence 0.75
+  sourceCount 3
+  sources:
+    githut:
+      rank 16
+      score 0.011586021959873833
+      rawValue 1.16%
+    pypl:
+      rank 22
+      score 0.004
+      rawValue 0.004
+    stackoverflow:
+      rank 25
+      score 0.027999999999999997
+      rawValue 0.027999999999999997
+
+  rank 30
+  name Scratch
+  score 0.0124
+  scorePercent 1.24%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    tiobe:
+      rank 17
+      score 0.0124
+      rawValue 0.0124
+
+  rank 31
+  name "Visual Basic"
+  score 0.012092857142857145
+  scorePercent 1.21%
+  confidence 0.75
+  sourceCount 3
+  sources:
+    tiobe:
+      rank 24
+      score 0.008
+      rawValue 0.008
+    pypl:
+      rank 26
+      score 0.0022
+      rawValue 0.0022
+
+  rank 32
+  name Perl
+  score 0.01145081014806305
+  scorePercent 1.15%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 22
+      score 0.004216600423037286
+      rawValue 0.42%
+    tiobe:
+      rank 11
+      score 0.0163
+      rawValue 0.0163
+    pypl:
+      rank 30
+      score 0.0005
+      rawValue 0.0005
+    stackoverflow:
+      rank 24
+      score 0.028999999999999998
+      rawValue 0.028999999999999998
+
+  rank 33
+  name Objective-C
+  score 0.01090262182813192
+  scorePercent 1.09%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 24
+      score 0.003293205223234055
+      rawValue 0.33%
+    tiobe:
+      rank 28
+      score 0.0046
+      rawValue 0.0046
+    pypl:
+      rank 11
+      score 0.019
+      rawValue 0.019
+    stackoverflow:
+      rank 27
+      score 0.024
+      rawValue 0.024
+
+  rank 34
+  name Elixir
+  score 0.010551192759846034
+  scorePercent 1.06%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    githut:
+      rank 27
+      score 0.0022947314797580505
+      rawValue 0.23%
+    stackoverflow:
+      rank 26
+      score 0.025
+      rawValue 0.025
+
+  rank 35
+  name Zig
+  score 0.00885
+  scorePercent 0.89%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    pypl:
+      rank 25
+      score 0.0027
+      rawValue 0.0027
+    stackoverflow:
+      rank 32
+      score 0.015
+      rawValue 0.015
+
+  rank 36
+  name "Jupyter Notebook"
+  score 0.0073651688621322155
+  scorePercent 0.74%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 19
+      score 0.0073651688621322155
+      rawValue 0.74%
+
+  rank 37
+  name Lisp
+  score 0.006999999999999999
+  scorePercent 0.70%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    stackoverflow:
+      rank 38
+      score 0.006999999999999999
+      rawValue 0.006999999999999999
+
+  rank 38
+  name Prolog
+  score 0.00661111111111111
+  scorePercent 0.66%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    tiobe:
+      rank 23
+      score 0.0087
+      rawValue 0.0087
+    stackoverflow:
+      rank 42
+      score 0.004
+      rawValue 0.004
+
+  rank 39
+  name COBOL
+  score 0.00633076923076923
+  scorePercent 0.63%
+  confidence 0.75
+  sourceCount 3
+  sources:
+    tiobe:
+      rank 21
+      score 0.0095
+      rawValue 0.0095
+    pypl:
+      rank 29
+      score 0.0007
+      rawValue 0.0007
+    stackoverflow:
+      rank 37
+      score 0.008
+      rawValue 0.008
+
+  rank 40
+  name Clojure
+  score 0.006305739726348684
+  scorePercent 0.63%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    githut:
+      rank 45
+      score 0.0007661624271193606
+      rawValue 0.08%
+    stackoverflow:
+      rank 31
+      score 0.016
+      rawValue 0.016
+
+  rank 41
+  name Groovy
+  score 0.006071225096468515
+  scorePercent 0.61%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 23
+      score 0.0036463574184814706
+      rawValue 0.36%
+    tiobe:
+      rank 31
+      score 0.0015
+      rawValue 0.0015
+    pypl:
+      rank 28
+      score 0.0011
+      rawValue 0.0011
+    stackoverflow:
+      rank 28
+      score 0.021
+      rawValue 0.021
+
+  rank 42
+  name Julia
+  score 0.005843912559659574
+  scorePercent 0.58%
+  confidence 1
+  sourceCount 4
+  sources:
+    githut:
+      rank 49
+      score 0.0006826073133130674
+      rawValue 0.07%
+    tiobe:
+      rank 27
+      score 0.005699999999999999
+      rawValue 0.005699999999999999
+    pypl:
+      rank 20
+      score 0.0089
+      rawValue 0.0089
+    stackoverflow:
+      rank 34
+      score 0.012
+      rawValue 0.012
+
+  rank 43
+  name Haskell
+  score 0.005048533175550772
+  scorePercent 0.50%
+  confidence 0.75
+  sourceCount 3
+  sources:
+    githut:
+      rank 30
+      score 0.0019039996618945114
+      rawValue 0.19%
+    pypl:
+      rank 27
+      score 0.0016
+      rawValue 0.0016
+    stackoverflow:
+      rank 33
+      score 0.013999999999999999
+      rawValue 0.013999999999999999
+
+  rank 44
+  name F#
+  score 0.0044454073730041226
+  scorePercent 0.44%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    githut:
+      rank 47
+      score 0.0006999258718636213
+      rawValue 0.07%
+    stackoverflow:
+      rank 35
+      score 0.011000000000000001
+      rawValue 0.011000000000000001
+
+  rank 45
+  name CSS
+  score 0.004421472997716858
+  scorePercent 0.44%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 20
+      score 0.004421472997716858
+      rawValue 0.44%
+
+  rank 46
+  name Erlang
+  score 0.004095815132234578
+  scorePercent 0.41%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    githut:
+      rank 40
+      score 0.0012934237792257665
+      rawValue 0.13%
+    stackoverflow:
+      rank 36
+      score 0.009000000000000001
+      rawValue 0.009000000000000001
+
+  rank 47
+  name Nim
+  score 0.004
+  scorePercent 0.40%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    stackoverflow:
+      rank 41
+      score 0.004
+      rawValue 0.004
+
+  rank 48
+  name Abap
+  score 0.0037
+  scorePercent 0.37%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    pypl:
+      rank 23
+      score 0.0037
+      rawValue 0.0037
+
+  rank 49
+  name OCaml
+  score 0.003242601220460462
+  scorePercent 0.32%
+  confidence 0.5
+  sourceCount 2
+  sources:
+    githut:
+      rank 32
+      score 0.0016669447750092981
+      rawValue 0.17%
+    stackoverflow:
+      rank 39
+      score 0.006
+      rawValue 0.006
+
+  rank 50
+  name PL/SQL
+  score 0.0032
+  scorePercent 0.32%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    tiobe:
+      rank 30
+      score 0.0032
+      rawValue 0.0032
+
+  rank 51
+  name Crystal
+  score 0.003
+  scorePercent 0.30%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    stackoverflow:
+      rank 43
+      score 0.003
+      rawValue 0.003
+
+  rank 52
+  name SCSS
+  score 0.0025550303020237444
+  scorePercent 0.26%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 25
+      score 0.0025550303020237444
+      rawValue 0.26%
+
+  rank 53
+  name Makefile
+  score 0.0025487641126021336
+  scorePercent 0.25%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 26
+      score 0.0025487641126021336
+      rawValue 0.25%
+
+  rank 54
+  name DM
+  score 0.0020739491425791788
+  scorePercent 0.21%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 28
+      score 0.0020739491425791788
+      rawValue 0.21%
+
+  rank 55
+  name HCL
+  score 0.0020051178498371363
+  scorePercent 0.20%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 29
+      score 0.0020051178498371363
+      rawValue 0.20%
+
+  rank 56
+  name "Emacs Lisp"
+  score 0.001705688102043901
+  scorePercent 0.17%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 31
+      score 0.001705688102043901
+      rawValue 0.17%
+
+  rank 57
+  name "Adblock Filter List"
+  score 0.0015943571590075203
+  scorePercent 0.16%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 33
+      score 0.0015943571590075205
+      rawValue 0.16%
+
+  rank 58
+  name Transact-SQL
+  score 0.0015
+  scorePercent 0.15%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    tiobe:
+      rank 32
+      score 0.0015
+      rawValue 0.0015
+
+  rank 59
+  name Roff
+  score 0.0014879919336521607
+  scorePercent 0.15%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 35
+      score 0.0014879919336521607
+      rawValue 0.15%
+
+  rank 60
+  name SystemVerilog
+  score 0.0014828175491635731
+  scorePercent 0.15%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 36
+      score 0.0014828175491635731
+      rawValue 0.15%
+
+  rank 61
+  name Dockerfile
+  score 0.001390320156882064
+  scorePercent 0.14%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 38
+      score 0.001390320156882064
+      rawValue 0.14%
+
+  rank 62
+  name Vue
+  score 0.0013812905518013755
+  scorePercent 0.14%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 39
+      score 0.0013812905518013755
+      rawValue 0.14%
+
+  rank 63
+  name Starlark
+  score 0.001146845261235014
+  scorePercent 0.11%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 41
+      score 0.001146845261235014
+      rawValue 0.11%
+
+  rank 64
+  name Smarty
+  score 0.0011240384935396227
+  scorePercent 0.11%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 42
+      score 0.0011240384935396227
+      rawValue 0.11%
+
+  rank 65
+  name "Vim Script"
+  score 0.0010622629641192454
+  scorePercent 0.11%
+  confidence 0.25
+  sourceCount 1
+  sources:
+    githut:
+      rank 43
+      score 0.0010622629641192454
+      rawValue 0.11%

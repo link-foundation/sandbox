@@ -29,19 +29,98 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '../../data');
 
-// Try to import lino-objects-codec, fallback to JSON if not available
-let encode, decode, jsonToLino;
-try {
-  const codec = await import('lino-objects-codec');
-  encode = codec.encode;
-  decode = codec.decode;
-  jsonToLino = codec.jsonToLino;
-  console.log('Using lino-objects-codec for output encoding');
-} catch (e) {
-  console.log('lino-objects-codec not available, using JSON output only');
-  encode = null;
-  decode = null;
-  jsonToLino = null;
+/**
+ * Formats a value for Links Notation output.
+ * Quotes strings that contain spaces or special characters.
+ */
+function formatLinoValue(value) {
+  if (value === null || value === undefined) {
+    return 'null';
+  }
+  if (typeof value === 'boolean') {
+    return value ? 'true' : 'false';
+  }
+  if (typeof value === 'number') {
+    return String(value);
+  }
+  if (typeof value === 'string') {
+    // Quote strings that contain spaces, special chars, or are empty
+    if (value === '' || /[\s():'"]/.test(value)) {
+      // Use single quotes if the string contains double quotes
+      if (value.includes('"')) {
+        return `'${value.replace(/'/g, "\\'")}'`;
+      }
+      return `"${value.replace(/"/g, '\\"')}"`;
+    }
+    return value;
+  }
+  return String(value);
+}
+
+/**
+ * Converts JSON data to indented Links Notation format.
+ * This produces a human-readable, hierarchical representation.
+ *
+ * @param {any} data - The data to convert
+ * @param {string} indent - Current indentation level
+ * @param {string} parentKey - The key of the parent (for special handling)
+ */
+function jsonToIndentedLino(data, indent = '', parentKey = '') {
+  const lines = [];
+  const nextIndent = indent + '  ';
+
+  if (Array.isArray(data)) {
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+      if (typeof item === 'object' && item !== null) {
+        // Add empty line between ranking items for readability
+        if (i > 0 && parentKey === 'rankings') {
+          lines.push('');
+        }
+        lines.push(...jsonToIndentedLino(item, indent, parentKey));
+      } else {
+        lines.push(`${indent}${formatLinoValue(item)}`);
+      }
+    }
+  } else if (typeof data === 'object' && data !== null) {
+    for (const [key, value] of Object.entries(data)) {
+      if (value === null || value === undefined) {
+        lines.push(`${indent}${key} null`);
+      } else if (Array.isArray(value)) {
+        if (value.length === 0) {
+          lines.push(`${indent}${key}`);
+        } else if (value.every(item => typeof item !== 'object')) {
+          // Simple array of primitives - inline format
+          const items = value.map(formatLinoValue).join(' ');
+          lines.push(`${indent}${key} ${items}`);
+        } else {
+          // Array of objects - nested format
+          lines.push(`${indent}${key}:`);
+          for (let i = 0; i < value.length; i++) {
+            const item = value[i];
+            if (typeof item === 'object' && item !== null) {
+              // Add empty line between ranking items for readability
+              if (i > 0 && key === 'rankings') {
+                lines.push('');
+              }
+              lines.push(...jsonToIndentedLino(item, nextIndent, key));
+            } else {
+              lines.push(`${nextIndent}${formatLinoValue(item)}`);
+            }
+          }
+        }
+      } else if (typeof value === 'object') {
+        lines.push(`${indent}${key}:`);
+        lines.push(...jsonToIndentedLino(value, nextIndent, key));
+      } else {
+        lines.push(`${indent}${key} ${formatLinoValue(value)}`);
+      }
+    }
+  } else {
+    lines.push(`${indent}${formatLinoValue(data)}`);
+  }
+
+  return lines;
 }
 
 /**
@@ -351,16 +430,15 @@ async function main() {
     writeFileSync(jsonPath, JSON.stringify(data, null, 2));
     console.log(`\nJSON data saved to: ${jsonPath}`);
 
-    // Save as lino format if available (using jsonToLino for readable output)
-    if (jsonToLino) {
-      try {
-        const linoData = jsonToLino({ json: data });
-        const linoPath = join(DATA_DIR, 'aggregated.lino');
-        writeFileSync(linoPath, linoData);
-        console.log(`Lino data saved to: ${linoPath}`);
-      } catch (e) {
-        console.warn('Could not convert to lino format:', e.message);
-      }
+    // Save as indented lino format
+    try {
+      const linoLines = jsonToIndentedLino(data);
+      const linoData = linoLines.join('\n');
+      const linoPath = join(DATA_DIR, 'aggregated.lino');
+      writeFileSync(linoPath, linoData);
+      console.log(`Lino data saved to: ${linoPath}`);
+    } catch (e) {
+      console.warn('Could not convert to lino format:', e.message);
     }
 
     // Print summary
