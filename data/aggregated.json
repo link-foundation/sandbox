@@ -2,7 +2,7 @@
   "meta": {
     "title": "Aggregated Programming Language Rankings",
     "description": "Scientifically weighted ranking of programming languages based on multiple independent data sources",
-    "generatedAt": "2026-01-11T04:31:45.953Z",
+    "generatedAt": "2026-01-13T21:27:33.358Z",
     "version": "1.0.0"
   },
   "methodology": {
@@ -49,7 +49,7 @@
         "Over-represents web technologies"
       ],
       "languageCount": 50,
-      "fetchedAt": "2026-01-10T15:00:09.608Z",
+      "fetchedAt": "2026-01-13T21:27:33.282Z",
       "latestDataDate": "2024-Q1",
       "dataOrigin": "GitHub Archive (BigQuery)"
     },
@@ -69,7 +69,7 @@
         "Can be gamed"
       ],
       "languageCount": 32,
-      "fetchedAt": "2026-01-10T15:00:52.745Z",
+      "fetchedAt": "2026-01-13T21:27:32.397Z",
       "latestDataDate": "Jan 1, 2026",
       "dataOrigin": "Search engines (Google, Bing, Yahoo, Wikipedia, Amazon, YouTube, Baidu)"
     },
@@ -88,7 +88,7 @@
         "Regional bias"
       ],
       "languageCount": 30,
-      "fetchedAt": "2026-01-10T15:00:00.245Z",
+      "fetchedAt": "2026-01-13T21:27:32.066Z",
       "latestDataDate": "2026-01",
       "dataOrigin": "Google Trends"
     },
@@ -108,7 +108,7 @@
         "English-speaking bias"
       ],
       "languageCount": 43,
-      "fetchedAt": "2026-01-10T15:00:13.499Z",
+      "fetchedAt": "2026-01-13T21:27:33.316Z",
       "latestDataDate": 2025,
       "dataOrigin": "Stack Overflow Developer Survey"
     }

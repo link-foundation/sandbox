@@ -61,11 +61,16 @@ function formatLinoValue(value) {
  * Converts JSON data to indented Links Notation format.
  * This produces a human-readable, hierarchical representation.
  *
+ * For the `rankings` array, uses the language `name` as the key to create
+ * semantically correct absolute references. For `sources` within rankings,
+ * uses relative references (no colon) since they are relative to each language.
+ *
  * @param {any} data - The data to convert
  * @param {string} indent - Current indentation level
  * @param {string} parentKey - The key of the parent (for special handling)
+ * @param {boolean} isRelative - Whether we're in a relative context (inside a ranking item)
  */
-function jsonToIndentedLino(data, indent = '', parentKey = '') {
+function jsonToIndentedLino(data, indent = '', parentKey = '', isRelative = false) {
   const lines = [];
   const nextIndent = indent + '  ';
 
@@ -73,11 +78,23 @@ function jsonToIndentedLino(data, indent = '', parentKey = '') {
     for (let i = 0; i < data.length; i++) {
       const item = data[i];
       if (typeof item === 'object' && item !== null) {
-        // Add empty line between ranking items for readability
-        if (i > 0 && parentKey === 'rankings') {
-          lines.push('');
+        // For rankings array, use the language name as the key
+        if (parentKey === 'rankings' && item.name) {
+          // Add empty line between ranking items for readability
+          if (i > 0) {
+            lines.push('');
+          }
+          // Use language name as absolute key with colon
+          lines.push(`${indent}${item.name}:`);
+          // Render the item's contents with isRelative=true (inside a ranking)
+          lines.push(...jsonToIndentedLino(item, nextIndent, 'rankingItem', true));
+        } else {
+          // Add empty line between items for readability
+          if (i > 0 && parentKey === 'rankings') {
+            lines.push('');
+          }
+          lines.push(...jsonToIndentedLino(item, indent, parentKey, isRelative));
         }
-        lines.push(...jsonToIndentedLino(item, indent, parentKey));
       } else {
         lines.push(`${indent}${formatLinoValue(item)}`);
       }
@@ -95,23 +112,45 @@ function jsonToIndentedLino(data, indent = '', parentKey = '') {
           lines.push(`${indent}${key} ${items}`);
         } else {
           // Array of objects - nested format
+          // For rankings, keep the colon since it's the top-level container
           lines.push(`${indent}${key}:`);
           for (let i = 0; i < value.length; i++) {
             const item = value[i];
             if (typeof item === 'object' && item !== null) {
-              // Add empty line between ranking items for readability
-              if (i > 0 && key === 'rankings') {
-                lines.push('');
+              // For rankings array, use the language name as the key
+              if (key === 'rankings' && item.name) {
+                // Add empty line between ranking items for readability
+                if (i > 0) {
+                  lines.push('');
+                }
+                // Use language name as absolute key with colon
+                lines.push(`${nextIndent}${item.name}:`);
+                // Render the item's contents with isRelative=true
+                lines.push(...jsonToIndentedLino(item, nextIndent + '  ', 'rankingItem', true));
+              } else {
+                // Add empty line between ranking items for readability
+                if (i > 0 && key === 'rankings') {
+                  lines.push('');
+                }
+                lines.push(...jsonToIndentedLino(item, nextIndent, key, isRelative));
               }
-              lines.push(...jsonToIndentedLino(item, nextIndent, key));
             } else {
               lines.push(`${nextIndent}${formatLinoValue(item)}`);
             }
           }
         }
       } else if (typeof value === 'object') {
-        lines.push(`${indent}${key}:`);
-        lines.push(...jsonToIndentedLino(value, nextIndent, key));
+        // If we're inside a ranking item (isRelative=true), use relative references (no colon)
+        // for 'sources' and its children, as they are relative to each language
+        const useRelative = isRelative && (key === 'sources' || parentKey === 'sources');
+        if (useRelative) {
+          lines.push(`${indent}${key}`);
+        } else {
+          lines.push(`${indent}${key}:`);
+        }
+        // Only propagate relative context if we're already in a ranking item
+        // (don't enter relative mode for top-level 'sources')
+        lines.push(...jsonToIndentedLino(value, nextIndent, key, isRelative));
       } else {
         lines.push(`${indent}${key} ${formatLinoValue(value)}`);
       }

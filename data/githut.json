@@ -6,7 +6,7 @@
   "methodology": "Aggregated rankings based on weighted combination of pull requests (40%), push events (30%), star events (15%), and issue events (15%)",
   "updateFrequency": "quarterly",
   "dataOrigin": "GitHub Archive (BigQuery)",
-  "fetchedAt": "2026-01-10T15:00:09.608Z",
+  "fetchedAt": "2026-01-13T21:27:33.282Z",
   "latestDataPeriod": "2024-Q1",
   "totalLanguages": 64,
   "metricWeights": {
