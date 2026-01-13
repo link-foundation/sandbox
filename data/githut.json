@@ -1,0 +1,2232 @@
+{
+  "source": "GitHut",
+  "sourceUrl": "https://madnight.github.io/githut/",
+  "repositoryUrl": "https://github.com/madnight/githut",
+  "description": "GitHub Language Statistics - based on GitHub Archive data via BigQuery",
+  "methodology": "Aggregated rankings based on weighted combination of pull requests (40%), push events (30%), star events (15%), and issue events (15%)",
+  "updateFrequency": "quarterly",
+  "dataOrigin": "GitHub Archive (BigQuery)",
+  "fetchedAt": "2026-01-10T15:00:09.608Z",
+  "latestDataPeriod": "2024-Q1",
+  "totalLanguages": 64,
+  "metricWeights": {
+    "pullRequests": "40%",
+    "pushEvents": "30%",
+    "starEvents": "15%",
+    "issueEvents": "15%"
+  },
+  "metricDetails": {
+    "pullRequests": {
+      "period": "2024-Q1",
+      "totalCount": 737494,
+      "topLanguage": "Python"
+    },
+    "pushEvents": {
+      "period": "2024-Q1",
+      "totalCount": 1150279,
+      "topLanguage": "Python"
+    },
+    "starEvents": {
+      "period": "2024-Q1",
+      "totalCount": 1381317,
+      "topLanguage": "Python"
+    },
+    "issueEvents": {
+      "period": "2024-Q1",
+      "totalCount": 387919,
+      "topLanguage": "Python"
+    }
+  },
+  "rankings": [
+    {
+      "name": "Python",
+      "weightedScore": 0.1588904722579824,
+      "metrics": {
+        "pullRequests": {
+          "rank": 1,
+          "share": 0.16082029141932003,
+          "count": 118604
+        },
+        "pushEvents": {
+          "rank": 1,
+          "share": 0.1506112864791933,
+          "count": 173245
+        },
+        "starEvents": {
+          "rank": 1,
+          "share": 0.17247742552940418,
+          "count": 238246
+        },
+        "issueEvents": {
+          "rank": 1,
+          "share": 0.15671570611390523,
+          "count": 60793
+        }
+      },
+      "rank": 1,
+      "normalizedScore": 0.16116812886804074,
+      "sharePercent": "16.12%"
+    },
+    {
+      "name": "Java",
+      "weightedScore": 0.10538230555768713,
+      "metrics": {
+        "pullRequests": {
+          "rank": 2,
+          "share": 0.1112442948688396,
+          "count": 82042
+        },
+        "pushEvents": {
+          "rank": 2,
+          "share": 0.11004808398658064,
+          "count": 126586
+        },
+        "starEvents": {
+          "rank": 5,
+          "share": 0.07554095113576391,
+          "count": 104346
+        },
+        "issueEvents": {
+          "rank": 2,
+          "share": 0.11026013162541665,
+          "count": 42772
+        }
+      },
+      "rank": 2,
+      "normalizedScore": 0.1068929354993424,
+      "sharePercent": "10.69%"
+    },
+    {
+      "name": "JavaScript",
+      "weightedScore": 0.10423062989788706,
+      "metrics": {
+        "pullRequests": {
+          "rank": 4,
+          "share": 0.09368076214857342,
+          "count": 69089
+        },
+        "pushEvents": {
+          "rank": 3,
+          "share": 0.10217695011384195,
+          "count": 117532
+        },
+        "starEvents": {
+          "rank": 2,
+          "share": 0.1450166761141722,
+          "count": 200314
+        },
+        "issueEvents": {
+          "rank": 5,
+          "share": 0.09568492391452856,
+          "count": 37118
+        }
+      },
+      "rank": 3,
+      "normalizedScore": 0.10572475084663728,
+      "sharePercent": "10.57%"
+    },
+    {
+      "name": "C++",
+      "weightedScore": 0.09285630663168186,
+      "metrics": {
+        "pullRequests": {
+          "rank": 5,
+          "share": 0.08987598543174588,
+          "count": 66283
+        },
+        "pushEvents": {
+          "rank": 4,
+          "share": 0.09349731673793923,
+          "count": 107548
+        },
+        "starEvents": {
+          "rank": 4,
+          "share": 0.09254284136081725,
+          "count": 127831
+        },
+        "issueEvents": {
+          "rank": 3,
+          "share": 0.09983527488986103,
+          "count": 38728
+        }
+      },
+      "rank": 4,
+      "normalizedScore": 0.09418737939885106,
+      "sharePercent": "9.42%"
+    },
+    {
+      "name": "Go",
+      "weightedScore": 0.08842340318913473,
+      "metrics": {
+        "pullRequests": {
+          "rank": 3,
+          "share": 0.09750452207068804,
+          "count": 71909
+        },
+        "pushEvents": {
+          "rank": 7,
+          "share": 0.06322466114742598,
+          "count": 72726
+        },
+        "starEvents": {
+          "rank": 3,
+          "share": 0.11650475596839828,
+          "count": 160930
+        },
+        "issueEvents": {
+          "rank": 6,
+          "share": 0.08652321747581325,
+          "count": 33564
+        }
+      },
+      "rank": 5,
+      "normalizedScore": 0.0896909313542634,
+      "sharePercent": "8.97%"
+    },
+    {
+      "name": "TypeScript",
+      "weightedScore": 0.07391289979374636,
+      "metrics": {
+        "pullRequests": {
+          "rank": 6,
+          "share": 0.06979175423800058,
+          "count": 51471
+        },
+        "pushEvents": {
+          "rank": 5,
+          "share": 0.07144440609626013,
+          "count": 82181
+        },
+        "starEvents": {
+          "rank": 6,
+          "share": 0.06686372498130408,
+          "count": 92360
+        },
+        "issueEvents": {
+          "rank": 4,
+          "share": 0.09688878348314983,
+          "count": 37585
+        }
+      },
+      "rank": 6,
+      "normalizedScore": 0.07497242339130021,
+      "sharePercent": "7.50%"
+    },
+    {
+      "name": "PHP",
+      "weightedScore": 0.05653849011263669,
+      "metrics": {
+        "pullRequests": {
+          "rank": 7,
+          "share": 0.05382823453478944,
+          "count": 39698
+        },
+        "pushEvents": {
+          "rank": 6,
+          "share": 0.07142701901017058,
+          "count": 82161
+        },
+        "starEvents": {
+          "rank": 9,
+          "share": 0.03502599330928382,
+          "count": 48382
+        },
+        "issueEvents": {
+          "rank": 7,
+          "share": 0.05550127732851446,
+          "count": 21530
+        }
+      },
+      "rank": 7,
+      "normalizedScore": 0.05734895573652054,
+      "sharePercent": "5.73%"
+    },
+    {
+      "name": "C",
+      "weightedScore": 0.04777925590815592,
+      "metrics": {
+        "pullRequests": {
+          "rank": 9,
+          "share": 0.04385662798612599,
+          "count": 32344
+        },
+        "pushEvents": {
+          "rank": 8,
+          "share": 0.045171649660647545,
+          "count": 51960
+        },
+        "starEvents": {
+          "rank": 7,
+          "share": 0.05644685470460437,
+          "count": 77971
+        },
+        "issueEvents": {
+          "rank": 8,
+          "share": 0.05478721073213738,
+          "count": 21253
+        }
+      },
+      "rank": 8,
+      "normalizedScore": 0.04846416002163975,
+      "sharePercent": "4.85%"
+    },
+    {
+      "name": "Ruby",
+      "weightedScore": 0.0360175242494296,
+      "metrics": {
+        "pullRequests": {
+          "rank": 8,
+          "share": 0.04471222816728,
+          "count": 32975
+        },
+        "pushEvents": {
+          "rank": 9,
+          "share": 0.04240884168101826,
+          "count": 48782
+        },
+        "starEvents": {
+          "rank": 12,
+          "share": 0.017748279359480843,
+          "count": 24516
+        },
+        "issueEvents": {
+          "rank": 11,
+          "share": 0.01831825716193329,
+          "count": 7106
+        }
+      },
+      "rank": 9,
+      "normalizedScore": 0.036533826775432876,
+      "sharePercent": "3.65%"
+    },
+    {
+      "name": "C#",
+      "weightedScore": 0.03513413115714854,
+      "metrics": {
+        "pullRequests": {
+          "rank": 10,
+          "share": 0.03270263893672355,
+          "count": 24118
+        },
+        "pushEvents": {
+          "rank": 11,
+          "share": 0.03090902294139074,
+          "count": 35554
+        },
+        "starEvents": {
+          "rank": 8,
+          "share": 0.04007190239459878,
+          "count": 55352
+        },
+        "issueEvents": {
+          "rank": 9,
+          "share": 0.045130555605680564,
+          "count": 17507
+        }
+      },
+      "rank": 10,
+      "normalizedScore": 0.03563777045616709,
+      "sharePercent": "3.56%"
+    },
+    {
+      "name": "Shell",
+      "weightedScore": 0.022462972158151094,
+      "metrics": {
+        "pullRequests": {
+          "rank": 12,
+          "share": 0.022332385077031135,
+          "count": 16470
+        },
+        "pushEvents": {
+          "rank": 12,
+          "share": 0.02668917714745727,
+          "count": 30700
+        },
+        "starEvents": {
+          "rank": 11,
+          "share": 0.02387576494027077,
+          "count": 32980
+        },
+        "issueEvents": {
+          "rank": 14,
+          "share": 0.01294600161373895,
+          "count": 5022
+        }
+      },
+      "rank": 11,
+      "normalizedScore": 0.022784973448036486,
+      "sharePercent": "2.28%"
+    },
+    {
+      "name": "HTML",
+      "weightedScore": 0.020701443849916942,
+      "metrics": {
+        "pullRequests": {
+          "rank": 13,
+          "share": 0.019148630361738535,
+          "count": 14122
+        },
+        "pushEvents": {
+          "rank": 10,
+          "share": 0.031704482129987596,
+          "count": 36469
+        },
+        "starEvents": {
+          "rank": 15,
+          "share": 0.012989053200677324,
+          "count": 17942
+        },
+        "issueEvents": {
+          "rank": 16,
+          "share": 0.010548593907490997,
+          "count": 4092
+        }
+      },
+      "rank": 12,
+      "normalizedScore": 0.02099819405622232,
+      "sharePercent": "2.10%"
+    },
+    {
+      "name": "Rust",
+      "weightedScore": 0.017986560635476153,
+      "metrics": {
+        "pullRequests": {
+          "rank": 14,
+          "share": 0.017791331183711324,
+          "count": 13121
+        },
+        "pushEvents": {
+          "rank": 13,
+          "share": 0.013980955924606117,
+          "count": 16082
+        },
+        "starEvents": {
+          "rank": 10,
+          "share": 0.028787743870523564,
+          "count": 39765
+        },
+        "issueEvents": {
+          "rank": 12,
+          "share": 0.015717198693541694,
+          "count": 6097
+        }
+      },
+      "rank": 13,
+      "normalizedScore": 0.018244393645482512,
+      "sharePercent": "1.82%"
+    },
+    {
+      "name": "Nix",
+      "weightedScore": 0.01452950913000912,
+      "metrics": {
+        "pullRequests": {
+          "rank": 11,
+          "share": 0.025963601059805233,
+          "count": 19148
+        },
+        "pushEvents": {
+          "rank": 17,
+          "share": 0.008421435147472917,
+          "count": 9687
+        },
+        "starEvents": {
+          "rank": 33,
+          "share": 0.0013364057634851377,
+          "count": 1846
+        },
+        "issueEvents": {
+          "rank": 17,
+          "share": 0.00944784864881586,
+          "count": 3665
+        }
+      },
+      "rank": 14,
+      "normalizedScore": 0.014737786140207293,
+      "sharePercent": "1.47%"
+    },
+    {
+      "name": "Kotlin",
+      "weightedScore": 0.01328274190271076,
+      "metrics": {
+        "pullRequests": {
+          "rank": 16,
+          "share": 0.014059775401562589,
+          "count": 10369
+        },
+        "pushEvents": {
+          "rank": 15,
+          "share": 0.012823845345346651,
+          "count": 14751
+        },
+        "starEvents": {
+          "rank": 16,
+          "share": 0.011686672936045818,
+          "count": 16143
+        },
+        "issueEvents": {
+          "rank": 13,
+          "share": 0.013724514653832372,
+          "count": 5324
+        }
+      },
+      "rank": 15,
+      "normalizedScore": 0.01347314680531113,
+      "sharePercent": "1.35%"
+    },
+    {
+      "name": "Scala",
+      "weightedScore": 0.011422286240618855,
+      "metrics": {
+        "pullRequests": {
+          "rank": 15,
+          "share": 0.015111987351761506,
+          "count": 11145
+        },
+        "pushEvents": {
+          "rank": 14,
+          "share": 0.013920970477597175,
+          "count": 16013
+        },
+        "starEvents": {
+          "rank": 22,
+          "share": 0.0030043791540971406,
+          "count": 4150
+        },
+        "issueEvents": {
+          "rank": 20,
+          "share": 0.005003621890136858,
+          "count": 1941
+        }
+      },
+      "rank": 16,
+      "normalizedScore": 0.011586021959873833,
+      "sharePercent": "1.16%"
+    },
+    {
+      "name": "Swift",
+      "weightedScore": 0.011043333553202628,
+      "metrics": {
+        "pullRequests": {
+          "rank": 17,
+          "share": 0.01023737142268276,
+          "count": 7550
+        },
+        "pushEvents": {
+          "rank": 16,
+          "share": 0.010117545395508394,
+          "count": 11638
+        },
+        "starEvents": {
+          "rank": 14,
+          "share": 0.015533726146858396,
+          "count": 21457
+        },
+        "issueEvents": {
+          "rank": 15,
+          "share": 0.010553749622988304,
+          "count": 4094
+        }
+      },
+      "rank": 17,
+      "normalizedScore": 0.011201637077052011,
+      "sharePercent": "1.12%"
+    },
+    {
+      "name": "Dart",
+      "weightedScore": 0.0077312598869231,
+      "metrics": {
+        "pullRequests": {
+          "rank": 18,
+          "share": 0.006772936457788131,
+          "count": 4995
+        },
+        "pushEvents": {
+          "rank": 24,
+          "share": 0.002768893459760632,
+          "count": 3185
+        },
+        "starEvents": {
+          "rank": 19,
+          "share": 0.004708549883915133,
+          "count": 6504
+        },
+        "issueEvents": {
+          "rank": 10,
+          "share": 0.02323423188861592,
+          "count": 9013
+        }
+      },
+      "rank": 18,
+      "normalizedScore": 0.007842085633333737,
+      "sharePercent": "0.78%"
+    },
+    {
+      "name": "Jupyter Notebook",
+      "weightedScore": 0.007261082988201356,
+      "metrics": {
+        "pullRequests": {
+          "rank": 19,
+          "share": 0.006047506827174187,
+          "count": 4460
+        },
+        "pushEvents": {
+          "rank": 20,
+          "share": 0.006161113955831585,
+          "count": 7087
+        },
+        "starEvents": {
+          "rank": 13,
+          "share": 0.015689374705444153,
+          "count": 21672
+        },
+        "issueEvents": {
+          "rank": 21,
+          "share": 0.00426893243177055,
+          "count": 1656
+        }
+      },
+      "rank": 19,
+      "normalizedScore": 0.0073651688621322155,
+      "sharePercent": "0.74%"
+    },
+    {
+      "name": "CSS",
+      "weightedScore": 0.004358987956349344,
+      "metrics": {
+        "pullRequests": {
+          "rank": 27,
+          "share": 0.0026901913778281587,
+          "count": 1984
+        },
+        "pushEvents": {
+          "rank": 19,
+          "share": 0.006221099402840528,
+          "count": 7156
+        },
+        "starEvents": {
+          "rank": 18,
+          "share": 0.005546156313141734,
+          "count": 7661
+        },
+        "issueEvents": {
+          "rank": 23,
+          "share": 0.0038977209159644153,
+          "count": 1512
+        }
+      },
+      "rank": 20,
+      "normalizedScore": 0.004421472997716858,
+      "sharePercent": "0.44%"
+    },
+    {
+      "name": "Lua",
+      "weightedScore": 0.004306732609992913,
+      "metrics": {
+        "pullRequests": {
+          "rank": 23,
+          "share": 0.003045448505343772,
+          "count": 2246
+        },
+        "pushEvents": {
+          "rank": 21,
+          "share": 0.0057916383764286756,
+          "count": 6662
+        },
+        "starEvents": {
+          "rank": 20,
+          "share": 0.003874563188609132,
+          "count": 5352
+        },
+        "issueEvents": {
+          "rank": 19,
+          "share": 0.005132514777569544,
+          "count": 1991
+        }
+      },
+      "rank": 21,
+      "normalizedScore": 0.004368468583569588,
+      "sharePercent": "0.44%"
+    },
+    {
+      "name": "Perl",
+      "weightedScore": 0.004157010677267084,
+      "metrics": {
+        "pullRequests": {
+          "rank": 22,
+          "share": 0.003125449156196525,
+          "count": 2305
+        },
+        "pushEvents": {
+          "rank": 18,
+          "share": 0.006249788094888284,
+          "count": 7189
+        },
+        "starEvents": {
+          "rank": 23,
+          "share": 0.0027908148527818017,
+          "count": 3855
+        },
+        "issueEvents": {
+          "rank": 22,
+          "share": 0.0040884823893647905,
+          "count": 1586
+        }
+      },
+      "rank": 22,
+      "normalizedScore": 0.004216600423037286,
+      "sharePercent": "0.42%"
+    },
+    {
+      "name": "Groovy",
+      "weightedScore": 0.00359482644808943,
+      "metrics": {
+        "pullRequests": {
+          "rank": 21,
+          "share": 0.00358240202632157,
+          "count": 2642
+        },
+        "pushEvents": {
+          "rank": 22,
+          "share": 0.004731895479270681,
+          "count": 5443
+        },
+        "starEvents": {
+          "rank": 36,
+          "share": 0.0011076385797032832,
+          "count": 1530
+        },
+        "issueEvents": {
+          "rank": 25,
+          "share": 0.0038410080454940334,
+          "count": 1490
+        }
+      },
+      "rank": 23,
+      "normalizedScore": 0.0036463574184814706,
+      "sharePercent": "0.36%"
+    },
+    {
+      "name": "Objective-C",
+      "weightedScore": 0.0032466650623619317,
+      "metrics": {
+        "pullRequests": {
+          "rank": 28,
+          "share": 0.0022590014291641695,
+          "count": 1666
+        },
+        "pushEvents": {
+          "rank": 27,
+          "share": 0.0025002629796771043,
+          "count": 2876
+        },
+        "starEvents": {
+          "rank": 17,
+          "share": 0.0067660066443835844,
+          "count": 9346
+        },
+        "issueEvents": {
+          "rank": 24,
+          "share": 0.003853897334237302,
+          "count": 1495
+        }
+      },
+      "rank": 24,
+      "normalizedScore": 0.003293205223234055,
+      "sharePercent": "0.33%"
+    },
+    {
+      "name": "SCSS",
+      "weightedScore": 0.002518922160189644,
+      "metrics": {
+        "pullRequests": {
+          "rank": 30,
+          "share": 0.0020298470224842506,
+          "count": 1497
+        },
+        "pushEvents": {
+          "rank": 23,
+          "share": 0.004253750611808092,
+          "count": 4893
+        },
+        "starEvents": {
+          "rank": 31,
+          "share": 0.0014030088676241586,
+          "count": 1938
+        },
+        "issueEvents": {
+          "rank": 35,
+          "share": 0.0014693789167326168,
+          "count": 570
+        }
+      },
+      "rank": 25,
+      "normalizedScore": 0.0025550303020237444,
+      "sharePercent": "0.26%"
+    },
+    {
+      "name": "Makefile",
+      "weightedScore": 0.002512744525669404,
+      "metrics": {
+        "pullRequests": {
+          "rank": 20,
+          "share": 0.00362714815306972,
+          "count": 2675
+        },
+        "pushEvents": {
+          "rank": 25,
+          "share": 0.0026019774333009642,
+          "count": 2993
+        },
+        "starEvents": {
+          "rank": 42,
+          "share": 0.000779690686497017,
+          "count": 1077
+        },
+        "issueEvents": {
+          "rank": 42,
+          "share": 0.0010955895431778283,
+          "count": 425
+        }
+      },
+      "rank": 26,
+      "normalizedScore": 0.0025487641126021336,
+      "sharePercent": "0.25%"
+    },
+    {
+      "name": "Elixir",
+      "weightedScore": 0.002262301927092217,
+      "metrics": {
+        "pullRequests": {
+          "rank": 29,
+          "share": 0.002185780494485379,
+          "count": 1612
+        },
+        "pushEvents": {
+          "rank": 33,
+          "share": 0.002293356655211475,
+          "count": 2638
+        },
+        "starEvents": {
+          "rank": 26,
+          "share": 0.0021247838113915922,
+          "count": 2935
+        },
+        "issueEvents": {
+          "rank": 27,
+          "share": 0.0025417677401725616,
+          "count": 986
+        }
+      },
+      "rank": 27,
+      "normalizedScore": 0.0022947314797580505,
+      "sharePercent": "0.23%"
+    },
+    {
+      "name": "DM",
+      "weightedScore": 0.002044639725098828,
+      "metrics": {
+        "pullRequests": {
+          "rank": 25,
+          "share": 0.00296002408155185,
+          "count": 2183
+        },
+        "pushEvents": {
+          "rank": 39,
+          "share": 0.0017100199169071157,
+          "count": 1967
+        },
+        "issueEvents": {
+          "rank": 29,
+          "share": 0.0023174941160396885,
+          "count": 899
+        }
+      },
+      "rank": 28,
+      "normalizedScore": 0.0020739491425791788,
+      "sharePercent": "0.21%"
+    },
+    {
+      "name": "HCL",
+      "weightedScore": 0.001976781168405742,
+      "metrics": {
+        "pullRequests": {
+          "rank": 24,
+          "share": 0.0029817191733085284,
+          "count": 2199
+        },
+        "pushEvents": {
+          "rank": 37,
+          "share": 0.0017952166387459043,
+          "count": 2065
+        },
+        "starEvents": {
+          "rank": 49,
+          "share": 0.000597980043682949,
+          "count": 826
+        },
+        "issueEvents": {
+          "rank": 43,
+          "share": 0.0010388766727074466,
+          "count": 403
+        }
+      },
+      "rank": 29,
+      "normalizedScore": 0.0020051178498371363,
+      "sharePercent": "0.20%"
+    },
+    {
+      "name": "Haskell",
+      "weightedScore": 0.0018770920006470845,
+      "metrics": {
+        "pullRequests": {
+          "rank": 37,
+          "share": 0.00125017966247861,
+          "count": 922
+        },
+        "pushEvents": {
+          "rank": 28,
+          "share": 0.0024785291220651685,
+          "count": 2851
+        },
+        "starEvents": {
+          "rank": 25,
+          "share": 0.0022355476693619205,
+          "count": 3088
+        },
+        "issueEvents": {
+          "rank": 32,
+          "share": 0.0019875283242120133,
+          "count": 771
+        }
+      },
+      "rank": 30,
+      "normalizedScore": 0.0019039996618945114,
+      "sharePercent": "0.19%"
+    },
+    {
+      "name": "Emacs Lisp",
+      "weightedScore": 0.0016815830149674166,
+      "metrics": {
+        "pullRequests": {
+          "rank": 42,
+          "share": 0.0009979742208072202,
+          "count": 736
+        },
+        "pushEvents": {
+          "rank": 29,
+          "share": 0.0024698355790203942,
+          "count": 2841
+        },
+        "starEvents": {
+          "rank": 28,
+          "share": 0.001807695119947123,
+          "count": 2497
+        },
+        "issueEvents": {
+          "rank": 33,
+          "share": 0.001801922566308946,
+          "count": 699
+        }
+      },
+      "rank": 31,
+      "normalizedScore": 0.001705688102043901,
+      "sharePercent": "0.17%"
+    },
+    {
+      "name": "OCaml",
+      "weightedScore": 0.001643387215508742,
+      "metrics": {
+        "pullRequests": {
+          "rank": 35,
+          "share": 0.001460350863871435,
+          "count": 1077
+        },
+        "pushEvents": {
+          "rank": 34,
+          "share": 0.0019656100824234817,
+          "count": 2261
+        },
+        "starEvents": {
+          "rank": 37,
+          "share": 0.0010707172937131737,
+          "count": 1479
+        },
+        "issueEvents": {
+          "rank": 31,
+          "share": 0.0020597083411743175,
+          "count": 799
+        }
+      },
+      "rank": 32,
+      "normalizedScore": 0.0016669447750092981,
+      "sharePercent": "0.17%"
+    },
+    {
+      "name": "Adblock Filter List",
+      "weightedScore": 0.0015718254205831042,
+      "metrics": {
+        "pushEvents": {
+          "rank": 26,
+          "share": 0.0025159113571576984,
+          "count": 2894
+        },
+        "issueEvents": {
+          "rank": 18,
+          "share": 0.005447013422905297,
+          "count": 2113
+        }
+      },
+      "rank": 33,
+      "normalizedScore": 0.0015943571590075205,
+      "sharePercent": "0.16%"
+    },
+    {
+      "name": "PowerShell",
+      "weightedScore": 0.0015320755162639632,
+      "metrics": {
+        "pullRequests": {
+          "rank": 39,
+          "share": 0.001133568544286462,
+          "count": 836
+        },
+        "pushEvents": {
+          "rank": 41,
+          "share": 0.0013049008110206305,
+          "count": 1501
+        },
+        "starEvents": {
+          "rank": 21,
+          "share": 0.0031375853623751824,
+          "count": 4334
+        },
+        "issueEvents": {
+          "rank": 38,
+          "share": 0.0014436003392460798,
+          "count": 560
+        }
+      },
+      "rank": 34,
+      "normalizedScore": 0.0015540374493939835,
+      "sharePercent": "0.16%"
+    },
+    {
+      "name": "Roff",
+      "weightedScore": 0.001466963367475958,
+      "metrics": {
+        "pullRequests": {
+          "rank": 32,
+          "share": 0.0017410311134734655,
+          "count": 1284
+        },
+        "pushEvents": {
+          "rank": 35,
+          "share": 0.0019517004135518427,
+          "count": 2245
+        },
+        "starEvents": {
+          "rank": 34,
+          "share": 0.0012336053201401271,
+          "count": 1704
+        }
+      },
+      "rank": 35,
+      "normalizedScore": 0.0014879919336521607,
+      "sharePercent": "0.15%"
+    },
+    {
+      "name": "SystemVerilog",
+      "weightedScore": 0.0014618621083075946,
+      "metrics": {
+        "pullRequests": {
+          "rank": 26,
+          "share": 0.002736293447811101,
+          "count": 2018
+        },
+        "issueEvents": {
+          "rank": 28,
+          "share": 0.002448964861221028,
+          "count": 950
+        }
+      },
+      "rank": 36,
+      "normalizedScore": 0.0014828175491635731,
+      "sharePercent": "0.15%"
+    },
+    {
+      "name": "R",
+      "weightedScore": 0.0014126430268033047,
+      "metrics": {
+        "pullRequests": {
+          "rank": 46,
+          "share": 0.0006779716173962093,
+          "count": 500
+        },
+        "pushEvents": {
+          "rank": 31,
+          "share": 0.002315959867127888,
+          "count": 2664
+        },
+        "starEvents": {
+          "rank": 41,
+          "share": 0.0008484656309883973,
+          "count": 1172
+        },
+        "issueEvents": {
+          "rank": 30,
+          "share": 0.0021293105003879678,
+          "count": 826
+        }
+      },
+      "rank": 37,
+      "normalizedScore": 0.001432892923993032,
+      "sharePercent": "0.14%"
+    },
+    {
+      "name": "Dockerfile",
+      "weightedScore": 0.0013706719055952817,
+      "metrics": {
+        "pullRequests": {
+          "rank": 36,
+          "share": 0.0014047571912449456,
+          "count": 1036
+        },
+        "pushEvents": {
+          "rank": 43,
+          "share": 0.0011327686587340984,
+          "count": 1303
+        },
+        "starEvents": {
+          "rank": 27,
+          "share": 0.0019249744989745293,
+          "count": 2659
+        },
+        "issueEvents": {
+          "rank": 41,
+          "share": 0.0012012817108726307,
+          "count": 466
+        }
+      },
+      "rank": 38,
+      "normalizedScore": 0.001390320156882064,
+      "sharePercent": "0.14%"
+    },
+    {
+      "name": "Vue",
+      "weightedScore": 0.0013617699084966593,
+      "metrics": {
+        "pullRequests": {
+          "rank": 38,
+          "share": 0.0011484839198691785,
+          "count": 847
+        },
+        "pushEvents": {
+          "rank": 44,
+          "share": 0.001056265479940084,
+          "count": 1215
+        },
+        "starEvents": {
+          "rank": 24,
+          "share": 0.002580870285387062,
+          "count": 3565
+        },
+        "issueEvents": {
+          "rank": 39,
+          "share": 0.0013224410250593551,
+          "count": 513
+        }
+      },
+      "rank": 39,
+      "normalizedScore": 0.0013812905518013755,
+      "sharePercent": "0.14%"
+    },
+    {
+      "name": "Erlang",
+      "weightedScore": 0.0012751448847504682,
+      "metrics": {
+        "pullRequests": {
+          "rank": 40,
+          "share": 0.0011267888281125,
+          "count": 831
+        },
+        "pushEvents": {
+          "rank": 36,
+          "share": 0.0018638956287996217,
+          "count": 2144
+        },
+        "starEvents": {
+          "rank": 43,
+          "share": 0.0007630399104622618,
+          "count": 1054
+        },
+        "issueEvents": {
+          "rank": 44,
+          "share": 0.0010053645219749484,
+          "count": 390
+        }
+      },
+      "rank": 40,
+      "normalizedScore": 0.0012934237792257665,
+      "sharePercent": "0.13%"
+    },
+    {
+      "name": "Starlark",
+      "weightedScore": 0.0011306378403986976,
+      "metrics": {
+        "pullRequests": {
+          "rank": 31,
+          "share": 0.0018806932666570848,
+          "count": 1387
+        },
+        "starEvents": {
+          "rank": 38,
+          "share": 0.0010504467837578195,
+          "count": 1451
+        },
+        "issueEvents": {
+          "rank": 34,
+          "share": 0.0014719567744812705,
+          "count": 571
+        }
+      },
+      "rank": 41,
+      "normalizedScore": 0.001146845261235014,
+      "sharePercent": "0.11%"
+    },
+    {
+      "name": "Smarty",
+      "weightedScore": 0.0011081533819933644,
+      "metrics": {
+        "pullRequests": {
+          "rank": 41,
+          "share": 0.0010210252557986913,
+          "count": 753
+        },
+        "pushEvents": {
+          "rank": 30,
+          "share": 0.0023324775989129595,
+          "count": 2683
+        }
+      },
+      "rank": 42,
+      "normalizedScore": 0.0011240384935396227,
+      "sharePercent": "0.11%"
+    },
+    {
+      "name": "Vim Script",
+      "weightedScore": 0.0010472508753220405,
+      "metrics": {
+        "pushEvents": {
+          "rank": 32,
+          "share": 0.0023072663240831137,
+          "count": 2654
+        },
+        "starEvents": {
+          "rank": 30,
+          "share": 0.001720097559068628,
+          "count": 2376
+        },
+        "issueEvents": {
+          "rank": 49,
+          "share": 0.0006470422949120822,
+          "count": 251
+        }
+      },
+      "rank": 43,
+      "normalizedScore": 0.0010622629641192454,
+      "sharePercent": "0.11%"
+    },
+    {
+      "name": "Jinja",
+      "weightedScore": 0.0007718642227374352,
+      "metrics": {
+        "pullRequests": {
+          "rank": 43,
+          "share": 0.0009830588452245034,
+          "count": 725
+        },
+        "pushEvents": {
+          "rank": 50,
+          "share": 0.0009258623342684688,
+          "count": 1065
+        },
+        "starEvents": {
+          "rank": 46,
+          "share": 0.0006725465624472876,
+          "count": 929
+        }
+      },
+      "rank": 44,
+      "normalizedScore": 0.0007829287102677575,
+      "sharePercent": "0.08%"
+    },
+    {
+      "name": "Clojure",
+      "weightedScore": 0.0007553348836790843,
+      "metrics": {
+        "pullRequests": {
+          "rank": 45,
+          "share": 0.0006874632200397563,
+          "count": 507
+        },
+        "pushEvents": {
+          "rank": 42,
+          "share": 0.0011371154302564856,
+          "count": 1308
+        },
+        "starEvents": {
+          "rank": 39,
+          "share": 0.0009280997772415745,
+          "count": 1282
+        }
+      },
+      "rank": 45,
+      "normalizedScore": 0.0007661624271193606,
+      "sharePercent": "0.08%"
+    },
+    {
+      "name": "TeX",
+      "weightedScore": 0.0007125907272185399,
+      "metrics": {
+        "pushEvents": {
+          "rank": 40,
+          "share": 0.0014718168374802984,
+          "count": 1693
+        },
+        "starEvents": {
+          "rank": 29,
+          "share": 0.0018069711731630031,
+          "count": 2496
+        }
+      },
+      "rank": 46,
+      "normalizedScore": 0.0007228055434819113,
+      "sharePercent": "0.07%"
+    },
+    {
+      "name": "F#",
+      "weightedScore": 0.0006900343951814896,
+      "metrics": {
+        "pullRequests": {
+          "rank": 48,
+          "share": 0.000618310115065343,
+          "count": 456
+        },
+        "pushEvents": {
+          "rank": 46,
+          "share": 0.0009910639071042764,
+          "count": 1140
+        },
+        "issueEvents": {
+          "rank": 45,
+          "share": 0.0009692745134937964,
+          "count": 376
+        }
+      },
+      "rank": 47,
+      "normalizedScore": 0.0006999258718636213,
+      "sharePercent": "0.07%"
+    },
+    {
+      "name": "JSON",
+      "weightedScore": 0.000683937767629296,
+      "metrics": {
+        "pullRequests": {
+          "rank": 33,
+          "share": 0.00170984441907324,
+          "count": 1261
+        }
+      },
+      "rank": 48,
+      "normalizedScore": 0.0006937418506254126,
+      "sharePercent": "0.07%"
+    },
+    {
+      "name": "Julia",
+      "weightedScore": 0.0006729605855750129,
+      "metrics": {
+        "pullRequests": {
+          "rank": 44,
+          "share": 0.0007023785956224728,
+          "count": 518
+        },
+        "pushEvents": {
+          "rank": 48,
+          "share": 0.0009406413574445852,
+          "count": 1082
+        },
+        "issueEvents": {
+          "rank": 46,
+          "share": 0.0007321116006176547,
+          "count": 284
+        }
+      },
+      "rank": 49,
+      "normalizedScore": 0.0006826073133130674,
+      "sharePercent": "0.07%"
+    },
+    {
+      "name": "CodeQL",
+      "weightedScore": 0.0006421747159976895,
+      "metrics": {
+        "pullRequests": {
+          "rank": 34,
+          "share": 0.0016054367899942237,
+          "count": 1184
+        }
+      },
+      "rank": 50,
+      "normalizedScore": 0.0006513801357180718,
+      "sharePercent": "0.07%"
+    }
+  ],
+  "individualMetrics": {
+    "pullRequests": [
+      {
+        "rank": 1,
+        "name": "Python",
+        "count": 118604,
+        "share": 0.16082029141932003,
+        "sharePercent": "16.08%"
+      },
+      {
+        "rank": 2,
+        "name": "Java",
+        "count": 82042,
+        "share": 0.1112442948688396,
+        "sharePercent": "11.12%"
+      },
+      {
+        "rank": 3,
+        "name": "Go",
+        "count": 71909,
+        "share": 0.09750452207068804,
+        "sharePercent": "9.75%"
+      },
+      {
+        "rank": 4,
+        "name": "JavaScript",
+        "count": 69089,
+        "share": 0.09368076214857342,
+        "sharePercent": "9.37%"
+      },
+      {
+        "rank": 5,
+        "name": "C++",
+        "count": 66283,
+        "share": 0.08987598543174588,
+        "sharePercent": "8.99%"
+      },
+      {
+        "rank": 6,
+        "name": "TypeScript",
+        "count": 51471,
+        "share": 0.06979175423800058,
+        "sharePercent": "6.98%"
+      },
+      {
+        "rank": 7,
+        "name": "PHP",
+        "count": 39698,
+        "share": 0.05382823453478944,
+        "sharePercent": "5.38%"
+      },
+      {
+        "rank": 8,
+        "name": "Ruby",
+        "count": 32975,
+        "share": 0.04471222816728,
+        "sharePercent": "4.47%"
+      },
+      {
+        "rank": 9,
+        "name": "C",
+        "count": 32344,
+        "share": 0.04385662798612599,
+        "sharePercent": "4.39%"
+      },
+      {
+        "rank": 10,
+        "name": "C#",
+        "count": 24118,
+        "share": 0.03270263893672355,
+        "sharePercent": "3.27%"
+      },
+      {
+        "rank": 11,
+        "name": "Nix",
+        "count": 19148,
+        "share": 0.025963601059805233,
+        "sharePercent": "2.60%"
+      },
+      {
+        "rank": 12,
+        "name": "Shell",
+        "count": 16470,
+        "share": 0.022332385077031135,
+        "sharePercent": "2.23%"
+      },
+      {
+        "rank": 13,
+        "name": "HTML",
+        "count": 14122,
+        "share": 0.019148630361738535,
+        "sharePercent": "1.91%"
+      },
+      {
+        "rank": 14,
+        "name": "Rust",
+        "count": 13121,
+        "share": 0.017791331183711324,
+        "sharePercent": "1.78%"
+      },
+      {
+        "rank": 15,
+        "name": "Scala",
+        "count": 11145,
+        "share": 0.015111987351761506,
+        "sharePercent": "1.51%"
+      },
+      {
+        "rank": 16,
+        "name": "Kotlin",
+        "count": 10369,
+        "share": 0.014059775401562589,
+        "sharePercent": "1.41%"
+      },
+      {
+        "rank": 17,
+        "name": "Swift",
+        "count": 7550,
+        "share": 0.01023737142268276,
+        "sharePercent": "1.02%"
+      },
+      {
+        "rank": 18,
+        "name": "Dart",
+        "count": 4995,
+        "share": 0.006772936457788131,
+        "sharePercent": "0.68%"
+      },
+      {
+        "rank": 19,
+        "name": "Jupyter Notebook",
+        "count": 4460,
+        "share": 0.006047506827174187,
+        "sharePercent": "0.60%"
+      },
+      {
+        "rank": 20,
+        "name": "Makefile",
+        "count": 2675,
+        "share": 0.00362714815306972,
+        "sharePercent": "0.36%"
+      },
+      {
+        "rank": 21,
+        "name": "Groovy",
+        "count": 2642,
+        "share": 0.00358240202632157,
+        "sharePercent": "0.36%"
+      },
+      {
+        "rank": 22,
+        "name": "Perl",
+        "count": 2305,
+        "share": 0.003125449156196525,
+        "sharePercent": "0.31%"
+      },
+      {
+        "rank": 23,
+        "name": "Lua",
+        "count": 2246,
+        "share": 0.003045448505343772,
+        "sharePercent": "0.30%"
+      },
+      {
+        "rank": 24,
+        "name": "HCL",
+        "count": 2199,
+        "share": 0.0029817191733085284,
+        "sharePercent": "0.30%"
+      },
+      {
+        "rank": 25,
+        "name": "DM",
+        "count": 2183,
+        "share": 0.00296002408155185,
+        "sharePercent": "0.30%"
+      },
+      {
+        "rank": 26,
+        "name": "SystemVerilog",
+        "count": 2018,
+        "share": 0.002736293447811101,
+        "sharePercent": "0.27%"
+      },
+      {
+        "rank": 27,
+        "name": "CSS",
+        "count": 1984,
+        "share": 0.0026901913778281587,
+        "sharePercent": "0.27%"
+      },
+      {
+        "rank": 28,
+        "name": "Objective-C",
+        "count": 1666,
+        "share": 0.0022590014291641695,
+        "sharePercent": "0.23%"
+      },
+      {
+        "rank": 29,
+        "name": "Elixir",
+        "count": 1612,
+        "share": 0.002185780494485379,
+        "sharePercent": "0.22%"
+      },
+      {
+        "rank": 30,
+        "name": "SCSS",
+        "count": 1497,
+        "share": 0.0020298470224842506,
+        "sharePercent": "0.20%"
+      }
+    ],
+    "pushEvents": [
+      {
+        "rank": 1,
+        "name": "Python",
+        "count": 173245,
+        "share": 0.1506112864791933,
+        "sharePercent": "15.06%"
+      },
+      {
+        "rank": 2,
+        "name": "Java",
+        "count": 126586,
+        "share": 0.11004808398658064,
+        "sharePercent": "11.00%"
+      },
+      {
+        "rank": 3,
+        "name": "JavaScript",
+        "count": 117532,
+        "share": 0.10217695011384195,
+        "sharePercent": "10.22%"
+      },
+      {
+        "rank": 4,
+        "name": "C++",
+        "count": 107548,
+        "share": 0.09349731673793923,
+        "sharePercent": "9.35%"
+      },
+      {
+        "rank": 5,
+        "name": "TypeScript",
+        "count": 82181,
+        "share": 0.07144440609626013,
+        "sharePercent": "7.14%"
+      },
+      {
+        "rank": 6,
+        "name": "PHP",
+        "count": 82161,
+        "share": 0.07142701901017058,
+        "sharePercent": "7.14%"
+      },
+      {
+        "rank": 7,
+        "name": "Go",
+        "count": 72726,
+        "share": 0.06322466114742598,
+        "sharePercent": "6.32%"
+      },
+      {
+        "rank": 8,
+        "name": "C",
+        "count": 51960,
+        "share": 0.045171649660647545,
+        "sharePercent": "4.52%"
+      },
+      {
+        "rank": 9,
+        "name": "Ruby",
+        "count": 48782,
+        "share": 0.04240884168101826,
+        "sharePercent": "4.24%"
+      },
+      {
+        "rank": 10,
+        "name": "HTML",
+        "count": 36469,
+        "share": 0.031704482129987596,
+        "sharePercent": "3.17%"
+      },
+      {
+        "rank": 11,
+        "name": "C#",
+        "count": 35554,
+        "share": 0.03090902294139074,
+        "sharePercent": "3.09%"
+      },
+      {
+        "rank": 12,
+        "name": "Shell",
+        "count": 30700,
+        "share": 0.02668917714745727,
+        "sharePercent": "2.67%"
+      },
+      {
+        "rank": 13,
+        "name": "Rust",
+        "count": 16082,
+        "share": 0.013980955924606117,
+        "sharePercent": "1.40%"
+      },
+      {
+        "rank": 14,
+        "name": "Scala",
+        "count": 16013,
+        "share": 0.013920970477597175,
+        "sharePercent": "1.39%"
+      },
+      {
+        "rank": 15,
+        "name": "Kotlin",
+        "count": 14751,
+        "share": 0.012823845345346651,
+        "sharePercent": "1.28%"
+      },
+      {
+        "rank": 16,
+        "name": "Swift",
+        "count": 11638,
+        "share": 0.010117545395508394,
+        "sharePercent": "1.01%"
+      },
+      {
+        "rank": 17,
+        "name": "Nix",
+        "count": 9687,
+        "share": 0.008421435147472917,
+        "sharePercent": "0.84%"
+      },
+      {
+        "rank": 18,
+        "name": "Perl",
+        "count": 7189,
+        "share": 0.006249788094888284,
+        "sharePercent": "0.62%"
+      },
+      {
+        "rank": 19,
+        "name": "CSS",
+        "count": 7156,
+        "share": 0.006221099402840528,
+        "sharePercent": "0.62%"
+      },
+      {
+        "rank": 20,
+        "name": "Jupyter Notebook",
+        "count": 7087,
+        "share": 0.006161113955831585,
+        "sharePercent": "0.62%"
+      },
+      {
+        "rank": 21,
+        "name": "Lua",
+        "count": 6662,
+        "share": 0.0057916383764286756,
+        "sharePercent": "0.58%"
+      },
+      {
+        "rank": 22,
+        "name": "Groovy",
+        "count": 5443,
+        "share": 0.004731895479270681,
+        "sharePercent": "0.47%"
+      },
+      {
+        "rank": 23,
+        "name": "SCSS",
+        "count": 4893,
+        "share": 0.004253750611808092,
+        "sharePercent": "0.43%"
+      },
+      {
+        "rank": 24,
+        "name": "Dart",
+        "count": 3185,
+        "share": 0.002768893459760632,
+        "sharePercent": "0.28%"
+      },
+      {
+        "rank": 25,
+        "name": "Makefile",
+        "count": 2993,
+        "share": 0.0026019774333009642,
+        "sharePercent": "0.26%"
+      },
+      {
+        "rank": 26,
+        "name": "Adblock Filter List",
+        "count": 2894,
+        "share": 0.0025159113571576984,
+        "sharePercent": "0.25%"
+      },
+      {
+        "rank": 27,
+        "name": "Objective-C",
+        "count": 2876,
+        "share": 0.0025002629796771043,
+        "sharePercent": "0.25%"
+      },
+      {
+        "rank": 28,
+        "name": "Haskell",
+        "count": 2851,
+        "share": 0.0024785291220651685,
+        "sharePercent": "0.25%"
+      },
+      {
+        "rank": 29,
+        "name": "Emacs Lisp",
+        "count": 2841,
+        "share": 0.0024698355790203942,
+        "sharePercent": "0.25%"
+      },
+      {
+        "rank": 30,
+        "name": "Smarty",
+        "count": 2683,
+        "share": 0.0023324775989129595,
+        "sharePercent": "0.23%"
+      }
+    ],
+    "starEvents": [
+      {
+        "rank": 1,
+        "name": "Python",
+        "count": 238246,
+        "share": 0.17247742552940418,
+        "sharePercent": "17.25%"
+      },
+      {
+        "rank": 2,
+        "name": "JavaScript",
+        "count": 200314,
+        "share": 0.1450166761141722,
+        "sharePercent": "14.50%"
+      },
+      {
+        "rank": 3,
+        "name": "Go",
+        "count": 160930,
+        "share": 0.11650475596839828,
+        "sharePercent": "11.65%"
+      },
+      {
+        "rank": 4,
+        "name": "C++",
+        "count": 127831,
+        "share": 0.09254284136081725,
+        "sharePercent": "9.25%"
+      },
+      {
+        "rank": 5,
+        "name": "Java",
+        "count": 104346,
+        "share": 0.07554095113576391,
+        "sharePercent": "7.55%"
+      },
+      {
+        "rank": 6,
+        "name": "TypeScript",
+        "count": 92360,
+        "share": 0.06686372498130408,
+        "sharePercent": "6.69%"
+      },
+      {
+        "rank": 7,
+        "name": "C",
+        "count": 77971,
+        "share": 0.05644685470460437,
+        "sharePercent": "5.64%"
+      },
+      {
+        "rank": 8,
+        "name": "C#",
+        "count": 55352,
+        "share": 0.04007190239459878,
+        "sharePercent": "4.01%"
+      },
+      {
+        "rank": 9,
+        "name": "PHP",
+        "count": 48382,
+        "share": 0.03502599330928382,
+        "sharePercent": "3.50%"
+      },
+      {
+        "rank": 10,
+        "name": "Rust",
+        "count": 39765,
+        "share": 0.028787743870523564,
+        "sharePercent": "2.88%"
+      },
+      {
+        "rank": 11,
+        "name": "Shell",
+        "count": 32980,
+        "share": 0.02387576494027077,
+        "sharePercent": "2.39%"
+      },
+      {
+        "rank": 12,
+        "name": "Ruby",
+        "count": 24516,
+        "share": 0.017748279359480843,
+        "sharePercent": "1.77%"
+      },
+      {
+        "rank": 13,
+        "name": "Jupyter Notebook",
+        "count": 21672,
+        "share": 0.015689374705444153,
+        "sharePercent": "1.57%"
+      },
+      {
+        "rank": 14,
+        "name": "Swift",
+        "count": 21457,
+        "share": 0.015533726146858396,
+        "sharePercent": "1.55%"
+      },
+      {
+        "rank": 15,
+        "name": "HTML",
+        "count": 17942,
+        "share": 0.012989053200677324,
+        "sharePercent": "1.30%"
+      },
+      {
+        "rank": 16,
+        "name": "Kotlin",
+        "count": 16143,
+        "share": 0.011686672936045818,
+        "sharePercent": "1.17%"
+      },
+      {
+        "rank": 17,
+        "name": "Objective-C",
+        "count": 9346,
+        "share": 0.0067660066443835844,
+        "sharePercent": "0.68%"
+      },
+      {
+        "rank": 18,
+        "name": "CSS",
+        "count": 7661,
+        "share": 0.005546156313141734,
+        "sharePercent": "0.55%"
+      },
+      {
+        "rank": 19,
+        "name": "Dart",
+        "count": 6504,
+        "share": 0.004708549883915133,
+        "sharePercent": "0.47%"
+      },
+      {
+        "rank": 20,
+        "name": "Lua",
+        "count": 5352,
+        "share": 0.003874563188609132,
+        "sharePercent": "0.39%"
+      },
+      {
+        "rank": 21,
+        "name": "PowerShell",
+        "count": 4334,
+        "share": 0.0031375853623751824,
+        "sharePercent": "0.31%"
+      },
+      {
+        "rank": 22,
+        "name": "Scala",
+        "count": 4150,
+        "share": 0.0030043791540971406,
+        "sharePercent": "0.30%"
+      },
+      {
+        "rank": 23,
+        "name": "Perl",
+        "count": 3855,
+        "share": 0.0027908148527818017,
+        "sharePercent": "0.28%"
+      },
+      {
+        "rank": 24,
+        "name": "Vue",
+        "count": 3565,
+        "share": 0.002580870285387062,
+        "sharePercent": "0.26%"
+      },
+      {
+        "rank": 25,
+        "name": "Haskell",
+        "count": 3088,
+        "share": 0.0022355476693619205,
+        "sharePercent": "0.22%"
+      },
+      {
+        "rank": 26,
+        "name": "Elixir",
+        "count": 2935,
+        "share": 0.0021247838113915922,
+        "sharePercent": "0.21%"
+      },
+      {
+        "rank": 27,
+        "name": "Dockerfile",
+        "count": 2659,
+        "share": 0.0019249744989745293,
+        "sharePercent": "0.19%"
+      },
+      {
+        "rank": 28,
+        "name": "Emacs Lisp",
+        "count": 2497,
+        "share": 0.001807695119947123,
+        "sharePercent": "0.18%"
+      },
+      {
+        "rank": 29,
+        "name": "TeX",
+        "count": 2496,
+        "share": 0.0018069711731630031,
+        "sharePercent": "0.18%"
+      },
+      {
+        "rank": 30,
+        "name": "Vim Script",
+        "count": 2376,
+        "share": 0.001720097559068628,
+        "sharePercent": "0.17%"
+      }
+    ],
+    "issueEvents": [
+      {
+        "rank": 1,
+        "name": "Python",
+        "count": 60793,
+        "share": 0.15671570611390523,
+        "sharePercent": "15.67%"
+      },
+      {
+        "rank": 2,
+        "name": "Java",
+        "count": 42772,
+        "share": 0.11026013162541665,
+        "sharePercent": "11.03%"
+      },
+      {
+        "rank": 3,
+        "name": "C++",
+        "count": 38728,
+        "share": 0.09983527488986103,
+        "sharePercent": "9.98%"
+      },
+      {
+        "rank": 4,
+        "name": "TypeScript",
+        "count": 37585,
+        "share": 0.09688878348314983,
+        "sharePercent": "9.69%"
+      },
+      {
+        "rank": 5,
+        "name": "JavaScript",
+        "count": 37118,
+        "share": 0.09568492391452856,
+        "sharePercent": "9.57%"
+      },
+      {
+        "rank": 6,
+        "name": "Go",
+        "count": 33564,
+        "share": 0.08652321747581325,
+        "sharePercent": "8.65%"
+      },
+      {
+        "rank": 7,
+        "name": "PHP",
+        "count": 21530,
+        "share": 0.05550127732851446,
+        "sharePercent": "5.55%"
+      },
+      {
+        "rank": 8,
+        "name": "C",
+        "count": 21253,
+        "share": 0.05478721073213738,
+        "sharePercent": "5.48%"
+      },
+      {
+        "rank": 9,
+        "name": "C#",
+        "count": 17507,
+        "share": 0.045130555605680564,
+        "sharePercent": "4.51%"
+      },
+      {
+        "rank": 10,
+        "name": "Dart",
+        "count": 9013,
+        "share": 0.02323423188861592,
+        "sharePercent": "2.32%"
+      },
+      {
+        "rank": 11,
+        "name": "Ruby",
+        "count": 7106,
+        "share": 0.01831825716193329,
+        "sharePercent": "1.83%"
+      },
+      {
+        "rank": 12,
+        "name": "Rust",
+        "count": 6097,
+        "share": 0.015717198693541694,
+        "sharePercent": "1.57%"
+      },
+      {
+        "rank": 13,
+        "name": "Kotlin",
+        "count": 5324,
+        "share": 0.013724514653832372,
+        "sharePercent": "1.37%"
+      },
+      {
+        "rank": 14,
+        "name": "Shell",
+        "count": 5022,
+        "share": 0.01294600161373895,
+        "sharePercent": "1.29%"
+      },
+      {
+        "rank": 15,
+        "name": "Swift",
+        "count": 4094,
+        "share": 0.010553749622988304,
+        "sharePercent": "1.06%"
+      },
+      {
+        "rank": 16,
+        "name": "HTML",
+        "count": 4092,
+        "share": 0.010548593907490997,
+        "sharePercent": "1.05%"
+      },
+      {
+        "rank": 17,
+        "name": "Nix",
+        "count": 3665,
+        "share": 0.00944784864881586,
+        "sharePercent": "0.94%"
+      },
+      {
+        "rank": 18,
+        "name": "Adblock Filter List",
+        "count": 2113,
+        "share": 0.005447013422905297,
+        "sharePercent": "0.54%"
+      },
+      {
+        "rank": 19,
+        "name": "Lua",
+        "count": 1991,
+        "share": 0.005132514777569544,
+        "sharePercent": "0.51%"
+      },
+      {
+        "rank": 20,
+        "name": "Scala",
+        "count": 1941,
+        "share": 0.005003621890136858,
+        "sharePercent": "0.50%"
+      },
+      {
+        "rank": 21,
+        "name": "Jupyter Notebook",
+        "count": 1656,
+        "share": 0.00426893243177055,
+        "sharePercent": "0.43%"
+      },
+      {
+        "rank": 22,
+        "name": "Perl",
+        "count": 1586,
+        "share": 0.0040884823893647905,
+        "sharePercent": "0.41%"
+      },
+      {
+        "rank": 23,
+        "name": "CSS",
+        "count": 1512,
+        "share": 0.0038977209159644153,
+        "sharePercent": "0.39%"
+      },
+      {
+        "rank": 24,
+        "name": "Objective-C",
+        "count": 1495,
+        "share": 0.003853897334237302,
+        "sharePercent": "0.39%"
+      },
+      {
+        "rank": 25,
+        "name": "Groovy",
+        "count": 1490,
+        "share": 0.0038410080454940334,
+        "sharePercent": "0.38%"
+      },
+      {
+        "rank": 26,
+        "name": "ColdFusion",
+        "count": 1013,
+        "share": 0.002611369899386212,
+        "sharePercent": "0.26%"
+      },
+      {
+        "rank": 27,
+        "name": "Elixir",
+        "count": 986,
+        "share": 0.0025417677401725616,
+        "sharePercent": "0.25%"
+      },
+      {
+        "rank": 28,
+        "name": "SystemVerilog",
+        "count": 950,
+        "share": 0.002448964861221028,
+        "sharePercent": "0.24%"
+      },
+      {
+        "rank": 29,
+        "name": "DM",
+        "count": 899,
+        "share": 0.0023174941160396885,
+        "sharePercent": "0.23%"
+      },
+      {
+        "rank": 30,
+        "name": "R",
+        "count": 826,
+        "share": 0.0021293105003879678,
+        "sharePercent": "0.21%"
+      }
+    ]
+  }
+}
