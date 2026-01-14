@@ -5,7 +5,7 @@
   "methodology": "The PYPL index is created by analyzing how often language tutorials are searched on Google.",
   "updateFrequency": "monthly",
   "dataOrigin": "Google Trends",
-  "fetchedAt": "2026-01-10T15:00:00.245Z",
+  "fetchedAt": "2026-01-13T21:27:32.066Z",
   "latestDataDate": "2026-01",
   "totalLanguages": 30,
   "rankings": [

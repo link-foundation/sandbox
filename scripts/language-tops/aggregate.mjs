@@ -30,6 +30,19 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '../../data');
 
 /**
+ * Checks if a string needs to be quoted for Links Notation.
+ * According to the links-notation grammar, simple references cannot contain:
+ * - spaces, tabs, newlines, carriage returns
+ * - parentheses ( )
+ * - colons :
+ */
+function needsQuoting(value) {
+  if (value === '') return true;
+  // Check for characters not allowed in simple references: [ \t\n\r(:)]
+  return /[\s():]/.test(value);
+}
+
+/**
  * Formats a value for Links Notation output.
  * Quotes strings that contain spaces or special characters.
  */
@@ -44,13 +57,14 @@ function formatLinoValue(value) {
     return String(value);
   }
   if (typeof value === 'string') {
-    // Quote strings that contain spaces, special chars, or are empty
-    if (value === '' || /[\s():'"]/.test(value)) {
-      // Use single quotes if the string contains double quotes
-      if (value.includes('"')) {
-        return `'${value.replace(/'/g, "\\'")}'`;
+    // Quote strings that need quoting per links-notation grammar
+    if (needsQuoting(value)) {
+      // Use single quotes (preferred in lino), escaping internal single quotes
+      if (value.includes("'")) {
+        // Use double quotes if string contains single quotes
+        return `"${value.replace(/"/g, '""')}"`;
       }
-      return `"${value.replace(/"/g, '\\"')}"`;
+      return `'${value}'`;
     }
     return value;
   }
@@ -58,14 +72,35 @@ function formatLinoValue(value) {
 }
 
 /**
+ * Formats a reference/key for Links Notation output.
+ * Keys in lino must be valid references.
+ */
+function formatLinoKey(key) {
+  if (needsQuoting(key)) {
+    // Use single quotes (preferred in lino), escaping internal single quotes
+    if (key.includes("'")) {
+      // Use double quotes if key contains single quotes
+      return `"${key.replace(/"/g, '""')}"`;
+    }
+    return `'${key}'`;
+  }
+  return key;
+}
+
+/**
  * Converts JSON data to indented Links Notation format.
  * This produces a human-readable, hierarchical representation.
+ *
+ * For the `rankings` array, uses the language `name` as the key to create
+ * semantically correct absolute references. For `sources` within rankings,
+ * uses relative references (no colon) since they are relative to each language.
  *
  * @param {any} data - The data to convert
  * @param {string} indent - Current indentation level
  * @param {string} parentKey - The key of the parent (for special handling)
+ * @param {boolean} isRelative - Whether we're in a relative context (inside a ranking item)
  */
-function jsonToIndentedLino(data, indent = '', parentKey = '') {
+function jsonToIndentedLino(data, indent = '', parentKey = '', isRelative = false) {
   const lines = [];
   const nextIndent = indent + '  ';
 
@@ -73,47 +108,82 @@ function jsonToIndentedLino(data, indent = '', parentKey = '') {
     for (let i = 0; i < data.length; i++) {
       const item = data[i];
       if (typeof item === 'object' && item !== null) {
-        // Add empty line between ranking items for readability
-        if (i > 0 && parentKey === 'rankings') {
-          lines.push('');
+        // For rankings array, use the language name as the key
+        if (parentKey === 'rankings' && item.name) {
+          // Add empty line between ranking items for readability
+          if (i > 0) {
+            lines.push('');
+          }
+          // Use language name as absolute key with colon (properly quoted if needed)
+          lines.push(`${indent}${formatLinoKey(item.name)}:`);
+          // Render the item's contents with isRelative=true (inside a ranking)
+          lines.push(...jsonToIndentedLino(item, nextIndent, 'rankingItem', true));
+        } else {
+          // Add empty line between items for readability
+          if (i > 0 && parentKey === 'rankings') {
+            lines.push('');
+          }
+          lines.push(...jsonToIndentedLino(item, indent, parentKey, isRelative));
         }
-        lines.push(...jsonToIndentedLino(item, indent, parentKey));
       } else {
         lines.push(`${indent}${formatLinoValue(item)}`);
       }
     }
   } else if (typeof data === 'object' && data !== null) {
     for (const [key, value] of Object.entries(data)) {
+      const formattedKey = formatLinoKey(key);
       if (value === null || value === undefined) {
-        lines.push(`${indent}${key} null`);
+        lines.push(`${indent}${formattedKey} null`);
       } else if (Array.isArray(value)) {
         if (value.length === 0) {
-          lines.push(`${indent}${key}`);
+          lines.push(`${indent}${formattedKey}`);
         } else if (value.every(item => typeof item !== 'object')) {
           // Simple array of primitives - inline format
           const items = value.map(formatLinoValue).join(' ');
-          lines.push(`${indent}${key} ${items}`);
+          lines.push(`${indent}${formattedKey} ${items}`);
         } else {
           // Array of objects - nested format
-          lines.push(`${indent}${key}:`);
+          // For rankings, keep the colon since it's the top-level container
+          lines.push(`${indent}${formattedKey}:`);
           for (let i = 0; i < value.length; i++) {
             const item = value[i];
             if (typeof item === 'object' && item !== null) {
-              // Add empty line between ranking items for readability
-              if (i > 0 && key === 'rankings') {
-                lines.push('');
+              // For rankings array, use the language name as the key
+              if (key === 'rankings' && item.name) {
+                // Add empty line between ranking items for readability
+                if (i > 0) {
+                  lines.push('');
+                }
+                // Use language name as absolute key with colon (properly quoted if needed)
+                lines.push(`${nextIndent}${formatLinoKey(item.name)}:`);
+                // Render the item's contents with isRelative=true
+                lines.push(...jsonToIndentedLino(item, nextIndent + '  ', 'rankingItem', true));
+              } else {
+                // Add empty line between ranking items for readability
+                if (i > 0 && key === 'rankings') {
+                  lines.push('');
+                }
+                lines.push(...jsonToIndentedLino(item, nextIndent, key, isRelative));
               }
-              lines.push(...jsonToIndentedLino(item, nextIndent, key));
             } else {
               lines.push(`${nextIndent}${formatLinoValue(item)}`);
             }
           }
         }
       } else if (typeof value === 'object') {
-        lines.push(`${indent}${key}:`);
-        lines.push(...jsonToIndentedLino(value, nextIndent, key));
+        // If we're inside a ranking item (isRelative=true), use relative references (no colon)
+        // for 'sources' and its children, as they are relative to each language
+        const useRelative = isRelative && (key === 'sources' || parentKey === 'sources');
+        if (useRelative) {
+          lines.push(`${indent}${formattedKey}`);
+        } else {
+          lines.push(`${indent}${formattedKey}:`);
+        }
+        // Only propagate relative context if we're already in a ranking item
+        // (don't enter relative mode for top-level 'sources')
+        lines.push(...jsonToIndentedLino(value, nextIndent, key, isRelative));
       } else {
-        lines.push(`${indent}${key} ${formatLinoValue(value)}`);
+        lines.push(`${indent}${formattedKey} ${formatLinoValue(value)}`);
       }
     }
   } else {

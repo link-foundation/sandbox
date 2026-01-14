@@ -6,7 +6,7 @@
   "methodology": "Self-reported survey of professional developers. Usage represents percentage of respondents who reported using each language in the past year.",
   "updateFrequency": "yearly",
   "dataOrigin": "Stack Overflow Developer Survey",
-  "fetchedAt": "2026-01-10T15:00:13.499Z",
+  "fetchedAt": "2026-01-13T21:27:33.316Z",
   "surveyYear": 2025,
   "respondents": 49000,
   "countries": 177,
