@@ -1,78 +1,78 @@
 meta:
-  title "Aggregated Programming Language Rankings"
-  description "Scientifically weighted ranking of programming languages based on multiple independent data sources"
-  generatedAt "2026-01-13T21:27:33.358Z"
+  title 'Aggregated Programming Language Rankings'
+  description 'Scientifically weighted ranking of programming languages based on multiple independent data sources'
+  generatedAt '2026-01-14T15:18:31.109Z'
   version 1.0.0
 methodology:
-  description "Languages are scored using a weighted combination of multiple data sources. Each source measures a different aspect of language popularity (learning intent, actual usage, community activity)."
+  description 'Languages are scored using a weighted combination of multiple data sources. Each source measures a different aspect of language popularity (learning intent, actual usage, community activity).'
   weights:
     githut:
       weight 0.35
       normalizedWeight 35.0%
-      description "GitHub Activity (Pull Requests, Pushes, Stars, Issues)"
+      description 'GitHub Activity (Pull Requests, Pushes, Stars, Issues)'
     tiobe:
       weight 0.25
       normalizedWeight 25.0%
-      description "Search Engine Query Analysis"
+      description 'Search Engine Query Analysis'
     pypl:
       weight 0.2
       normalizedWeight 20.0%
-      description "Google Trends Tutorial Searches"
+      description 'Google Trends Tutorial Searches'
     stackoverflow:
       weight 0.2
       normalizedWeight 20.0%
-      description "Stack Overflow Developer Survey"
+      description 'Stack Overflow Developer Survey'
   totalWeight 1.00
   normalizedWeightSum 100%
 sources:
   githut:
     weight 0.35
-    description "GitHub Activity (Pull Requests, Pushes, Stars, Issues)"
+    description 'GitHub Activity (Pull Requests, Pushes, Stars, Issues)'
     updateFrequency quarterly
-    dataSize "very large (all GitHub repos)"
-    methodology "Direct measurement of code activity"
-    strengths "Actual code commits" "Large sample size" "Real project activity"
-    weaknesses "Biased toward open source" "Over-represents web technologies"
+    dataSize 'very large (all GitHub repos)'
+    methodology 'Direct measurement of code activity'
+    strengths 'Actual code commits' 'Large sample size' 'Real project activity'
+    weaknesses 'Biased toward open source' 'Over-represents web technologies'
     languageCount 50
-    fetchedAt "2026-01-13T21:27:33.282Z"
+    fetchedAt '2026-01-13T21:27:33.282Z'
     latestDataDate 2024-Q1
-    dataOrigin "GitHub Archive (BigQuery)"
+    dataOrigin 'GitHub Archive (BigQuery)'
   tiobe:
     weight 0.25
-    description "Search Engine Query Analysis"
+    description 'Search Engine Query Analysis'
     updateFrequency monthly
-    dataSize "very large (global search queries)"
-    methodology "Search engine mentions and tutorials"
-    strengths "Long history (since 2001)" "Global coverage" "Independent of GitHub"
-    weaknesses "Measures interest, not usage" "Can be gamed"
+    dataSize 'very large (global search queries)'
+    methodology 'Search engine mentions and tutorials'
+    strengths 'Long history (since 2001)' 'Global coverage' 'Independent of GitHub'
+    weaknesses 'Measures interest, not usage' 'Can be gamed'
     languageCount 32
-    fetchedAt "2026-01-13T21:27:32.397Z"
-    latestDataDate "Jan 1, 2026"
-    dataOrigin "Search engines (Google, Bing, Yahoo, Wikipedia, Amazon, YouTube, Baidu)"
+    fetchedAt '2026-01-13T21:27:32.397Z'
+    latestDataDate 'Jan 1, 2026'
+    dataOrigin 'Search engines (Google, Bing, Yahoo, Wikipedia, Amazon, YouTube, Baidu)'
   pypl:
     weight 0.2
-    description "Google Trends Tutorial Searches"
+    description 'Google Trends Tutorial Searches'
     updateFrequency monthly
-    dataSize "large (Google search data)"
-    methodology "Tutorial search frequency on Google"
-    strengths "Learning intent indicator" "Good for emerging languages"
-    weaknesses "Only measures learning intent" "Regional bias"
+    dataSize 'large (Google search data)'
+    methodology 'Tutorial search frequency on Google'
+    strengths 'Learning intent indicator' 'Good for emerging languages'
+    weaknesses 'Only measures learning intent' 'Regional bias'
     languageCount 30
-    fetchedAt "2026-01-13T21:27:32.066Z"
+    fetchedAt '2026-01-13T21:27:32.066Z'
     latestDataDate 2026-01
-    dataOrigin "Google Trends"
+    dataOrigin 'Google Trends'
   stackoverflow:
     weight 0.2
-    description "Stack Overflow Developer Survey"
+    description 'Stack Overflow Developer Survey'
     updateFrequency yearly
-    dataSize "medium (~50,000 respondents)"
-    methodology "Self-reported usage survey"
-    strengths "Direct developer feedback" "Includes sentiment data"
-    weaknesses "Selection bias" "Less frequent updates" "English-speaking bias"
+    dataSize 'medium (~50,000 respondents)'
+    methodology 'Self-reported usage survey'
+    strengths 'Direct developer feedback' 'Includes sentiment data'
+    weaknesses 'Selection bias' 'Less frequent updates' 'English-speaking bias'
     languageCount 43
-    fetchedAt "2026-01-13T21:27:33.316Z"
+    fetchedAt '2026-01-13T21:27:33.316Z'
     latestDataDate 2025
-    dataOrigin "Stack Overflow Developer Survey"
+    dataOrigin 'Stack Overflow Developer Survey'
 summary:
   totalLanguages 65
   sourcesUsed 4
@@ -713,9 +713,9 @@ rankings:
         score 0.0124
         rawValue 0.0124
 
-  Visual Basic:
+  'Visual Basic':
     rank 31
-    name "Visual Basic"
+    name 'Visual Basic'
     score 0.012092857142857145
     scorePercent 1.21%
     confidence 0.75
@@ -814,9 +814,9 @@ rankings:
         score 0.015
         rawValue 0.015
 
-  Jupyter Notebook:
+  'Jupyter Notebook':
     rank 36
-    name "Jupyter Notebook"
+    name 'Jupyter Notebook'
     score 0.0073651688621322155
     scorePercent 0.74%
     confidence 0.25
@@ -1134,9 +1134,9 @@ rankings:
         score 0.0020051178498371363
         rawValue 0.20%
 
-  Emacs Lisp:
+  'Emacs Lisp':
     rank 56
-    name "Emacs Lisp"
+    name 'Emacs Lisp'
     score 0.001705688102043901
     scorePercent 0.17%
     confidence 0.25
@@ -1147,9 +1147,9 @@ rankings:
         score 0.001705688102043901
         rawValue 0.17%
 
-  Adblock Filter List:
+  'Adblock Filter List':
     rank 57
-    name "Adblock Filter List"
+    name 'Adblock Filter List'
     score 0.0015943571590075203
     scorePercent 0.16%
     confidence 0.25
@@ -1251,9 +1251,9 @@ rankings:
         score 0.0011240384935396227
         rawValue 0.11%
 
-  Vim Script:
+  'Vim Script':
     rank 65
-    name "Vim Script"
+    name 'Vim Script'
     score 0.0010622629641192454
     scorePercent 0.11%
     confidence 0.25

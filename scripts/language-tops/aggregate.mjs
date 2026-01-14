@@ -30,6 +30,19 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '../../data');
 
 /**
+ * Checks if a string needs to be quoted for Links Notation.
+ * According to the links-notation grammar, simple references cannot contain:
+ * - spaces, tabs, newlines, carriage returns
+ * - parentheses ( )
+ * - colons :
+ */
+function needsQuoting(value) {
+  if (value === '') return true;
+  // Check for characters not allowed in simple references: [ \t\n\r(:)]
+  return /[\s():]/.test(value);
+}
+
+/**
  * Formats a value for Links Notation output.
  * Quotes strings that contain spaces or special characters.
  */
@@ -44,17 +57,34 @@ function formatLinoValue(value) {
     return String(value);
   }
   if (typeof value === 'string') {
-    // Quote strings that contain spaces, special chars, or are empty
-    if (value === '' || /[\s():'"]/.test(value)) {
-      // Use single quotes if the string contains double quotes
-      if (value.includes('"')) {
-        return `'${value.replace(/'/g, "\\'")}'`;
+    // Quote strings that need quoting per links-notation grammar
+    if (needsQuoting(value)) {
+      // Use single quotes (preferred in lino), escaping internal single quotes
+      if (value.includes("'")) {
+        // Use double quotes if string contains single quotes
+        return `"${value.replace(/"/g, '""')}"`;
       }
-      return `"${value.replace(/"/g, '\\"')}"`;
+      return `'${value}'`;
     }
     return value;
   }
   return String(value);
+}
+
+/**
+ * Formats a reference/key for Links Notation output.
+ * Keys in lino must be valid references.
+ */
+function formatLinoKey(key) {
+  if (needsQuoting(key)) {
+    // Use single quotes (preferred in lino), escaping internal single quotes
+    if (key.includes("'")) {
+      // Use double quotes if key contains single quotes
+      return `"${key.replace(/"/g, '""')}"`;
+    }
+    return `'${key}'`;
+  }
+  return key;
 }
 
 /**
@@ -84,8 +114,8 @@ function jsonToIndentedLino(data, indent = '', parentKey = '', isRelative = fals
           if (i > 0) {
             lines.push('');
           }
-          // Use language name as absolute key with colon
-          lines.push(`${indent}${item.name}:`);
+          // Use language name as absolute key with colon (properly quoted if needed)
+          lines.push(`${indent}${formatLinoKey(item.name)}:`);
           // Render the item's contents with isRelative=true (inside a ranking)
           lines.push(...jsonToIndentedLino(item, nextIndent, 'rankingItem', true));
         } else {
@@ -101,19 +131,20 @@ function jsonToIndentedLino(data, indent = '', parentKey = '', isRelative = fals
     }
   } else if (typeof data === 'object' && data !== null) {
     for (const [key, value] of Object.entries(data)) {
+      const formattedKey = formatLinoKey(key);
       if (value === null || value === undefined) {
-        lines.push(`${indent}${key} null`);
+        lines.push(`${indent}${formattedKey} null`);
       } else if (Array.isArray(value)) {
         if (value.length === 0) {
-          lines.push(`${indent}${key}`);
+          lines.push(`${indent}${formattedKey}`);
         } else if (value.every(item => typeof item !== 'object')) {
           // Simple array of primitives - inline format
           const items = value.map(formatLinoValue).join(' ');
-          lines.push(`${indent}${key} ${items}`);
+          lines.push(`${indent}${formattedKey} ${items}`);
         } else {
           // Array of objects - nested format
           // For rankings, keep the colon since it's the top-level container
-          lines.push(`${indent}${key}:`);
+          lines.push(`${indent}${formattedKey}:`);
           for (let i = 0; i < value.length; i++) {
             const item = value[i];
             if (typeof item === 'object' && item !== null) {
@@ -123,8 +154,8 @@ function jsonToIndentedLino(data, indent = '', parentKey = '', isRelative = fals
                 if (i > 0) {
                   lines.push('');
                 }
-                // Use language name as absolute key with colon
-                lines.push(`${nextIndent}${item.name}:`);
+                // Use language name as absolute key with colon (properly quoted if needed)
+                lines.push(`${nextIndent}${formatLinoKey(item.name)}:`);
                 // Render the item's contents with isRelative=true
                 lines.push(...jsonToIndentedLino(item, nextIndent + '  ', 'rankingItem', true));
               } else {
@@ -144,15 +175,15 @@ function jsonToIndentedLino(data, indent = '', parentKey = '', isRelative = fals
         // for 'sources' and its children, as they are relative to each language
         const useRelative = isRelative && (key === 'sources' || parentKey === 'sources');
         if (useRelative) {
-          lines.push(`${indent}${key}`);
+          lines.push(`${indent}${formattedKey}`);
         } else {
-          lines.push(`${indent}${key}:`);
+          lines.push(`${indent}${formattedKey}:`);
         }
         // Only propagate relative context if we're already in a ranking item
         // (don't enter relative mode for top-level 'sources')
         lines.push(...jsonToIndentedLino(value, nextIndent, key, isRelative));
       } else {
-        lines.push(`${indent}${key} ${formatLinoValue(value)}`);
+        lines.push(`${indent}${formattedKey} ${formatLinoValue(value)}`);
       }
     }
   } else {
