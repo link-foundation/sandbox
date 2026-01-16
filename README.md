@@ -71,6 +71,19 @@ docker build -t sandbox .
 
 The image is built for both `linux/amd64` and `linux/arm64` architectures.
 
+### CI/CD Build Requirements
+
+**IMPORTANT: ARM64 builds MUST use native ARM64 runners.**
+
+| Architecture | Runner | Build Time |
+|-------------|--------|------------|
+| `linux/amd64` | `ubuntu-latest` | ~5-10 minutes |
+| `linux/arm64` | `ubuntu-24.04-arm` (native) | ~30-60 minutes |
+
+Native ARM64 runners provide optimal build performance for compilation-heavy workloads. Emulation would incur a 10-30x performance penalty.
+
+For detailed analysis, see [Case Study: Issue #7](docs/case-studies/issue-7/README.md).
+
 ## Environment
 
 The container runs as the `sandbox` user with home directory at `/home/sandbox`. All language runtimes are installed in user-local directories:
@@ -83,6 +96,12 @@ The container runs as the `sandbox` user with home directory at `/home/sandbox`.
 - Lean: `~/.elan`
 - Perl: `~/.perl5`
 - OCaml/Rocq: `~/.opam`
+
+## Documentation
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture and design decisions
+- [REQUIREMENTS.md](REQUIREMENTS.md) - Project requirements and constraints
+- [docs/case-studies/](docs/case-studies/) - Case studies and incident analysis
 
 ## License
 
