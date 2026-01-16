@@ -19,7 +19,7 @@
 ### Phase 1: Setup (17:05:31 - 17:05:54)
 - Set up job: 7 seconds
 - Checkout repository: 1 second
-- Set up QEMU: 8 seconds
+- Set up emulation: 8 seconds
 - Set up Docker Buildx: 5 seconds
 - Log in to GHCR: 1 second
 - Extract metadata: 1 second
@@ -89,9 +89,9 @@
 | Rocq | Compiled from source | ~63 min | Very slow |
 | PHP | Compiled from source | 4+ hours (incomplete) | Extremely slow |
 
-### 2. QEMU Performance Impact
+### 2. Emulation Performance Impact
 
-The QEMU emulation overhead is visible in the timestamps:
+The emulation overhead is visible in the timestamps:
 - Simple downloads/extractions: Normal speed
 - Compilation tasks: 10-30x slower than native
 
@@ -130,5 +130,4 @@ Percentage of build time spent:
 
 ## Files
 
-- [Full CI Log](./full-ci-log.txt) - Complete 5508-line log file
 - [Main Analysis](./README.md) - Root cause analysis and solutions

@@ -73,14 +73,14 @@ The image is built for both `linux/amd64` and `linux/arm64` architectures.
 
 ### CI/CD Build Requirements
 
-**IMPORTANT: ARM64 builds MUST use native ARM64 runners. QEMU emulation is strictly prohibited.**
+**IMPORTANT: ARM64 builds MUST use native ARM64 runners.**
 
 | Architecture | Runner | Build Time |
 |-------------|--------|------------|
 | `linux/amd64` | `ubuntu-latest` | ~5-10 minutes |
 | `linux/arm64` | `ubuntu-24.04-arm` (native) | ~30-60 minutes |
 
-**Why no QEMU?** QEMU emulation incurs a 10-30x performance penalty for compilation-heavy workloads. What takes 30-60 minutes on native ARM64 would take 6+ hours (or timeout) with QEMU.
+Native ARM64 runners provide optimal build performance for compilation-heavy workloads. Emulation would incur a 10-30x performance penalty.
 
 For detailed analysis, see [Case Study: Issue #7](docs/case-studies/issue-7/README.md).
 

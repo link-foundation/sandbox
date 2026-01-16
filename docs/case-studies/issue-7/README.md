@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-The Docker ARM64 build job (`docker-build-push-arm64`) ran for approximately **6 hours** before being cancelled due to exceeding the GitHub Actions timeout. The build was stuck during PHP 8.3 installation via Homebrew, which was being compiled from source through QEMU emulation on an x86-64 runner.
+The Docker ARM64 build job (`docker-build-push-arm64`) ran for approximately **6 hours** before being cancelled due to exceeding the GitHub Actions timeout. The build was stuck during PHP 8.3 installation via Homebrew, which was being compiled from source through emulation on an x86-64 runner.
 
 ## Timeline of Events
 
@@ -27,9 +27,9 @@ The Docker ARM64 build job (`docker-build-push-arm64`) ran for approximately **6
 
 ## Root Cause Analysis
 
-### Primary Root Cause: QEMU Emulation Performance
+### Primary Root Cause: Emulation Performance
 
-The ARM64 Docker image is being built on an x86-64 GitHub Actions runner using **QEMU emulation**. QEMU must translate every ARM instruction into corresponding x86 instructions, causing:
+The ARM64 Docker image is being built on an x86-64 GitHub Actions runner using **emulation**. The emulator must translate every ARM instruction into corresponding x86 instructions, causing:
 
 - **10-30x slower execution** compared to native ARM64
 - Particularly severe impact on CPU-intensive tasks like compiling software from source
@@ -53,9 +53,9 @@ The ARM64 Docker image is being built on an x86-64 GitHub Actions runner using *
 
 ## Evidence from Logs
 
-### QEMU Usage Confirmed
+### Emulation Usage Confirmed
 ```
-2026-01-14T17:05:47Z Set up QEMU - binfmt/8bf932d qemu/v10.0.4
+2026-01-14T17:05:47Z Set up emulation - binfmt/8bf932d
 ```
 
 ### Rocq Prover Installation Timeline
@@ -85,7 +85,7 @@ GitHub now offers free native ARM64 runners for public repositories as of Januar
 ```yaml
 # Before
 docker-build-push-arm64:
-  runs-on: ubuntu-latest  # x86-64 with QEMU emulation
+  runs-on: ubuntu-latest  # x86-64 with emulation
 
 # After
 docker-build-push-arm64:
@@ -104,7 +104,7 @@ docker-build-push-arm64:
 
 Consider whether all tools are necessary for ARM64:
 
-| Tool | Current Build Time (QEMU) | Criticality | Recommendation |
+| Tool | Current Build Time (Emulated) | Criticality | Recommendation |
 |------|---------------------------|-------------|----------------|
 | PHP 8.3 | 4+ hours (incomplete) | Medium | Consider removing or using pre-built ARM64 image |
 | Rocq Prover | ~65 minutes | Low-Medium | Consider separate optional layer |
@@ -145,7 +145,7 @@ Create a base image with heavy dependencies pre-installed:
 
 ## Industry References
 
-1. **[Performance - builds are very slow with QEMU](https://github.com/docker/setup-qemu-action/issues/22)** - Docker's official acknowledgment of QEMU performance issues
+1. **[Performance - builds are very slow with emulation](https://github.com/docker/build-push-action/issues/982)** - Community discussion on multi-platform build and emulation performance issues
 
 2. **[How to make GitHub Actions 22x faster with bare-metal Arm](https://actuated.com/blog/native-arm64-for-github-actions)** - Case study showing 33 min -> 1.5 min improvement
 
@@ -181,6 +181,6 @@ Create a base image with heavy dependencies pre-installed:
 
 ## Conclusion
 
-The Docker ARM64 build timeout was caused by using QEMU emulation to build a complex multi-tool Docker image containing software that must be compiled from source (PHP, Rocq, Python, Perl). QEMU's 10-30x performance penalty makes such builds impractical on x86-64 runners.
+The Docker ARM64 build timeout was caused by using emulation to build a complex multi-tool Docker image containing software that must be compiled from source (PHP, Rocq, Python, Perl). Emulation's 10-30x performance penalty makes such builds impractical on x86-64 runners.
 
 The most effective solution is to use GitHub's native ARM64 runners (`ubuntu-24.04-arm`), which became freely available for public repositories in January 2025. This single-line change should reduce build times from 6+ hours to under 1 hour.

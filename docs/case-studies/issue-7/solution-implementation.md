@@ -23,10 +23,8 @@ docker-build-push-arm64:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Note: QEMU setup is NOT needed for native ARM64 runner
-    # Remove or comment out this step:
-    # - name: Set up QEMU
-    #   uses: docker/setup-qemu-action@v3
+    # Note: Emulation setup is NOT needed for native ARM64 runner
+    # Remove any emulation setup step as it's not needed
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -113,9 +111,7 @@ docker-build-push-arm64:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # QEMU is not needed on native ARM64 runner
-    # - name: Set up QEMU
-    #   uses: docker/setup-qemu-action@v3
+    # Emulation is not needed on native ARM64 runner
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -185,7 +181,7 @@ After implementing the solution:
 If the native ARM64 runner has issues:
 
 1. Revert to the original `ubuntu-latest` runner
-2. Add the QEMU setup step back
+2. Add emulation setup step back if needed
 3. Consider alternative solutions:
    - Remove heavy dependencies (PHP, Rocq)
    - Use pre-built base image

@@ -79,15 +79,15 @@ Builds exceeding these times indicate a configuration problem and MUST be invest
 
 ### CI-1: Native Runners Only (CRITICAL)
 
-**ARM64 builds MUST use native ARM64 runners. QEMU emulation is STRICTLY PROHIBITED.**
+**ARM64 builds MUST use native ARM64 runners.**
 
 | Requirement | Specification |
 |-------------|---------------|
 | AMD64 Runner | `ubuntu-latest` or equivalent |
 | ARM64 Runner | `ubuntu-24.04-arm` (native ARM64) |
-| QEMU | MUST NOT be used for ARM64 builds |
+| Emulation | MUST NOT be used for ARM64 builds |
 
-**Rationale**: QEMU emulation incurs a 10-30x performance penalty, making compilation-heavy builds timeout or run for 6+ hours instead of 30-60 minutes.
+**Rationale**: Emulation incurs a 10-30x performance penalty, making compilation-heavy builds timeout or run for 6+ hours instead of 30-60 minutes.
 
 **Reference**: [Case Study: Issue #7](docs/case-studies/issue-7/README.md)
 
@@ -138,7 +138,7 @@ Homebrew does not provide pre-built bottles for ARM64 Linux. Packages requiring 
 
 - Be built on native ARM64 runners
 - Have sufficient timeout allocated
-- NOT use QEMU emulation
+- NOT use emulation
 
 ## Future Considerations
 
@@ -159,7 +159,7 @@ Homebrew does not provide pre-built bottles for ARM64 Linux. Packages requiring 
 Before merging any CI/CD changes, verify:
 
 - [ ] ARM64 job uses `ubuntu-24.04-arm` runner
-- [ ] No QEMU setup step for ARM64 builds
+- [ ] No emulation setup step for ARM64 builds
 - [ ] Appropriate timeouts are configured
 - [ ] Change detection works correctly
 - [ ] Build completes within time limits

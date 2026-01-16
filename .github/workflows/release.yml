@@ -178,9 +178,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -213,7 +210,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   # === BUILD AND PUSH ARM64 IMAGE ===
-  # Using native ARM64 runner to avoid QEMU emulation performance issues
+  # Using native ARM64 runner for optimal build performance
   # See: docs/case-studies/issue-7/README.md for analysis of the previous timeout
   # Reference: https://github.blog/changelog/2025-01-16-linux-arm64-hosted-runners-now-available-for-free-in-public-repositories-public-preview/
   docker-build-push-arm64:
@@ -228,11 +225,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # Note: QEMU setup is not needed on native ARM64 runner
-      # Removing this step eliminates the 10-30x performance penalty from emulation
-      # - name: Set up QEMU
-      #   uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

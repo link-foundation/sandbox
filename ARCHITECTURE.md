@@ -63,9 +63,9 @@ The image is built for two architectures:
 
 ### Critical: Native ARM64 Runners Only
 
-**IMPORTANT: ARM64 builds MUST use native ARM64 runners. QEMU emulation is strictly prohibited.**
+**IMPORTANT: ARM64 builds MUST use native ARM64 runners.**
 
-Reason: QEMU emulation incurs a 10-30x performance penalty, making builds that take 30-60 minutes natively run for 6+ hours (or timeout entirely).
+Reason: Emulation incurs a 10-30x performance penalty, making builds that take 30-60 minutes natively run for 6+ hours (or timeout entirely).
 
 See [Case Study: Docker ARM64 Build Timeout](docs/case-studies/issue-7/README.md) for detailed analysis.
 
@@ -84,7 +84,7 @@ See [Case Study: Docker ARM64 Build Timeout](docs/case-studies/issue-7/README.md
 │docker-build-push│     │docker-build-push-   │
 │    (amd64)      │     │      arm64          │
 │ ubuntu-latest   │     │ ubuntu-24.04-arm    │
-└────────┬────────┘     │ (NATIVE - NO QEMU)  │
+└────────┬────────┘     │ (NATIVE - NO EMU)   │
          │              └──────────┬──────────┘
          │                         │
          └──────────┬──────────────┘
@@ -137,7 +137,7 @@ Most languages use version managers (nvm, pyenv, sdkman, etc.) to:
 
 ARM64 and AMD64 builds run as separate jobs (not a single multi-platform build) to:
 - Use native runners for each architecture
-- Avoid QEMU emulation entirely
+- Avoid emulation entirely
 - Enable parallel building when runners are available
 
 ### 4. Homebrew for PHP
@@ -157,20 +157,20 @@ Note: This requires compilation on ARM64 Linux (no pre-built bottles), which is 
 2. **Caching**: GitHub Actions cache for Docker layers
 3. **Timeout protection**: 120-minute safety timeout on ARM64 job
 
-### Why QEMU is Prohibited
+### Why Emulation is Prohibited
 
-QEMU user-mode emulation translates every instruction at runtime:
+User-mode emulation translates every instruction at runtime:
 
-| Metric | Native | QEMU Emulated |
-|--------|--------|---------------|
+| Metric | Native | Emulated |
+|--------|--------|----------|
 | Simple operations | 1x | ~2-5x slower |
 | Compilation (gcc, etc.) | 1x | 10-30x slower |
 | Full build | 30-60 min | 6+ hours |
 
-For compilation-heavy workloads like this image, QEMU makes builds impractical.
+For compilation-heavy workloads like this image, emulation makes builds impractical.
 
 ## References
 
 - [GitHub: Linux arm64 hosted runners for free](https://github.blog/changelog/2025-01-16-linux-arm64-hosted-runners-now-available-for-free-in-public-repositories-public-preview/)
-- [QEMU performance issues](https://github.com/docker/setup-qemu-action/issues/22)
+- [Emulation performance issues](https://github.com/docker/build-push-action/issues/982)
 - [Case Study: Issue #7 Analysis](docs/case-studies/issue-7/README.md)
