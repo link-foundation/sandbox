@@ -23,8 +23,12 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  # GitHub Container Registry
+  GHCR_REGISTRY: ghcr.io
+  GHCR_IMAGE_NAME: ${{ github.repository }}
+  # Docker Hub
+  DOCKERHUB_REGISTRY: docker.io
+  DOCKERHUB_IMAGE_NAME: konard/sandbox
 
 jobs:
   # === DETECT CHANGES ===
@@ -105,7 +109,7 @@ jobs:
         with:
           context: .
           push: false
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test
+          tags: ${{ env.GHCR_IMAGE_NAME }}:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -184,15 +188,24 @@ jobs:
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ env.GHCR_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKERHUB_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: |
+            ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}
+            ${{ env.DOCKERHUB_IMAGE_NAME }}
           tags: |
             type=raw,value=latest
             type=sha,prefix=
@@ -232,15 +245,24 @@ jobs:
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ env.GHCR_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKERHUB_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: |
+            ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}
+            ${{ env.DOCKERHUB_IMAGE_NAME }}
           flavor: |
             suffix=-arm64
           tags: |
@@ -272,17 +294,35 @@ jobs:
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ env.GHCR_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create and push multi-arch manifest
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKERHUB_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest (GHCR)
         run: |
-          # Create manifest for latest tag
-          docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-arm64
+          # Create manifest for latest tag on GHCR
+          docker manifest create ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:latest \
+            --amend ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:latest \
+            --amend ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:latest-arm64
 
-          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker manifest push ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:latest
 
-          echo "Multi-arch manifest created and pushed successfully"
+          echo "GHCR multi-arch manifest created and pushed successfully"
+
+      - name: Create and push multi-arch manifest (Docker Hub)
+        run: |
+          # Create manifest for latest tag on Docker Hub
+          docker manifest create ${{ env.DOCKERHUB_IMAGE_NAME }}:latest \
+            --amend ${{ env.DOCKERHUB_IMAGE_NAME }}:latest \
+            --amend ${{ env.DOCKERHUB_IMAGE_NAME }}:latest-arm64
+
+          docker manifest push ${{ env.DOCKERHUB_IMAGE_NAME }}:latest
+
+          echo "Docker Hub multi-arch manifest created and pushed successfully"
