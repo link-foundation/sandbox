@@ -214,6 +214,11 @@ log_info "Installing R statistical language..."
 maybe_sudo apt install -y r-base
 log_success "R language installed"
 
+# --- Install Ruby build dependencies ---
+log_info "Installing Ruby build dependencies..."
+maybe_sudo apt install -y libyaml-dev
+log_success "Ruby build dependencies installed"
+
 # --- Install Python build dependencies (required for pyenv) ---
 log_info "Installing Python build dependencies..."
 maybe_sudo apt install -y \
@@ -753,9 +758,9 @@ if [ ! -d "$HOME/.rbenv" ]; then
   eval "$(rbenv init - bash)"
   log_success "rbenv installed and configured"
 
-  # Install latest stable Ruby version
+  # Install latest stable Ruby 3.x version (avoid pre-release 4.x)
   log_info "Installing latest stable Ruby version (this may take several minutes)..."
-  LATEST_RUBY=$(rbenv install -l 2>/dev/null | grep -E '^\s*[0-9]+\.[0-9]+\.[0-9]+$' | tail -1 | tr -d '[:space:]')
+  LATEST_RUBY=$(rbenv install -l 2>/dev/null | grep -E '^\s*3\.[0-9]+\.[0-9]+$' | tail -1 | tr -d '[:space:]')
 
   if [ -n "$LATEST_RUBY" ]; then
     log_info "Installing Ruby $LATEST_RUBY..."
