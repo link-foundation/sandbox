@@ -34,7 +34,7 @@ env:
 jobs:
   # === DETECT CHANGES ===
   detect-changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       docker-changed: ${{ steps.changes.outputs.docker }}
       scripts-changed: ${{ steps.changes.outputs.scripts }}
@@ -113,7 +113,7 @@ jobs:
 
   # === BUILD AND TEST DOCKER IMAGE (PR) ===
   docker-build-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [detect-changes]
     if: github.event_name == 'pull_request' && needs.detect-changes.outputs.should-build == 'true'
 
@@ -191,7 +191,7 @@ jobs:
 
   # === BUILD AND PUSH DOCKER IMAGE (MAIN) ===
   docker-build-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [detect-changes]
     # Run on push to main with changes, OR on workflow_dispatch with force_build
     if: |
@@ -322,7 +322,7 @@ jobs:
 
   # === CREATE MULTI-ARCH MANIFEST ===
   docker-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [detect-changes, docker-build-push, docker-build-push-arm64]
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
@@ -388,7 +388,7 @@ jobs:
 
   # === CREATE GITHUB RELEASE ===
   create-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [detect-changes, docker-manifest]
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
