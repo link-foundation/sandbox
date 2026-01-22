@@ -403,71 +403,48 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_IMAGE: ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}
+          DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE_NAME }}
         run: |
           VERSION="${{ needs.detect-changes.outputs.version }}"
           DATE=$(date +%Y-%m-%d)
 
+          # Create release notes file
+          cat > /tmp/release-notes.md << ENDOFNOTES
+          ## Docker Images
+
+          ### GitHub Container Registry (GHCR)
+          - ${GHCR_IMAGE}:${VERSION} (multi-arch)
+          - ${GHCR_IMAGE}:${VERSION}-arm64 (ARM64)
+          - ${GHCR_IMAGE}:latest (multi-arch)
+
+          ### Docker Hub
+          - ${DOCKERHUB_IMAGE}:${VERSION} (multi-arch)
+          - ${DOCKERHUB_IMAGE}:${VERSION}-arm64 (ARM64)
+          - ${DOCKERHUB_IMAGE}:latest (multi-arch)
+
+          ## Quick Start
+
+          Pull from GHCR:
+          docker pull ${GHCR_IMAGE}:${VERSION}
+
+          Pull from Docker Hub:
+          docker pull ${DOCKERHUB_IMAGE}:${VERSION}
+
+          ## Links
+          - [GHCR Package](https://github.com/${{ github.repository }}/pkgs/container/sandbox)
+          - [Docker Hub](https://hub.docker.com/r/${DOCKERHUB_IMAGE})
+
+          Released on ${DATE}
+          ENDOFNOTES
+
           # Check if release already exists
           if gh release view "v${VERSION}" &>/dev/null; then
             echo "Release v${VERSION} already exists, updating..."
-            gh release edit "v${VERSION}" \
-              --title "v${VERSION}" \
-              --notes "## Docker Images
-
-### GitHub Container Registry (GHCR)
-- \`ghcr.io/${{ env.GHCR_IMAGE_NAME }}:${VERSION}\` (multi-arch)
-- \`ghcr.io/${{ env.GHCR_IMAGE_NAME }}:${VERSION}-arm64\` (ARM64)
-- \`ghcr.io/${{ env.GHCR_IMAGE_NAME }}:latest\` (multi-arch)
-
-### Docker Hub
-- \`${{ env.DOCKERHUB_IMAGE_NAME }}:${VERSION}\` (multi-arch)
-- \`${{ env.DOCKERHUB_IMAGE_NAME }}:${VERSION}-arm64\` (ARM64)
-- \`${{ env.DOCKERHUB_IMAGE_NAME }}:latest\` (multi-arch)
-
-## Quick Start
-\`\`\`bash
-# Pull from GHCR
-docker pull ghcr.io/${{ env.GHCR_IMAGE_NAME }}:${VERSION}
-
-# Pull from Docker Hub
-docker pull ${{ env.DOCKERHUB_IMAGE_NAME }}:${VERSION}
-\`\`\`
-
-## Links
-- [GHCR Package](https://github.com/${{ env.GHCR_IMAGE_NAME }}/pkgs/container/sandbox)
-- [Docker Hub](https://hub.docker.com/r/${{ env.DOCKERHUB_IMAGE_NAME }})
-
-Released on ${DATE}"
+            gh release edit "v${VERSION}" --title "v${VERSION}" --notes-file /tmp/release-notes.md
           else
             echo "Creating new release v${VERSION}..."
-            gh release create "v${VERSION}" \
-              --title "v${VERSION}" \
-              --notes "## Docker Images
-
-### GitHub Container Registry (GHCR)
-- \`ghcr.io/${{ env.GHCR_IMAGE_NAME }}:${VERSION}\` (multi-arch)
-- \`ghcr.io/${{ env.GHCR_IMAGE_NAME }}:${VERSION}-arm64\` (ARM64)
-- \`ghcr.io/${{ env.GHCR_IMAGE_NAME }}:latest\` (multi-arch)
-
-### Docker Hub
-- \`${{ env.DOCKERHUB_IMAGE_NAME }}:${VERSION}\` (multi-arch)
-- \`${{ env.DOCKERHUB_IMAGE_NAME }}:${VERSION}-arm64\` (ARM64)
-- \`${{ env.DOCKERHUB_IMAGE_NAME }}:latest\` (multi-arch)
-
-## Quick Start
-\`\`\`bash
-# Pull from GHCR
-docker pull ghcr.io/${{ env.GHCR_IMAGE_NAME }}:${VERSION}
-
-# Pull from Docker Hub
-docker pull ${{ env.DOCKERHUB_IMAGE_NAME }}:${VERSION}
-\`\`\`
-
-## Links
-- [GHCR Package](https://github.com/${{ env.GHCR_IMAGE_NAME }}/pkgs/container/sandbox)
-- [Docker Hub](https://hub.docker.com/r/${{ env.DOCKERHUB_IMAGE_NAME }})
-
-Released on ${DATE}"
+            gh release create "v${VERSION}" --title "v${VERSION}" --notes-file /tmp/release-notes.md
           fi
 
           echo "GitHub Release v${VERSION} created/updated successfully"
