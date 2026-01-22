@@ -175,6 +175,10 @@ jobs:
           docker run --rm sandbox-test gh --version || echo "GitHub CLI test failed"
 
           echo ""
+          echo "Testing GitLab CLI..."
+          docker run --rm sandbox-test glab --version || echo "GitLab CLI test failed"
+
+          echo ""
           echo "Testing Lean..."
           docker run --rm sandbox-test lean --version || echo "Lean test failed"
 
