@@ -241,6 +241,16 @@ else
   log_success "GitHub CLI already installed"
 fi
 
+# --- GitLab CLI (install system-wide) ---
+log_step "Installing GitLab CLI (system-wide)"
+if ! command -v glab &>/dev/null; then
+  log_info "Installing GitLab CLI..."
+  maybe_sudo apt install -y glab
+  log_success "GitLab CLI installed"
+else
+  log_success "GitLab CLI already installed"
+fi
+
 # --- Detect Docker environment ---
 is_docker=false
 if [ "${DOCKER_BUILD:-}" = "1" ]; then
@@ -754,6 +764,7 @@ log_step "Installation Summary"
 echo ""
 echo "System & Development Tools:"
 if command -v gh &>/dev/null; then log_success "GitHub CLI: $(gh --version | head -n1)"; else log_warning "GitHub CLI: not found"; fi
+if command -v glab &>/dev/null; then log_success "GitLab CLI: $(glab --version | head -n1)"; else log_warning "GitLab CLI: not found"; fi
 if command -v git &>/dev/null; then log_success "Git: $(git --version)"; else log_warning "Git: not found"; fi
 if command -v bun &>/dev/null; then log_success "Bun: $(bun --version)"; else log_warning "Bun: not found"; fi
 if command -v deno &>/dev/null; then log_success "Deno: $(deno --version | head -n1)"; else log_warning "Deno: not found"; fi
@@ -818,9 +829,7 @@ if command -v lld &>/dev/null; then log_success "LLD Linker: $(lld --version | h
 
 echo ""
 echo "Next Steps:"
-log_note "1. Authenticate with GitHub: gh auth login -h github.com -s repo,workflow,user,read:org,gist"
-log_note "2. Restart your shell or run: source ~/.bashrc"
-log_note "3. Verify installations with: <tool> --version"
+log_note "Restart your shell or run: source ~/.bashrc"
 
 echo ""
 
