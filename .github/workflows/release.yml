@@ -8,6 +8,7 @@ on:
       - 'Dockerfile'
       - 'scripts/**'
       - '.github/workflows/release.yml'
+      - 'package.json'  # Trigger on version changes
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
@@ -38,12 +39,21 @@ jobs:
       docker-changed: ${{ steps.changes.outputs.docker }}
       scripts-changed: ${{ steps.changes.outputs.scripts }}
       workflow-changed: ${{ steps.changes.outputs.workflow }}
+      package-changed: ${{ steps.changes.outputs.package }}
       should-build: ${{ steps.should-build.outputs.result }}
+      version: ${{ steps.version.outputs.version }}
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
+
+      - name: Get version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION"
 
       - name: Detect changes
         id: changes
@@ -80,15 +90,25 @@ jobs:
             echo "workflow=false" >> $GITHUB_OUTPUT
           fi
 
+          # Check for package.json changes (version bump)
+          if echo "$CHANGED_FILES" | grep -qE '^package\.json$'; then
+            echo "package=true" >> $GITHUB_OUTPUT
+          else
+            echo "package=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Determine if build is needed
         id: should-build
         run: |
           if [ "${{ github.event.inputs.force_build }}" = "true" ]; then
             echo "result=true" >> $GITHUB_OUTPUT
+            echo "Build triggered by: force_build input"
           elif [ "${{ steps.changes.outputs.docker }}" = "true" ] || [ "${{ steps.changes.outputs.scripts }}" = "true" ]; then
             echo "result=true" >> $GITHUB_OUTPUT
+            echo "Build triggered by: Dockerfile or scripts changes"
           else
             echo "result=false" >> $GITHUB_OUTPUT
+            echo "No build needed: no relevant changes detected"
           fi
 
   # === BUILD AND TEST DOCKER IMAGE (PR) ===
@@ -173,10 +193,17 @@ jobs:
   docker-build-push:
     runs-on: ubuntu-latest
     needs: [detect-changes]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true'
+    # Run on push to main with changes, OR on workflow_dispatch with force_build
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_build == 'true')
     permissions:
       contents: read
       packages: write
+
+    outputs:
+      version: ${{ needs.detect-changes.outputs.version }}
+      digest: ${{ steps.build.outputs.digest }}
 
     steps:
       - name: Checkout repository
@@ -208,10 +235,12 @@ jobs:
             ${{ env.DOCKERHUB_IMAGE_NAME }}
           tags: |
             type=raw,value=latest
+            type=raw,value=${{ needs.detect-changes.outputs.version }}
             type=sha,prefix=
             type=raw,value={{date 'YYYYMMDD'}}
 
       - name: Build and push Docker image (amd64)
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -219,6 +248,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: false  # Prevents unknown/unknown platform in registry
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -230,10 +260,16 @@ jobs:
     runs-on: ubuntu-24.04-arm  # Native ARM64 runner (free for public repos since Jan 2025)
     timeout-minutes: 120       # Safety timeout to prevent runaway builds
     needs: [detect-changes, docker-build-push]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true'
+    # Run on push to main with changes, OR on workflow_dispatch with force_build
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_build == 'true')
     permissions:
       contents: read
       packages: write
+
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
 
     steps:
       - name: Checkout repository
@@ -267,10 +303,12 @@ jobs:
             suffix=-arm64
           tags: |
             type=raw,value=latest
+            type=raw,value=${{ needs.detect-changes.outputs.version }}
             type=sha,prefix=
             type=raw,value={{date 'YYYYMMDD'}}
 
       - name: Build and push Docker image (arm64)
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -278,14 +316,17 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: false  # Prevents unknown/unknown platform in registry
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   # === CREATE MULTI-ARCH MANIFEST ===
   docker-manifest:
     runs-on: ubuntu-latest
-    needs: [docker-build-push, docker-build-push-arm64]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [detect-changes, docker-build-push, docker-build-push-arm64]
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_build == 'true')
     permissions:
       contents: read
       packages: write
@@ -307,6 +348,8 @@ jobs:
 
       - name: Create and push multi-arch manifest (GHCR)
         run: |
+          VERSION="${{ needs.detect-changes.outputs.version }}"
+
           # Create manifest for latest tag on GHCR
           docker manifest create ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:latest \
             --amend ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:latest \
@@ -314,10 +357,19 @@ jobs:
 
           docker manifest push ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:latest
 
-          echo "GHCR multi-arch manifest created and pushed successfully"
+          # Create manifest for version tag on GHCR
+          docker manifest create ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:${VERSION} \
+            --amend ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:${VERSION} \
+            --amend ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:${VERSION}-arm64
+
+          docker manifest push ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:${VERSION}
+
+          echo "GHCR multi-arch manifest created and pushed successfully for latest and ${VERSION}"
 
       - name: Create and push multi-arch manifest (Docker Hub)
         run: |
+          VERSION="${{ needs.detect-changes.outputs.version }}"
+
           # Create manifest for latest tag on Docker Hub
           docker manifest create ${{ env.DOCKERHUB_IMAGE_NAME }}:latest \
             --amend ${{ env.DOCKERHUB_IMAGE_NAME }}:latest \
@@ -325,4 +377,74 @@ jobs:
 
           docker manifest push ${{ env.DOCKERHUB_IMAGE_NAME }}:latest
 
-          echo "Docker Hub multi-arch manifest created and pushed successfully"
+          # Create manifest for version tag on Docker Hub
+          docker manifest create ${{ env.DOCKERHUB_IMAGE_NAME }}:${VERSION} \
+            --amend ${{ env.DOCKERHUB_IMAGE_NAME }}:${VERSION} \
+            --amend ${{ env.DOCKERHUB_IMAGE_NAME }}:${VERSION}-arm64
+
+          docker manifest push ${{ env.DOCKERHUB_IMAGE_NAME }}:${VERSION}
+
+          echo "Docker Hub multi-arch manifest created and pushed successfully for latest and ${VERSION}"
+
+  # === CREATE GITHUB RELEASE ===
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, docker-manifest]
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_build == 'true')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_IMAGE: ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}
+          DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE_NAME }}
+        run: |
+          VERSION="${{ needs.detect-changes.outputs.version }}"
+          DATE=$(date +%Y-%m-%d)
+
+          # Create release notes file
+          cat > /tmp/release-notes.md << ENDOFNOTES
+          ## Docker Images
+
+          ### GitHub Container Registry (GHCR)
+          - ${GHCR_IMAGE}:${VERSION} (multi-arch)
+          - ${GHCR_IMAGE}:${VERSION}-arm64 (ARM64)
+          - ${GHCR_IMAGE}:latest (multi-arch)
+
+          ### Docker Hub
+          - ${DOCKERHUB_IMAGE}:${VERSION} (multi-arch)
+          - ${DOCKERHUB_IMAGE}:${VERSION}-arm64 (ARM64)
+          - ${DOCKERHUB_IMAGE}:latest (multi-arch)
+
+          ## Quick Start
+
+          Pull from GHCR:
+          docker pull ${GHCR_IMAGE}:${VERSION}
+
+          Pull from Docker Hub:
+          docker pull ${DOCKERHUB_IMAGE}:${VERSION}
+
+          ## Links
+          - [GHCR Package](https://github.com/${{ github.repository }}/pkgs/container/sandbox)
+          - [Docker Hub](https://hub.docker.com/r/${DOCKERHUB_IMAGE})
+
+          Released on ${DATE}
+          ENDOFNOTES
+
+          # Check if release already exists
+          if gh release view "v${VERSION}" &>/dev/null; then
+            echo "Release v${VERSION} already exists, updating..."
+            gh release edit "v${VERSION}" --title "v${VERSION}" --notes-file /tmp/release-notes.md
+          else
+            echo "Creating new release v${VERSION}..."
+            gh release create "v${VERSION}" --title "v${VERSION}" --notes-file /tmp/release-notes.md
+          fi
+
+          echo "GitHub Release v${VERSION} created/updated successfully"
