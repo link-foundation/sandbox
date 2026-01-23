@@ -1,6 +1,6 @@
 {
   "name": "sandbox",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Docker container image that contains most popular language runtimes and tools to be reused for multiple software development tasks.",
   "type": "module",
   "scripts": {

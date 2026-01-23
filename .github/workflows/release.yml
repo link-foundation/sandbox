@@ -408,31 +408,36 @@ jobs:
         run: |
           VERSION="${{ needs.detect-changes.outputs.version }}"
           DATE=$(date +%Y-%m-%d)
+          REPO="${{ github.repository }}"
 
           # Create release notes file
           cat > /tmp/release-notes.md << ENDOFNOTES
           ## Docker Images
 
           ### GitHub Container Registry (GHCR)
-          - ${GHCR_IMAGE}:${VERSION} (multi-arch)
-          - ${GHCR_IMAGE}:${VERSION}-arm64 (ARM64)
-          - ${GHCR_IMAGE}:latest (multi-arch)
+          - [\`${GHCR_IMAGE}:${VERSION}\`](https://github.com/${REPO}/pkgs/container/sandbox) (multi-arch)
+          - [\`${GHCR_IMAGE}:${VERSION}-arm64\`](https://github.com/${REPO}/pkgs/container/sandbox) (ARM64)
+          - [\`${GHCR_IMAGE}:latest\`](https://github.com/${REPO}/pkgs/container/sandbox) (multi-arch)
 
           ### Docker Hub
-          - ${DOCKERHUB_IMAGE}:${VERSION} (multi-arch)
-          - ${DOCKERHUB_IMAGE}:${VERSION}-arm64 (ARM64)
-          - ${DOCKERHUB_IMAGE}:latest (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}:${VERSION}-arm64\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}) (ARM64)
+          - [\`${DOCKERHUB_IMAGE}:latest\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}) (multi-arch)
 
           ## Quick Start
 
           Pull from GHCR:
+          \`\`\`sh
           docker pull ${GHCR_IMAGE}:${VERSION}
+          \`\`\`
 
           Pull from Docker Hub:
+          \`\`\`sh
           docker pull ${DOCKERHUB_IMAGE}:${VERSION}
+          \`\`\`
 
           ## Links
-          - [GHCR Package](https://github.com/${{ github.repository }}/pkgs/container/sandbox)
+          - [GHCR Package](https://github.com/${REPO}/pkgs/container/sandbox)
           - [Docker Hub](https://hub.docker.com/r/${DOCKERHUB_IMAGE})
 
           Released on ${DATE}
