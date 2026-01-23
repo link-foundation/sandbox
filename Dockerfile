@@ -39,10 +39,11 @@ ENV GOROOT="/home/sandbox/.go"
 ENV GOPATH="/home/sandbox/.go/path"
 ENV SDKMAN_DIR="/home/sandbox/.sdkman"
 ENV PERLBREW_ROOT="/home/sandbox/.perl5"
+ENV RBENV_ROOT="/home/sandbox/.rbenv"
 
 # Set up PATH for tools that don't need special initialization
-# Bun, Deno, Cargo, elan, Homebrew work with just PATH
-ENV PATH="/home/sandbox/.elan/bin:/home/sandbox/.opam/default/bin:/home/linuxbrew/.linuxbrew/opt/php@8.3/bin:/home/linuxbrew/.linuxbrew/opt/php@8.3/sbin:/home/sandbox/.cargo/bin:/home/sandbox/.deno/bin:/home/sandbox/.bun/bin:/home/sandbox/.go/bin:/home/sandbox/.go/path/bin:/home/linuxbrew/.linuxbrew/bin:${PATH}"
+# Bun, Deno, Cargo, elan, rbenv, Swift, Homebrew work with just PATH
+ENV PATH="/home/sandbox/.rbenv/bin:/home/sandbox/.rbenv/shims:/home/sandbox/.swift/usr/bin:/home/sandbox/.elan/bin:/home/sandbox/.opam/default/bin:/home/linuxbrew/.linuxbrew/opt/php@8.3/bin:/home/linuxbrew/.linuxbrew/opt/php@8.3/sbin:/home/sandbox/.cargo/bin:/home/sandbox/.deno/bin:/home/sandbox/.bun/bin:/home/sandbox/.go/bin:/home/sandbox/.go/path/bin:/home/linuxbrew/.linuxbrew/bin:${PATH}"
 
 # Opam environment variables for Rocq/Coq theorem prover
 ENV OPAM_SWITCH_PREFIX="/home/sandbox/.opam/default"

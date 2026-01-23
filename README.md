@@ -14,9 +14,14 @@ This sandbox provides a pre-configured development environment with common langu
 - **Go** (latest stable)
 - **Rust** (via rustup) + Cargo
 - **Java 21 LTS** (Eclipse Temurin via SDKMAN)
+- **Kotlin** (via SDKMAN)
 - **PHP 8.3** (via Homebrew)
 - **Perl** (latest stable via Perlbrew)
+- **Ruby** (latest stable via rbenv)
+- **Swift 6.x** (latest stable)
+- **R** (latest stable)
 - **.NET SDK 8.0**
+- **Assembly** (GNU Assembler, NASM, LLVM-MC, FASM)
 
 ### Theorem Provers
 - **Lean** (via elan)
@@ -92,7 +97,9 @@ The container runs as the `sandbox` user with home directory at `/home/sandbox`.
 - Python: `~/.pyenv`
 - Go: `~/.go`
 - Rust: `~/.cargo`
-- Java: `~/.sdkman`
+- Java/Kotlin: `~/.sdkman`
+- Ruby: `~/.rbenv`
+- Swift: `~/.swift`
 - Lean: `~/.elan`
 - Perl: `~/.perl5`
 - OCaml/Rocq: `~/.opam`

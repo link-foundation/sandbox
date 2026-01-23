@@ -202,6 +202,23 @@ log_info "Installing C/C++ development tools (CMake, Clang/LLVM)..."
 sudo apt install -y cmake clang llvm lld
 log_success "C/C++ development tools installed"
 
+# --- Install Assembly Tools ---
+log_info "Installing Assembly tools (NASM, FASM)..."
+# Note: GNU Assembler (as) is already installed as part of binutils (via build-essential)
+# Note: llvm-mc is already installed as part of llvm package above
+maybe_sudo apt install -y nasm fasm
+log_success "Assembly tools installed"
+
+# --- Install R Language ---
+log_info "Installing R statistical language..."
+maybe_sudo apt install -y r-base
+log_success "R language installed"
+
+# --- Install Ruby build dependencies ---
+log_info "Installing Ruby build dependencies..."
+maybe_sudo apt install -y libyaml-dev
+log_success "Ruby build dependencies installed"
+
 # --- Install Python build dependencies (required for pyenv) ---
 log_info "Installing Python build dependencies..."
 maybe_sudo apt install -y \
@@ -717,6 +734,139 @@ else
   log_info "Perlbrew already installed."
 fi
 
+# --- Ruby (via rbenv) ---
+if [ ! -d "$HOME/.rbenv" ]; then
+  log_info "Installing rbenv (Ruby version manager)..."
+
+  # Install rbenv
+  git clone https://github.com/rbenv/rbenv.git "$HOME/.rbenv"
+
+  # Install ruby-build plugin
+  mkdir -p "$HOME/.rbenv/plugins"
+  git clone https://github.com/rbenv/ruby-build.git "$HOME/.rbenv/plugins/ruby-build"
+
+  if ! grep -q 'rbenv init' "$HOME/.bashrc" 2>/dev/null; then
+    {
+      echo ''
+      echo '# rbenv configuration'
+      echo 'export PATH="$HOME/.rbenv/bin:$PATH"'
+      echo 'eval "$(rbenv init - bash)"'
+    } >> "$HOME/.bashrc"
+  fi
+
+  export PATH="$HOME/.rbenv/bin:$PATH"
+  eval "$(rbenv init - bash)"
+  log_success "rbenv installed and configured"
+
+  # Install latest stable Ruby 3.x version (avoid pre-release 4.x)
+  log_info "Installing latest stable Ruby version (this may take several minutes)..."
+  LATEST_RUBY=$(rbenv install -l 2>/dev/null | grep -E '^\s*3\.[0-9]+\.[0-9]+$' | tail -1 | tr -d '[:space:]')
+
+  if [ -n "$LATEST_RUBY" ]; then
+    log_info "Installing Ruby $LATEST_RUBY..."
+    if ! rbenv versions | grep -q "$LATEST_RUBY"; then
+      rbenv install "$LATEST_RUBY"
+    else
+      log_info "Ruby $LATEST_RUBY already installed."
+    fi
+
+    rbenv global "$LATEST_RUBY"
+    log_success "Ruby version manager setup complete"
+    ruby --version
+  fi
+else
+  log_info "rbenv already installed."
+fi
+
+# --- Swift ---
+if ! command -v swift &>/dev/null; then
+  log_info "Installing Swift..."
+
+  ARCH=$(uname -m)
+
+  # Swift uses different URL patterns for different architectures
+  # For x86_64: ubuntu2404 directory, ubuntu24.04.tar.gz filename
+  # For aarch64: ubuntu2404-aarch64 directory, ubuntu24.04-aarch64.tar.gz filename
+  case "$ARCH" in
+    x86_64)
+      SWIFT_DIR="ubuntu2404"
+      SWIFT_FILE_SUFFIX="ubuntu24.04"
+      ;;
+    aarch64)
+      SWIFT_DIR="ubuntu2404-aarch64"
+      SWIFT_FILE_SUFFIX="ubuntu24.04-aarch64"
+      ;;
+    *)
+      SWIFT_DIR=""
+      SWIFT_FILE_SUFFIX=""
+      ;;
+  esac
+
+  if [ -n "$SWIFT_DIR" ]; then
+    # Swift version for Ubuntu 24.04
+    SWIFT_VERSION="6.0.3"
+    SWIFT_RELEASE="RELEASE"
+    SWIFT_PACKAGE="swift-${SWIFT_VERSION}-${SWIFT_RELEASE}-${SWIFT_FILE_SUFFIX}"
+    SWIFT_URL="https://download.swift.org/swift-${SWIFT_VERSION}-release/${SWIFT_DIR}/swift-${SWIFT_VERSION}-${SWIFT_RELEASE}/${SWIFT_PACKAGE}.tar.gz"
+
+    log_info "Downloading Swift $SWIFT_VERSION for $ARCH..."
+    log_info "URL: $SWIFT_URL"
+    TEMP_DIR=$(mktemp -d)
+
+    # Download with curl -L to follow redirects, and check if download succeeded
+    if curl -fsSL "$SWIFT_URL" -o "$TEMP_DIR/swift.tar.gz"; then
+      log_info "Installing Swift to $HOME/.swift..."
+      mkdir -p "$HOME/.swift"
+      tar -xzf "$TEMP_DIR/swift.tar.gz" -C "$TEMP_DIR"
+      cp -r "$TEMP_DIR/${SWIFT_PACKAGE}/usr" "$HOME/.swift/"
+      rm -rf "$TEMP_DIR"
+
+      if ! grep -q 'swift' "$HOME/.bashrc" 2>/dev/null; then
+        {
+          echo ''
+          echo '# Swift configuration'
+          echo 'export PATH="$HOME/.swift/usr/bin:$PATH"'
+        } >> "$HOME/.bashrc"
+      fi
+
+      export PATH="$HOME/.swift/usr/bin:$PATH"
+
+      if command -v swift &>/dev/null; then
+        log_success "Swift installed: $(swift --version | head -n1)"
+      fi
+    else
+      log_error "Failed to download Swift from $SWIFT_URL"
+      rm -rf "$TEMP_DIR"
+    fi
+  else
+    log_warning "Swift installation skipped: unsupported architecture $ARCH"
+  fi
+else
+  log_info "Swift already installed."
+fi
+
+# --- Kotlin (via SDKMAN) ---
+# Load SDKMAN for current session if not already loaded
+export SDKMAN_DIR="$HOME/.sdkman"
+if [ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]; then
+  set +u
+  source "$SDKMAN_DIR/bin/sdkman-init.sh"
+  set -u
+
+  if ! command -v kotlin &>/dev/null; then
+    log_info "Installing Kotlin via SDKMAN..."
+    set +u
+    sdk install kotlin < /dev/null || true
+    set -u
+
+    if command -v kotlin &>/dev/null; then
+      log_success "Kotlin installed: $(kotlin -version 2>&1 | head -n1)"
+    fi
+  else
+    log_info "Kotlin already installed."
+  fi
+fi
+
 # --- Load NVM and install Node.js ---
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -769,6 +919,12 @@ if command -v sdk &>/dev/null; then log_success "SDKMAN: $(sdk version 2>/dev/nu
 if command -v elan &>/dev/null; then log_success "Elan: $(elan --version)"; else log_warning "Elan: not found"; fi
 if command -v lean &>/dev/null; then log_success "Lean: $(lean --version)"; else log_warning "Lean: not found"; fi
 
+if command -v R &>/dev/null; then log_success "R: $(R --version | head -n1)"; else log_warning "R: not found"; fi
+if command -v ruby &>/dev/null; then log_success "Ruby: $(ruby --version)"; else log_warning "Ruby: not found"; fi
+if command -v rbenv &>/dev/null; then log_success "rbenv: $(rbenv --version)"; else log_warning "rbenv: not found"; fi
+if command -v swift &>/dev/null; then log_success "Swift: $(swift --version 2>&1 | head -n1)"; else log_warning "Swift: not found"; fi
+if command -v kotlin &>/dev/null; then log_success "Kotlin: $(kotlin -version 2>&1 | head -n1)"; else log_warning "Kotlin: not found"; fi
+
 if command -v brew &>/dev/null; then
   BREW_VERSION=$(brew --version 2>/dev/null | head -n1 || echo "version unknown")
   log_success "Homebrew: $BREW_VERSION"
@@ -815,6 +971,13 @@ if command -v clang &>/dev/null; then log_success "Clang: $(clang --version | he
 if command -v clang++ &>/dev/null; then log_success "Clang++: $(clang++ --version | head -n1)"; else log_warning "Clang++: not found"; fi
 if command -v llvm-config &>/dev/null; then log_success "LLVM: $(llvm-config --version)"; else log_warning "LLVM: not found"; fi
 if command -v lld &>/dev/null; then log_success "LLD Linker: $(lld --version | head -n1)"; else log_warning "LLD Linker: not found"; fi
+
+echo ""
+echo "Assembly Tools:"
+if command -v as &>/dev/null; then log_success "GNU Assembler (as): $(as --version | head -n1)"; else log_warning "GNU Assembler: not found"; fi
+if command -v nasm &>/dev/null; then log_success "NASM: $(nasm -v)"; else log_warning "NASM: not found"; fi
+if command -v llvm-mc &>/dev/null; then log_success "LLVM MC: installed (part of LLVM)"; else log_warning "LLVM MC: not found"; fi
+if command -v fasm &>/dev/null; then log_success "FASM: installed"; else log_warning "FASM: not found"; fi
 
 echo ""
 echo "Next Steps:"
