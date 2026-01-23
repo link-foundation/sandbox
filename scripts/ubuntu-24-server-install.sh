@@ -828,10 +828,6 @@ if command -v llvm-config &>/dev/null; then log_success "LLVM: $(llvm-config --v
 if command -v lld &>/dev/null; then log_success "LLD Linker: $(lld --version | head -n1)"; else log_warning "LLD Linker: not found"; fi
 
 echo ""
-echo "Next Steps:"
-log_note "Restart your shell or run: source ~/.bashrc"
-
-echo ""
 
 EOF_SANDBOX_SCRIPT
 
