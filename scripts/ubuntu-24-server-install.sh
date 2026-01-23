@@ -783,42 +783,60 @@ if ! command -v swift &>/dev/null; then
   log_info "Installing Swift..."
 
   ARCH=$(uname -m)
+
+  # Swift uses different URL patterns for different architectures
+  # For x86_64: ubuntu2404 directory, ubuntu24.04.tar.gz filename
+  # For aarch64: ubuntu2404-aarch64 directory, ubuntu24.04-aarch64.tar.gz filename
   case "$ARCH" in
-    x86_64) SWIFT_ARCH="x86_64" ;;
-    aarch64) SWIFT_ARCH="aarch64" ;;
-    *) SWIFT_ARCH="" ;;
+    x86_64)
+      SWIFT_DIR="ubuntu2404"
+      SWIFT_FILE_SUFFIX="ubuntu24.04"
+      ;;
+    aarch64)
+      SWIFT_DIR="ubuntu2404-aarch64"
+      SWIFT_FILE_SUFFIX="ubuntu24.04-aarch64"
+      ;;
+    *)
+      SWIFT_DIR=""
+      SWIFT_FILE_SUFFIX=""
+      ;;
   esac
 
-  if [ -n "$SWIFT_ARCH" ]; then
+  if [ -n "$SWIFT_DIR" ]; then
     # Swift version for Ubuntu 24.04
     SWIFT_VERSION="6.0.3"
     SWIFT_RELEASE="RELEASE"
-    SWIFT_PLATFORM="ubuntu2404"
-    SWIFT_PACKAGE="swift-${SWIFT_VERSION}-${SWIFT_RELEASE}-${SWIFT_PLATFORM}-${SWIFT_ARCH}"
-    SWIFT_URL="https://download.swift.org/swift-${SWIFT_VERSION}-release/ubuntu2404/swift-${SWIFT_VERSION}-${SWIFT_RELEASE}/${SWIFT_PACKAGE}.tar.gz"
+    SWIFT_PACKAGE="swift-${SWIFT_VERSION}-${SWIFT_RELEASE}-${SWIFT_FILE_SUFFIX}"
+    SWIFT_URL="https://download.swift.org/swift-${SWIFT_VERSION}-release/${SWIFT_DIR}/swift-${SWIFT_VERSION}-${SWIFT_RELEASE}/${SWIFT_PACKAGE}.tar.gz"
 
-    log_info "Downloading Swift $SWIFT_VERSION for $SWIFT_ARCH..."
+    log_info "Downloading Swift $SWIFT_VERSION for $ARCH..."
+    log_info "URL: $SWIFT_URL"
     TEMP_DIR=$(mktemp -d)
-    curl -sL "$SWIFT_URL" -o "$TEMP_DIR/swift.tar.gz"
 
-    log_info "Installing Swift to $HOME/.swift..."
-    mkdir -p "$HOME/.swift"
-    tar -xzf "$TEMP_DIR/swift.tar.gz" -C "$TEMP_DIR"
-    cp -r "$TEMP_DIR/${SWIFT_PACKAGE}/usr" "$HOME/.swift/"
-    rm -rf "$TEMP_DIR"
+    # Download with curl -L to follow redirects, and check if download succeeded
+    if curl -fsSL "$SWIFT_URL" -o "$TEMP_DIR/swift.tar.gz"; then
+      log_info "Installing Swift to $HOME/.swift..."
+      mkdir -p "$HOME/.swift"
+      tar -xzf "$TEMP_DIR/swift.tar.gz" -C "$TEMP_DIR"
+      cp -r "$TEMP_DIR/${SWIFT_PACKAGE}/usr" "$HOME/.swift/"
+      rm -rf "$TEMP_DIR"
 
-    if ! grep -q 'swift' "$HOME/.bashrc" 2>/dev/null; then
-      {
-        echo ''
-        echo '# Swift configuration'
-        echo 'export PATH="$HOME/.swift/usr/bin:$PATH"'
-      } >> "$HOME/.bashrc"
-    fi
+      if ! grep -q 'swift' "$HOME/.bashrc" 2>/dev/null; then
+        {
+          echo ''
+          echo '# Swift configuration'
+          echo 'export PATH="$HOME/.swift/usr/bin:$PATH"'
+        } >> "$HOME/.bashrc"
+      fi
 
-    export PATH="$HOME/.swift/usr/bin:$PATH"
+      export PATH="$HOME/.swift/usr/bin:$PATH"
 
-    if command -v swift &>/dev/null; then
-      log_success "Swift installed: $(swift --version | head -n1)"
+      if command -v swift &>/dev/null; then
+        log_success "Swift installed: $(swift --version | head -n1)"
+      fi
+    else
+      log_error "Failed to download Swift from $SWIFT_URL"
+      rm -rf "$TEMP_DIR"
     fi
   else
     log_warning "Swift installation skipped: unsupported architecture $ARCH"
