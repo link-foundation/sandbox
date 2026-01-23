@@ -24,9 +24,15 @@ The sandbox is a multi-architecture Docker image that provides a comprehensive d
 |  |  |(nvm)| |      |       |       |  |  |
 |  |  +-----+ +------+ +-----+ +-----+  |  |
 |  |  +-----+ +------+ +-----+ +-----+  |  |
-|  |  |Java | | PHP  | |Perl | |.NET |  |  |
-|  |  |(sdk | |(brew)|(perl | |(sys)|  |  |
-|  |  | man)|       | brew) |       |  |  |
+|  |  |Java/| | PHP  | |Perl | |Ruby |  |  |
+|  |  |Kotln| |(brew)|(perl | |(rbenv|  |  |
+|  |  |(sdk | |      | brew) |)     |  |  |
+|  |  | man)| |      |       |       |  |  |
+|  |  +-----+ +------+ +-----+ +-----+  |  |
+|  |  +-----+ +------+ +-----+ +-----+  |  |
+|  |  |Swift| | R    | |.NET | |Assem|  |  |
+|  |  |(~/.s| |(sys) |(sys) | |bly  |  |  |
+|  |  |wift)| |      |       | tools |  |  |
 |  |  +-----+ +------+ +-----+ +-----+  |  |
 |  +------------------------------------+  |
 |                                          |

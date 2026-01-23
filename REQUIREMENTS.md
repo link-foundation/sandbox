@@ -15,9 +15,14 @@ The Docker image MUST include the following programming language runtimes:
 | Go | Latest stable | Manual |
 | Rust | Latest stable | rustup |
 | Java | 21 LTS | SDKMAN |
+| Kotlin | Latest stable | SDKMAN |
 | PHP | 8.3 | Homebrew |
 | Perl | Latest stable | Perlbrew |
+| Ruby | Latest stable | rbenv |
+| Swift | 6.x | Manual |
+| R | Latest stable | System package |
 | .NET | 8.0 | System package |
+| Assembly | - | System packages (nasm, fasm) |
 
 ### FR-2: Theorem Prover Support
 
@@ -41,6 +46,7 @@ The Docker image MUST include:
 - Clang/Clang++
 - LLVM
 - LLD linker
+- Assembly tools (GNU Assembler, NASM, LLVM-MC, FASM)
 
 ### FR-4: Multi-Architecture Support
 

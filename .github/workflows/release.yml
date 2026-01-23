@@ -34,7 +34,7 @@ env:
 jobs:
   # === DETECT CHANGES ===
   detect-changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       docker-changed: ${{ steps.changes.outputs.docker }}
       scripts-changed: ${{ steps.changes.outputs.scripts }}
@@ -113,7 +113,7 @@ jobs:
 
   # === BUILD AND TEST DOCKER IMAGE (PR) ===
   docker-build-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [detect-changes]
     if: github.event_name == 'pull_request' && needs.detect-changes.outputs.should-build == 'true'
 
@@ -195,7 +195,7 @@ jobs:
 
   # === BUILD AND PUSH DOCKER IMAGE (MAIN) ===
   docker-build-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [detect-changes]
     # Run on push to main with changes, OR on workflow_dispatch with force_build
     if: |
@@ -326,7 +326,7 @@ jobs:
 
   # === CREATE MULTI-ARCH MANIFEST ===
   docker-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [detect-changes, docker-build-push, docker-build-push-arm64]
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
@@ -392,7 +392,7 @@ jobs:
 
   # === CREATE GITHUB RELEASE ===
   create-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [detect-changes, docker-manifest]
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
@@ -412,31 +412,36 @@ jobs:
         run: |
           VERSION="${{ needs.detect-changes.outputs.version }}"
           DATE=$(date +%Y-%m-%d)
+          REPO="${{ github.repository }}"
 
           # Create release notes file
           cat > /tmp/release-notes.md << ENDOFNOTES
           ## Docker Images
 
           ### GitHub Container Registry (GHCR)
-          - ${GHCR_IMAGE}:${VERSION} (multi-arch)
-          - ${GHCR_IMAGE}:${VERSION}-arm64 (ARM64)
-          - ${GHCR_IMAGE}:latest (multi-arch)
+          - [\`${GHCR_IMAGE}:${VERSION}\`](https://github.com/${REPO}/pkgs/container/sandbox) (multi-arch)
+          - [\`${GHCR_IMAGE}:${VERSION}-arm64\`](https://github.com/${REPO}/pkgs/container/sandbox) (ARM64)
+          - [\`${GHCR_IMAGE}:latest\`](https://github.com/${REPO}/pkgs/container/sandbox) (multi-arch)
 
           ### Docker Hub
-          - ${DOCKERHUB_IMAGE}:${VERSION} (multi-arch)
-          - ${DOCKERHUB_IMAGE}:${VERSION}-arm64 (ARM64)
-          - ${DOCKERHUB_IMAGE}:latest (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}:${VERSION}-arm64\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}) (ARM64)
+          - [\`${DOCKERHUB_IMAGE}:latest\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}) (multi-arch)
 
           ## Quick Start
 
           Pull from GHCR:
+          \`\`\`sh
           docker pull ${GHCR_IMAGE}:${VERSION}
+          \`\`\`
 
           Pull from Docker Hub:
+          \`\`\`sh
           docker pull ${DOCKERHUB_IMAGE}:${VERSION}
+          \`\`\`
 
           ## Links
-          - [GHCR Package](https://github.com/${{ github.repository }}/pkgs/container/sandbox)
+          - [GHCR Package](https://github.com/${REPO}/pkgs/container/sandbox)
           - [Docker Hub](https://hub.docker.com/r/${DOCKERHUB_IMAGE})
 
           Released on ${DATE}
