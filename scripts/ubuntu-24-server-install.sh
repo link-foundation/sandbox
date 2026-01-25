@@ -355,6 +355,32 @@ else
   log_info "Bun already installed."
 fi
 
+# Ensure bun is available for global installs
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# --- gh-setup-git-identity (GitHub git identity tool) ---
+if command -v bun &>/dev/null; then
+  if ! command -v gh-setup-git-identity &>/dev/null; then
+    log_info "Installing gh-setup-git-identity..."
+    bun install -g gh-setup-git-identity
+    log_success "gh-setup-git-identity installed"
+  else
+    log_info "gh-setup-git-identity already installed."
+  fi
+fi
+
+# --- glab-setup-git-identity (GitLab git identity tool) ---
+if command -v bun &>/dev/null; then
+  if ! command -v glab-setup-git-identity &>/dev/null; then
+    log_info "Installing glab-setup-git-identity..."
+    bun install -g glab-setup-git-identity
+    log_success "glab-setup-git-identity installed"
+  else
+    log_info "glab-setup-git-identity already installed."
+  fi
+fi
+
 # --- Deno ---
 if ! command -v deno &>/dev/null; then
   log_info "Installing Deno..."
@@ -914,7 +940,9 @@ log_step "Installation Summary"
 echo ""
 echo "System & Development Tools:"
 if command -v gh &>/dev/null; then log_success "GitHub CLI: $(gh --version | head -n1)"; else log_warning "GitHub CLI: not found"; fi
+if command -v gh-setup-git-identity &>/dev/null; then log_success "gh-setup-git-identity: $(gh-setup-git-identity --version 2>&1 | head -n1)"; else log_warning "gh-setup-git-identity: not found"; fi
 if command -v glab &>/dev/null; then log_success "GitLab CLI: $(glab --version | head -n1)"; else log_warning "GitLab CLI: not found"; fi
+if command -v glab-setup-git-identity &>/dev/null; then log_success "glab-setup-git-identity: $(glab-setup-git-identity --version 2>&1 | head -n1)"; else log_warning "glab-setup-git-identity: not found"; fi
 if command -v git &>/dev/null; then log_success "Git: $(git --version)"; else log_warning "Git: not found"; fi
 if command -v bun &>/dev/null; then log_success "Bun: $(bun --version)"; else log_warning "Bun: not found"; fi
 if command -v deno &>/dev/null; then log_success "Deno: $(deno --version | head -n1)"; else log_warning "Deno: not found"; fi

@@ -179,6 +179,14 @@ jobs:
           docker run --rm sandbox-test glab --version || echo "GitLab CLI test failed"
 
           echo ""
+          echo "Testing gh-setup-git-identity..."
+          docker run --rm sandbox-test gh-setup-git-identity --version || echo "gh-setup-git-identity test failed"
+
+          echo ""
+          echo "Testing glab-setup-git-identity..."
+          docker run --rm sandbox-test glab-setup-git-identity --version || echo "glab-setup-git-identity test failed"
+
+          echo ""
           echo "Testing Lean..."
           docker run --rm sandbox-test lean --version || echo "Lean test failed"
 
