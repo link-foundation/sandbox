@@ -1,9 +1,17 @@
 #!/usr/bin/env node
 /**
  * Test script to verify how to quote keys in lino format
+ *
+ * Dependencies are loaded dynamically using use-m, so no package.json is needed.
  */
 
-import { Parser } from 'links-notation';
+// Load use-m dynamically for zero-dependency package loading
+const { use } = eval(
+  await (await fetch('https://unpkg.com/use-m/use.js')).text()
+);
+
+// Import links-notation parser dynamically
+const { Parser } = await use('links-notation');
 
 const parser = new Parser();
 
