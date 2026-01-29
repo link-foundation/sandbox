@@ -104,24 +104,41 @@ docker-build-push:
 3. **docker-manifest** - Needs `always()` and checks for dependent job results
 4. **create-release** - Needs `always()` and checks for dependent job results
 
+## Implemented Solution
+
+### Changeset-Based Versioning System
+
+The following features have been implemented based on the template repository patterns:
+
+| Feature | Implementation |
+|---------|----------------|
+| Version Source | VERSION file (kept as-is) |
+| Changesets | `.changeset/` directory with shell scripts |
+| Version Bump | Automatic via changesets on push to main |
+| Version Check | Prevents manual VERSION changes in PRs |
+| Changeset Check | Requires changesets for code changes in PRs |
+| Manual Release | Supported via `workflow_dispatch` with `bump-and-release` mode |
+
+### New Files Added
+
+1. **`.changeset/README.md`** - Documentation for contributors
+2. **`.changeset/config.json`** - Changeset configuration
+3. **`scripts/release/check-changesets.sh`** - Detects pending changesets
+4. **`scripts/release/check-version.sh`** - Prevents manual VERSION changes
+5. **`scripts/release/validate-changeset.sh`** - Validates changeset format in PRs
+6. **`scripts/release/apply-changesets.sh`** - Applies changesets and bumps version
+7. **`scripts/release/create-changeset.sh`** - Creates changesets for manual releases
+
+### Workflow Changes
+
+1. **version-check job** - Runs on PRs to prevent manual VERSION changes
+2. **changeset-check job** - Runs on PRs to require changesets for code changes
+3. **apply-changesets job** - Runs on push to main, applies pending changesets
+4. **always() pattern** - Added to all downstream jobs to prevent skipping
+
 ## Comparison with Template Repository
 
-The [js-ai-driven-development-pipeline-template](https://github.com/link-foundation/js-ai-driven-development-pipeline-template) has a different architecture:
-
-| Feature | Sandbox (Current) | Template |
-|---------|-------------------|----------|
-| Version Source | VERSION file | package.json |
-| Changesets | Not implemented | Full changeset support |
-| Version Bump | Manual via workflow_dispatch | Automatic via changesets |
-| Release Flow | Docker images only | npm + GitHub releases |
-| Version PR | Not supported | `changeset-release/*` PRs |
-
-### Features to Consider Adopting
-
-1. **Changeset-based versioning** - Allows contributors to declare changes and their impact (patch/minor/major)
-2. **Version check in PRs** - Prevents manual version changes in source files
-3. **Automated changelog generation** - From changeset summaries
-4. **Multiple release modes** - instant, changeset-pr
+The [js-ai-driven-development-pipeline-template](https://github.com/link-foundation/js-ai-driven-development-pipeline-template) uses Node.js/Bun scripts and the `@changesets/cli` package. This repository uses shell scripts for simplicity since it's a Docker-based project without Node.js dependencies.
 
 ## Industry Best Practices
 
