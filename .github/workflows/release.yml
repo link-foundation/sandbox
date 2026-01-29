@@ -8,7 +8,8 @@ on:
       - 'Dockerfile'
       - 'scripts/**'
       - '.github/workflows/release.yml'
-      - 'VERSION'  # Trigger on version changes
+      - '.changeset/**'
+      - 'VERSION'
   pull_request:
     types: [opened, synchronize, reopened]
   # Manual release support - allows instant version bump and release
@@ -49,6 +50,92 @@ env:
   DOCKERHUB_IMAGE_NAME: konard/sandbox
 
 jobs:
+  # === VERSION CHECK (PRs only) ===
+  # Prohibit manual version changes in VERSION file - versions should only be changed by CI/CD
+  version-check:
+    name: Check for Manual Version Changes
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for version changes in VERSION file
+        env:
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+        run: |
+          chmod +x scripts/release/check-version.sh
+          ./scripts/release/check-version.sh
+
+  # === CHANGESET CHECK (PRs only) ===
+  # Ensure PRs with code changes include a changeset
+  changeset-check:
+    name: Check for Changesets
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changesets
+        env:
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+        run: |
+          # Skip for branches that don't need changesets
+          if [[ "$GITHUB_HEAD_REF" == changeset-release/* ]] || [[ "$GITHUB_HEAD_REF" == changeset-manual-release-* ]]; then
+            echo "Skipping changeset check for release PR"
+            exit 0
+          fi
+
+          # Check if there are code changes (Dockerfile, scripts, etc.)
+          git fetch origin "$GITHUB_BASE_REF" 2>/dev/null || true
+          CODE_CHANGES=$(git diff --name-only "origin/${GITHUB_BASE_REF}...HEAD" | grep -E '^(Dockerfile|scripts/|\.github/workflows/)' || true)
+
+          if [ -z "$CODE_CHANGES" ]; then
+            echo "No code changes detected, changeset not required"
+            exit 0
+          fi
+
+          echo "Code changes detected:"
+          echo "$CODE_CHANGES"
+          echo ""
+
+          chmod +x scripts/release/validate-changeset.sh
+          ./scripts/release/validate-changeset.sh
+
+  # === AUTOMATIC VERSION BUMP (push to main with changesets) ===
+  apply-changesets:
+    name: Apply Changesets
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    outputs:
+      version_bumped: ${{ steps.apply.outputs.version_bumped }}
+      new_version: ${{ steps.apply.outputs.new_version }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changesets
+        id: check
+        run: |
+          chmod +x scripts/release/check-changesets.sh
+          ./scripts/release/check-changesets.sh
+
+      - name: Apply changesets
+        id: apply
+        if: steps.check.outputs.has_changesets == 'true'
+        run: |
+          chmod +x scripts/release/apply-changesets.sh
+          ./scripts/release/apply-changesets.sh
+
   # === MANUAL VERSION BUMP (workflow_dispatch with bump-and-release) ===
   version-bump:
     runs-on: ubuntu-24.04
@@ -117,9 +204,9 @@ jobs:
   # === DETECT CHANGES ===
   detect-changes:
     runs-on: ubuntu-24.04
-    needs: [version-bump]
-    # Always run, but wait for version-bump if it's running
-    if: always() && (needs.version-bump.result == 'success' || needs.version-bump.result == 'skipped')
+    needs: [apply-changesets, version-bump]
+    # Always run, but wait for version jobs if they're running
+    if: always() && (needs.apply-changesets.result == 'success' || needs.apply-changesets.result == 'skipped') && (needs.version-bump.result == 'success' || needs.version-bump.result == 'skipped')
     outputs:
       docker-changed: ${{ steps.changes.outputs.docker }}
       scripts-changed: ${{ steps.changes.outputs.scripts }}
@@ -136,7 +223,7 @@ jobs:
 
       # Re-fetch if version was bumped to get latest commit
       - name: Fetch latest changes
-        if: needs.version-bump.outputs.version_bumped == 'true'
+        if: needs.version-bump.outputs.version_bumped == 'true' || needs.apply-changesets.outputs.version_bumped == 'true'
         run: |
           git fetch origin main
           git checkout main
@@ -207,9 +294,19 @@ jobs:
             fi
           fi
 
-          if [ "${{ steps.changes.outputs.docker }}" = "true" ] || [ "${{ steps.changes.outputs.scripts }}" = "true" ]; then
+          # Trigger build on any relevant changes
+          if [ "${{ steps.changes.outputs.docker }}" = "true" ]; then
             echo "result=true" >> $GITHUB_OUTPUT
-            echo "Build triggered by: Dockerfile or scripts changes"
+            echo "Build triggered by: Dockerfile changes"
+          elif [ "${{ steps.changes.outputs.scripts }}" = "true" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "Build triggered by: scripts changes"
+          elif [ "${{ steps.changes.outputs.workflow }}" = "true" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "Build triggered by: workflow changes"
+          elif [ "${{ steps.changes.outputs.version }}" = "true" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "Build triggered by: VERSION file changes"
           else
             echo "result=false" >> $GITHUB_OUTPUT
             echo "No build needed: no relevant changes detected"
@@ -218,8 +315,16 @@ jobs:
   # === BUILD AND TEST DOCKER IMAGE (PR) ===
   docker-build-test:
     runs-on: ubuntu-24.04
-    needs: [detect-changes]
-    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.should-build == 'true'
+    needs: [detect-changes, version-check, changeset-check]
+    # Use always() to prevent implicit success() check from skipping this job
+    # when upstream jobs are skipped (see docs/case-studies/issue-23)
+    if: |
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      (needs.version-check.result == 'success' || needs.version-check.result == 'skipped') &&
+      (needs.changeset-check.result == 'success' || needs.changeset-check.result == 'skipped') &&
+      github.event_name == 'pull_request' &&
+      needs.detect-changes.outputs.should-build == 'true'
 
     steps:
       - name: Checkout repository
@@ -310,9 +415,15 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [detect-changes]
     # Run on push to main with changes, OR on workflow_dispatch
+    # Use always() to prevent implicit success() check from skipping this job
+    # when upstream jobs are skipped (see docs/case-studies/issue-23)
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
-      (github.event_name == 'workflow_dispatch')
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
+        (github.event_name == 'workflow_dispatch')
+      )
     permissions:
       contents: read
       packages: write
@@ -387,9 +498,16 @@ jobs:
     timeout-minutes: 120       # Safety timeout to prevent runaway builds
     needs: [detect-changes, docker-build-push]
     # Run on push to main with changes, OR on workflow_dispatch
+    # Use always() to prevent implicit success() check from skipping this job
+    # when upstream jobs are skipped (see docs/case-studies/issue-23)
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
-      (github.event_name == 'workflow_dispatch')
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      needs.docker-build-push.result == 'success' &&
+      (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
+        (github.event_name == 'workflow_dispatch')
+      )
     permissions:
       contents: read
       packages: write
@@ -460,9 +578,17 @@ jobs:
   docker-manifest:
     runs-on: ubuntu-24.04
     needs: [detect-changes, docker-build-push, docker-build-push-arm64]
+    # Use always() to prevent implicit success() check from skipping this job
+    # when upstream jobs are skipped (see docs/case-studies/issue-23)
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch')
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      needs.docker-build-push.result == 'success' &&
+      needs.docker-build-push-arm64.result == 'success' &&
+      (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+        (github.event_name == 'workflow_dispatch')
+      )
     permissions:
       contents: read
       packages: write
@@ -539,9 +665,16 @@ jobs:
   create-release:
     runs-on: ubuntu-24.04
     needs: [detect-changes, docker-manifest]
+    # Use always() to prevent implicit success() check from skipping this job
+    # when upstream jobs are skipped (see docs/case-studies/issue-23)
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch')
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      needs.docker-manifest.result == 'success' &&
+      (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+        (github.event_name == 'workflow_dispatch')
+      )
     permissions:
       contents: write
 
