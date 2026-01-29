@@ -1,0 +1,169 @@
+name: Measure Disk Space and Update README
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/ubuntu-24-server-install.sh'
+      - 'Dockerfile'
+      - '.github/workflows/measure-disk-space.yml'
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force update README even if no changes detected'
+        required: false
+        type: boolean
+        default: false
+
+# Only run one instance at a time
+concurrency:
+  group: measure-disk-space-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  measure-disk-space:
+    name: Measure Component Disk Space
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180  # 3 hours max for full installation measurement
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Free up disk space
+        run: |
+          echo "=== Initial disk space ==="
+          df -h /
+
+          echo ""
+          echo "=== Freeing up disk space ==="
+
+          # Remove unnecessary large packages
+          sudo apt-get remove -y '^dotnet-.*' '^llvm-.*' 'php.*' '^mongodb-.*' azure-cli google-cloud-cli google-chrome-stable firefox powershell mono-devel || true
+          sudo apt-get autoremove -y
+          sudo apt-get clean
+
+          # Remove large directories
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
+          echo ""
+          echo "=== Disk space after cleanup ==="
+          df -h /
+
+      - name: Create data directory
+        run: mkdir -p data
+
+      - name: Run disk space measurement
+        id: measure
+        run: |
+          echo "=== Starting disk space measurement ==="
+
+          # Make script executable
+          chmod +x scripts/measure-disk-space.sh
+
+          # Run measurement script with sudo
+          sudo ./scripts/measure-disk-space.sh --json-output data/disk-space-measurements.json 2>&1 | tee measurement.log
+
+          echo "=== Measurement complete ==="
+
+          # Check if JSON was created
+          if [ -f data/disk-space-measurements.json ]; then
+            echo "json_created=true" >> $GITHUB_OUTPUT
+            echo ""
+            echo "=== Measurements JSON ==="
+            cat data/disk-space-measurements.json
+          else
+            echo "json_created=false" >> $GITHUB_OUTPUT
+            echo "ERROR: JSON file was not created"
+            exit 1
+          fi
+
+      - name: Update README with component sizes
+        if: steps.measure.outputs.json_created == 'true'
+        env:
+          JSON_FILE: data/disk-space-measurements.json
+          README_FILE: README.md
+        run: |
+          chmod +x scripts/update-readme-sizes.sh
+          ./scripts/update-readme-sizes.sh
+
+          echo ""
+          echo "=== Updated README section ==="
+          sed -n '/<!-- COMPONENT_SIZES_START -->/,/<!-- COMPONENT_SIZES_END -->/p' README.md || echo "No markers found in README"
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet README.md data/disk-space-measurements.json 2>/dev/null; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected:"
+            git diff --stat README.md data/disk-space-measurements.json 2>/dev/null || true
+          fi
+
+      - name: Commit and push changes
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add README.md data/disk-space-measurements.json
+
+          # Create commit message with summary
+          TOTAL_SIZE=$(python3 -c "import json; print(json.load(open('data/disk-space-measurements.json'))['total_size_mb'])" 2>/dev/null || echo "unknown")
+
+          git commit -m "chore: update component disk space measurements (${TOTAL_SIZE}MB total)"
+
+          git push origin main
+
+          echo "Changes committed and pushed successfully"
+
+      - name: Upload measurement artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: disk-space-measurements
+          path: |
+            data/disk-space-measurements.json
+            measurement.log
+          retention-days: 30
+
+      - name: Summary
+        run: |
+          echo "## Disk Space Measurement Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f data/disk-space-measurements.json ]; then
+            python3 -c "
+          import json
+          with open('data/disk-space-measurements.json', 'r') as f:
+              data = json.load(f)
+          print(f\"**Generated at:** {data['generated_at']}\")
+          print()
+          print(f\"**Total Installation Size:** {data['total_size_mb']} MB\")
+          print()
+          print('### Components by Size')
+          print()
+          print('| Component | Category | Size (MB) |')
+          print('|-----------|----------|-----------|')
+          components = sorted(data['components'], key=lambda x: x['size_mb'], reverse=True)
+          for comp in components:
+              print(f\"| {comp['name']} | {comp['category']} | {comp['size_mb']} |\")
+          " >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Measurement JSON not found" >> $GITHUB_STEP_SUMMARY
+          fi

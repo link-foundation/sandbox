@@ -104,6 +104,14 @@ The container runs as the `sandbox` user with home directory at `/home/sandbox`.
 - Perl: `~/.perl5`
 - OCaml/Rocq: `~/.opam`
 
+<!-- COMPONENT_SIZES_START -->
+## Component Sizes
+
+_Component sizes will be automatically measured and updated by CI/CD._
+
+_Run the disk space measurement workflow manually or wait for it to run on the next push to main._
+<!-- COMPONENT_SIZES_END -->
+
 ## Documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture and design decisions
