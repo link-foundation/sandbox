@@ -94,6 +94,63 @@ If FASM is not critical for the sandbox environment, simply remove it from the i
 - [Ubuntu Launchpad - fasm](https://launchpad.net/ubuntu/+source/fasm)
 - [GitHub Actions Run #21472785075](https://github.com/link-foundation/sandbox/actions/runs/21472785075)
 
+## Architecture Analysis of All Installation Items
+
+A comprehensive review of all packages and tools in the installation script was performed to verify architecture awareness. Below is the analysis:
+
+### Packages Already Architecture-Aware ✅
+
+| Package/Tool | Line | How It Handles Architecture |
+|--------------|------|----------------------------|
+| **FASM** | 209-219 | Conditionally installed on x86-64 only |
+| **Go** | 467-517 | Detects `uname -m` and downloads correct binary (amd64/arm64/armv6l) |
+| **Swift** | 827-891 | Detects `uname -m` and constructs architecture-specific download URL |
+
+### APT Packages - Available for ARM64 ✅
+
+All APT packages in the script are available for ARM64 in Ubuntu 24.04:
+
+| Package | Architectures |
+|---------|---------------|
+| cmake | amd64, arm64, armhf, i386, ppc64el, riscv64, s390x |
+| clang | amd64, arm64, armhf, i386, ppc64el, riscv64, s390x |
+| llvm | amd64, arm64, armhf, i386, ppc64el, riscv64, s390x |
+| lld | amd64, arm64, armhf, i386, ppc64el, riscv64, s390x |
+| nasm | amd64, arm64, armhf, i386, ppc64el, riscv64, s390x |
+| r-base | all (architecture-independent) |
+| dotnet-sdk-8.0 | amd64, arm64, s390x |
+| glab | amd64, arm64, armhf, ppc64el, riscv64, s390x |
+| build-essential | all architectures |
+| Python build deps | all architectures |
+| Ruby build deps | all architectures |
+
+### Tools with Built-in Architecture Support ✅
+
+These tools automatically handle architecture detection:
+
+| Tool | ARM64 Support |
+|------|---------------|
+| **Homebrew** | Tier 1 support for Linux ARM64 |
+| **PHP (via Homebrew)** | Supports Linux x86_64 and arm64 |
+| **SDKMAN/Java** | Eclipse Temurin provides ARM64 binaries |
+| **opam/OCaml/Rocq** | Pre-compiled binaries for arm64 |
+| **elan/Lean** | ARM64 Linux officially supported |
+| **Bun** | ARM64 Linux supported |
+| **Deno** | ARM64 Linux supported |
+| **NVM/Node.js** | ARM64 Linux supported |
+| **Rust (rustup)** | ARM64 Linux supported |
+| **Pyenv** | Builds from source, works on all architectures |
+| **rbenv/ruby-build** | Builds from source, works on all architectures |
+| **Perlbrew** | Builds from source, works on all architectures |
+
+### Conclusion
+
+After thorough analysis, **only FASM requires special architecture handling**, which is already implemented. All other packages and tools in the installation script either:
+1. Are available for ARM64 in Ubuntu repositories
+2. Are architecture-independent
+3. Have built-in architecture detection that automatically downloads the correct binaries
+4. Build from source and work on all architectures
+
 ## CI Logs
 
 The complete CI logs from the failed run are available at:
