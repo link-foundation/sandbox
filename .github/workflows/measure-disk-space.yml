@@ -46,18 +46,18 @@ jobs:
           echo ""
           echo "=== Freeing up disk space ==="
 
-          # Remove unnecessary large packages
-          sudo apt-get remove -y '^dotnet-.*' '^llvm-.*' 'php.*' '^mongodb-.*' azure-cli google-cloud-cli google-chrome-stable firefox powershell mono-devel || true
-          sudo apt-get autoremove -y
-          sudo apt-get clean
-
-          # Remove large directories
+          # Remove large directories that won't affect apt functionality
+          # NOTE: We intentionally do NOT run apt-get remove/autoremove as it breaks
+          # package installation. See docs/case-studies/issue-29 for details.
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache
           sudo rm -rf /usr/local/share/boost
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
+          # Refresh apt cache to ensure all packages are available
+          sudo apt-get update
 
           echo ""
           echo "=== Disk space after cleanup ==="
@@ -116,8 +116,34 @@ jobs:
             git diff --stat README.md data/disk-space-measurements.json 2>/dev/null || true
           fi
 
+      - name: Validate measurements
+        id: validate
+        run: |
+          TOTAL_SIZE=$(python3 -c "import json; print(json.load(open('data/disk-space-measurements.json'))['total_size_mb'])" 2>/dev/null || echo "0")
+          COMPONENT_COUNT=$(python3 -c "import json; print(len(json.load(open('data/disk-space-measurements.json'))['components']))" 2>/dev/null || echo "0")
+
+          echo "Total size: ${TOTAL_SIZE}MB"
+          echo "Component count: ${COMPONENT_COUNT}"
+
+          # Validate that measurements are reasonable
+          # Total size should be at least 1000MB (1GB) for a full installation
+          # Should have at least 10 components measured
+          if [ "$TOTAL_SIZE" -lt 1000 ] || [ "$COMPONENT_COUNT" -lt 10 ]; then
+            echo "WARNING: Measurements appear incomplete or invalid!"
+            echo "  - Total size: ${TOTAL_SIZE}MB (expected >= 1000MB)"
+            echo "  - Components: ${COMPONENT_COUNT} (expected >= 10)"
+            echo ""
+            echo "This likely indicates a problem with the measurement script."
+            echo "See docs/case-studies/issue-29 for common causes."
+            echo ""
+            echo "valid=false" >> $GITHUB_OUTPUT
+          else
+            echo "Measurements look valid"
+            echo "valid=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Commit and push changes
-        if: steps.changes.outputs.has_changes == 'true'
+        if: steps.changes.outputs.has_changes == 'true' && steps.validate.outputs.valid == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -132,6 +158,13 @@ jobs:
           git push origin main
 
           echo "Changes committed and pushed successfully"
+
+      - name: Fail on invalid measurements
+        if: steps.changes.outputs.has_changes == 'true' && steps.validate.outputs.valid != 'true'
+        run: |
+          echo "ERROR: Invalid measurements detected. Not committing to prevent data corruption."
+          echo "Please investigate the measurement logs and fix the underlying issue."
+          exit 1
 
       - name: Upload measurement artifacts
         uses: actions/upload-artifact@v4
