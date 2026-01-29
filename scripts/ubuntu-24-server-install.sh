@@ -203,11 +203,20 @@ sudo apt install -y cmake clang llvm lld
 log_success "C/C++ development tools installed"
 
 # --- Install Assembly Tools ---
-log_info "Installing Assembly tools (NASM, FASM)..."
+log_info "Installing Assembly tools..."
 # Note: GNU Assembler (as) is already installed as part of binutils (via build-essential)
 # Note: llvm-mc is already installed as part of llvm package above
-maybe_sudo apt install -y nasm fasm
-log_success "Assembly tools installed"
+ARCH=$(uname -m)
+if [ "$ARCH" = "x86_64" ]; then
+  # FASM (Flat Assembler) is only available for x86-64 architecture
+  maybe_sudo apt install -y nasm fasm
+  log_success "Assembly tools installed (NASM + FASM)"
+else
+  # On non-x86 architectures (ARM64, etc.), only install NASM
+  # FASM is not available as it's a self-compiling x86 assembler
+  maybe_sudo apt install -y nasm
+  log_success "Assembly tools installed (NASM only - FASM not available for $ARCH)"
+fi
 
 # --- Install R Language ---
 log_info "Installing R statistical language..."
@@ -1016,7 +1025,7 @@ echo "Assembly Tools:"
 if command -v as &>/dev/null; then log_success "GNU Assembler (as): $(as --version | head -n1)"; else log_warning "GNU Assembler: not found"; fi
 if command -v nasm &>/dev/null; then log_success "NASM: $(nasm -v)"; else log_warning "NASM: not found"; fi
 if command -v llvm-mc &>/dev/null; then log_success "LLVM MC: installed (part of LLVM)"; else log_warning "LLVM MC: not found"; fi
-if command -v fasm &>/dev/null; then log_success "FASM: installed"; else log_warning "FASM: not found"; fi
+if command -v fasm &>/dev/null; then log_success "FASM: installed"; else log_note "FASM: not available (x86-64 only)"; fi
 
 echo ""
 
