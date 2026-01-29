@@ -68,10 +68,10 @@ get_disk_usage_mb() {
 
 # Cleanup function to ensure accurate measurements
 cleanup_for_measurement() {
-  # Clean apt cache
+  # Clean apt cache (downloaded .deb files) but preserve package lists
+  # NOTE: We intentionally do NOT delete /var/lib/apt/lists/* as it breaks
+  # package installation. See docs/case-studies/issue-29 for details.
   maybe_sudo apt-get clean 2>/dev/null || true
-  maybe_sudo apt-get autoclean 2>/dev/null || true
-  maybe_sudo rm -rf /var/lib/apt/lists/* 2>/dev/null || true
 
   # Clean temp files
   maybe_sudo rm -rf /tmp/* 2>/dev/null || true
@@ -324,8 +324,8 @@ get_disk_usage_bytes() {
 }
 
 cleanup_for_measurement() {
+  # Clean apt cache but preserve package lists (see docs/case-studies/issue-29)
   maybe_sudo apt-get clean 2>/dev/null || true
-  maybe_sudo rm -rf /var/lib/apt/lists/* 2>/dev/null || true
   rm -rf /tmp/measure-* 2>/dev/null || true
   sync
 }
