@@ -107,9 +107,16 @@ The container runs as the `sandbox` user with home directory at `/home/sandbox`.
 <!-- COMPONENT_SIZES_START -->
 ## Component Sizes
 
-_Component sizes will be automatically measured and updated by CI/CD._
+_Last updated: _
 
-_Run the disk space measurement workflow manually or wait for it to run on the next push to main._
+**Total installation size: 0 MB**
+
+| Component | Category | Size (MB) |
+|-----------|----------|-----------|
+| Essential Tools | System | 0 |
+
+_Note: Sizes are measured after cleanup and may vary based on system state and package versions._
+
 <!-- COMPONENT_SIZES_END -->
 
 ## Documentation
