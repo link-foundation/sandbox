@@ -219,7 +219,13 @@ jobs:
   docker-build-test:
     runs-on: ubuntu-24.04
     needs: [detect-changes]
-    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.should-build == 'true'
+    # Use always() to prevent implicit success() check from skipping this job
+    # when version-bump is skipped (see docs/case-studies/issue-23)
+    if: |
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      github.event_name == 'pull_request' &&
+      needs.detect-changes.outputs.should-build == 'true'
 
     steps:
       - name: Checkout repository
@@ -310,9 +316,15 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [detect-changes]
     # Run on push to main with changes, OR on workflow_dispatch
+    # Use always() to prevent implicit success() check from skipping this job
+    # when version-bump is skipped (see docs/case-studies/issue-23)
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
-      (github.event_name == 'workflow_dispatch')
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
+        (github.event_name == 'workflow_dispatch')
+      )
     permissions:
       contents: read
       packages: write
@@ -387,9 +399,16 @@ jobs:
     timeout-minutes: 120       # Safety timeout to prevent runaway builds
     needs: [detect-changes, docker-build-push]
     # Run on push to main with changes, OR on workflow_dispatch
+    # Use always() to prevent implicit success() check from skipping this job
+    # when version-bump is skipped (see docs/case-studies/issue-23)
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
-      (github.event_name == 'workflow_dispatch')
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      needs.docker-build-push.result == 'success' &&
+      (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
+        (github.event_name == 'workflow_dispatch')
+      )
     permissions:
       contents: read
       packages: write
@@ -460,9 +479,17 @@ jobs:
   docker-manifest:
     runs-on: ubuntu-24.04
     needs: [detect-changes, docker-build-push, docker-build-push-arm64]
+    # Use always() to prevent implicit success() check from skipping this job
+    # when version-bump is skipped (see docs/case-studies/issue-23)
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch')
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      needs.docker-build-push.result == 'success' &&
+      needs.docker-build-push-arm64.result == 'success' &&
+      (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+        (github.event_name == 'workflow_dispatch')
+      )
     permissions:
       contents: read
       packages: write
@@ -539,9 +566,16 @@ jobs:
   create-release:
     runs-on: ubuntu-24.04
     needs: [detect-changes, docker-manifest]
+    # Use always() to prevent implicit success() check from skipping this job
+    # when version-bump is skipped (see docs/case-studies/issue-23)
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch')
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      needs.docker-manifest.result == 'success' &&
+      (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+        (github.event_name == 'workflow_dispatch')
+      )
     permissions:
       contents: write
 
