@@ -111,10 +111,12 @@ add_measurement() {
   # Check if components array is empty
   if echo "$current_json" | grep -q '"components": \[\]'; then
     # First component - replace empty array
-    current_json=$(echo "$current_json" | sed "s/\"components\": \[\]/\"components\": [$new_component]/")
+    # Use | as sed delimiter to avoid issues with / in component names (e.g., "C/C++ Tools")
+    current_json=$(echo "$current_json" | sed "s|\"components\": \[\]|\"components\": [$new_component]|")
   else
     # Append to existing array
-    current_json=$(echo "$current_json" | sed "s/\]$/,$new_component]/")
+    # Use | as sed delimiter to avoid issues with / in component names
+    current_json=$(echo "$current_json" | sed "s|\]$|,$new_component]|")
   fi
 
   echo "$current_json" > "$JSON_OUTPUT_FILE"
@@ -128,10 +130,11 @@ finalize_json_output() {
   timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
   # Update timestamp and total
+  # Use | as sed delimiter for consistency with add_measurement function
   local current_json
   current_json=$(cat "$JSON_OUTPUT_FILE")
-  current_json=$(echo "$current_json" | sed "s/\"generated_at\": \"\"/\"generated_at\": \"$timestamp\"/")
-  current_json=$(echo "$current_json" | sed "s/\"total_size_mb\": 0/\"total_size_mb\": $total_mb/")
+  current_json=$(echo "$current_json" | sed "s|\"generated_at\": \"\"|\"generated_at\": \"$timestamp\"|")
+  current_json=$(echo "$current_json" | sed "s|\"total_size_mb\": 0|\"total_size_mb\": $total_mb|")
 
   echo "$current_json" > "$JSON_OUTPUT_FILE"
   log_success "Finalized JSON output with total: ${total_mb}MB"
@@ -340,10 +343,11 @@ add_measurement() {
   current_json=$(cat "$JSON_OUTPUT_FILE")
   local new_component="{\"name\": \"$name\", \"category\": \"$category\", \"size_bytes\": $size_bytes, \"size_mb\": $size_mb}"
 
+  # Use | as sed delimiter to avoid issues with / in component names (e.g., "C/C++ Tools")
   if echo "$current_json" | grep -q '"components": \[\]'; then
-    current_json=$(echo "$current_json" | sed "s/\"components\": \[\]/\"components\": [$new_component]/")
+    current_json=$(echo "$current_json" | sed "s|\"components\": \[\]|\"components\": [$new_component]|")
   else
-    current_json=$(echo "$current_json" | sed "s/\]$/,$new_component]/")
+    current_json=$(echo "$current_json" | sed "s|\]$|,$new_component]|")
   fi
 
   echo "$current_json" > "$JSON_OUTPUT_FILE"
