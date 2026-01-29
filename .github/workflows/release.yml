@@ -207,9 +207,19 @@ jobs:
             fi
           fi
 
-          if [ "${{ steps.changes.outputs.docker }}" = "true" ] || [ "${{ steps.changes.outputs.scripts }}" = "true" ]; then
+          # Trigger build on any relevant changes
+          if [ "${{ steps.changes.outputs.docker }}" = "true" ]; then
             echo "result=true" >> $GITHUB_OUTPUT
-            echo "Build triggered by: Dockerfile or scripts changes"
+            echo "Build triggered by: Dockerfile changes"
+          elif [ "${{ steps.changes.outputs.scripts }}" = "true" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "Build triggered by: scripts changes"
+          elif [ "${{ steps.changes.outputs.workflow }}" = "true" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "Build triggered by: workflow changes"
+          elif [ "${{ steps.changes.outputs.version }}" = "true" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "Build triggered by: VERSION file changes"
           else
             echo "result=false" >> $GITHUB_OUTPUT
             echo "No build needed: no relevant changes detected"
