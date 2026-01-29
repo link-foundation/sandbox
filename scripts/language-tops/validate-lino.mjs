@@ -10,12 +10,21 @@
  *   node scripts/language-tops/validate-lino.mjs [filepath]
  *
  * If no filepath is provided, defaults to data/aggregated.lino
+ *
+ * Dependencies are loaded dynamically using use-m, so no package.json is needed.
  */
 
-import { Parser } from 'links-notation';
 import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+
+// Load use-m dynamically for zero-dependency package loading
+const { use } = eval(
+  await (await fetch('https://unpkg.com/use-m/use.js')).text()
+);
+
+// Import links-notation parser dynamically
+const { Parser } = await use('links-notation');
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '../../data');

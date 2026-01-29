@@ -46,12 +46,11 @@ The goal is to create a scientifically weighted ranking of programming languages
 ### Prerequisites
 
 ```bash
-# Node.js 18+ required
+# Node.js 18+ required (with fetch support)
 node --version
-
-# Optional: Install lino-objects-codec for link-notation output
-npm install lino-objects-codec
 ```
+
+> **Note**: No `npm install` is required. Scripts that need npm packages use [use-m](https://github.com/link-foundation/use-m) for dynamic loading at runtime.
 
 ### Fetch All Data
 
@@ -90,7 +89,7 @@ All data is saved to the `data/` directory:
 | `githut.json` | GitHut rankings from GitHub activity metrics |
 | `stackoverflow.json` | Stack Overflow survey results |
 | `aggregated.json` | Combined weighted rankings |
-| `aggregated.lino` | Rankings in links-notation format (if codec installed) |
+| `aggregated.lino` | Rankings in links-notation format |
 
 ### Output Format
 
@@ -157,12 +156,14 @@ Add to crontab for automatic updates:
 
 ## Links-Notation Integration
 
-When [lino-objects-codec](https://github.com/link-foundation/lino-objects-codec) is installed, the aggregation script also outputs data in links-notation format, enabling integration with the [links-notation](https://github.com/link-foundation/links-notation) ecosystem.
+The aggregation script outputs data in links-notation format, enabling integration with the [links-notation](https://github.com/link-foundation/links-notation) ecosystem.
 
 ```bash
-npm install lino-objects-codec
 node scripts/language-tops/aggregate.mjs
 # Creates data/aggregated.lino
+
+# Validate the lino file (uses use-m for dynamic dependency loading)
+node scripts/language-tops/validate-lino.mjs
 ```
 
 ## Contributing

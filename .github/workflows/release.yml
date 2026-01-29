@@ -8,16 +8,33 @@ on:
       - 'Dockerfile'
       - 'scripts/**'
       - '.github/workflows/release.yml'
-      - 'package.json'  # Trigger on version changes
+      - 'VERSION'  # Trigger on version changes
   pull_request:
     types: [opened, synchronize, reopened]
+  # Manual release support - allows instant version bump and release
   workflow_dispatch:
     inputs:
-      force_build:
-        description: 'Force Docker image build'
+      release_mode:
+        description: 'Release mode'
+        required: true
+        type: choice
+        default: 'build-only'
+        options:
+          - build-only
+          - bump-and-release
+      bump_type:
+        description: 'Version bump type (only for bump-and-release mode)'
         required: false
-        type: boolean
-        default: false
+        type: choice
+        default: 'patch'
+        options:
+          - patch
+          - minor
+          - major
+      description:
+        description: 'Release description (optional, for bump-and-release mode)'
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -32,14 +49,82 @@ env:
   DOCKERHUB_IMAGE_NAME: konard/sandbox
 
 jobs:
+  # === MANUAL VERSION BUMP (workflow_dispatch with bump-and-release) ===
+  version-bump:
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'bump-and-release'
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.bump.outputs.new_version }}
+      version_bumped: ${{ steps.bump.outputs.bumped }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version
+        id: bump
+        run: |
+          # Read current version
+          CURRENT_VERSION=$(cat VERSION | tr -d '[:space:]')
+          echo "Current version: $CURRENT_VERSION"
+
+          # Parse version components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+          # Bump based on type
+          case "${{ github.event.inputs.bump_type }}" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "New version: $NEW_VERSION"
+
+          # Update VERSION file
+          echo "$NEW_VERSION" > VERSION
+
+          # Commit and push
+          git add VERSION
+          DESCRIPTION="${{ github.event.inputs.description }}"
+          if [ -n "$DESCRIPTION" ]; then
+            git commit -m "$NEW_VERSION: $DESCRIPTION"
+          else
+            git commit -m "$NEW_VERSION"
+          fi
+          git push origin main
+
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "bumped=true" >> $GITHUB_OUTPUT
+
   # === DETECT CHANGES ===
   detect-changes:
     runs-on: ubuntu-24.04
+    needs: [version-bump]
+    # Always run, but wait for version-bump if it's running
+    if: always() && (needs.version-bump.result == 'success' || needs.version-bump.result == 'skipped')
     outputs:
       docker-changed: ${{ steps.changes.outputs.docker }}
       scripts-changed: ${{ steps.changes.outputs.scripts }}
       workflow-changed: ${{ steps.changes.outputs.workflow }}
-      package-changed: ${{ steps.changes.outputs.package }}
+      version-changed: ${{ steps.changes.outputs.version }}
       should-build: ${{ steps.should-build.outputs.result }}
       version: ${{ steps.version.outputs.version }}
 
@@ -47,11 +132,20 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
+          ref: ${{ github.ref }}
 
-      - name: Get version from package.json
+      # Re-fetch if version was bumped to get latest commit
+      - name: Fetch latest changes
+        if: needs.version-bump.outputs.version_bumped == 'true'
+        run: |
+          git fetch origin main
+          git checkout main
+          git pull origin main
+
+      - name: Get version from VERSION file
         id: version
         run: |
-          VERSION=$(node -p "require('./package.json').version")
+          VERSION=$(cat VERSION | tr -d '[:space:]')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Detected version: $VERSION"
 
@@ -90,20 +184,30 @@ jobs:
             echo "workflow=false" >> $GITHUB_OUTPUT
           fi
 
-          # Check for package.json changes (version bump)
-          if echo "$CHANGED_FILES" | grep -qE '^package\.json$'; then
-            echo "package=true" >> $GITHUB_OUTPUT
+          # Check for VERSION file changes
+          if echo "$CHANGED_FILES" | grep -qE '^VERSION$'; then
+            echo "version=true" >> $GITHUB_OUTPUT
           else
-            echo "package=false" >> $GITHUB_OUTPUT
+            echo "version=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Determine if build is needed
         id: should-build
         run: |
-          if [ "${{ github.event.inputs.force_build }}" = "true" ]; then
-            echo "result=true" >> $GITHUB_OUTPUT
-            echo "Build triggered by: force_build input"
-          elif [ "${{ steps.changes.outputs.docker }}" = "true" ] || [ "${{ steps.changes.outputs.scripts }}" = "true" ]; then
+          # For workflow_dispatch with bump-and-release, always build
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${{ github.event.inputs.release_mode }}" = "bump-and-release" ]; then
+              echo "result=true" >> $GITHUB_OUTPUT
+              echo "Build triggered by: manual bump-and-release"
+              exit 0
+            elif [ "${{ github.event.inputs.release_mode }}" = "build-only" ]; then
+              echo "result=true" >> $GITHUB_OUTPUT
+              echo "Build triggered by: manual build-only"
+              exit 0
+            fi
+          fi
+
+          if [ "${{ steps.changes.outputs.docker }}" = "true" ] || [ "${{ steps.changes.outputs.scripts }}" = "true" ]; then
             echo "result=true" >> $GITHUB_OUTPUT
             echo "Build triggered by: Dockerfile or scripts changes"
           else
@@ -205,10 +309,10 @@ jobs:
   docker-build-push:
     runs-on: ubuntu-24.04
     needs: [detect-changes]
-    # Run on push to main with changes, OR on workflow_dispatch with force_build
+    # Run on push to main with changes, OR on workflow_dispatch
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_build == 'true')
+      (github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       packages: write
@@ -220,6 +324,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main  # Always use latest main for releases
+
+      - name: Get latest version
+        id: version
+        run: |
+          git pull origin main || true
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -247,7 +361,7 @@ jobs:
             ${{ env.DOCKERHUB_IMAGE_NAME }}
           tags: |
             type=raw,value=latest
-            type=raw,value=${{ needs.detect-changes.outputs.version }}
+            type=raw,value=${{ steps.version.outputs.version }}
             type=sha,prefix=
             type=raw,value={{date 'YYYYMMDD'}}
 
@@ -272,10 +386,10 @@ jobs:
     runs-on: ubuntu-24.04-arm  # Native ARM64 runner (free for public repos since Jan 2025)
     timeout-minutes: 120       # Safety timeout to prevent runaway builds
     needs: [detect-changes, docker-build-push]
-    # Run on push to main with changes, OR on workflow_dispatch with force_build
+    # Run on push to main with changes, OR on workflow_dispatch
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_build == 'true')
+      (github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       packages: write
@@ -286,6 +400,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main  # Always use latest main for releases
+
+      - name: Get latest version
+        id: version
+        run: |
+          git pull origin main || true
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -315,7 +439,7 @@ jobs:
             suffix=-arm64
           tags: |
             type=raw,value=latest
-            type=raw,value=${{ needs.detect-changes.outputs.version }}
+            type=raw,value=${{ steps.version.outputs.version }}
             type=sha,prefix=
             type=raw,value={{date 'YYYYMMDD'}}
 
@@ -338,12 +462,25 @@ jobs:
     needs: [detect-changes, docker-build-push, docker-build-push-arm64]
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_build == 'true')
+      (github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       packages: write
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Get latest version
+        id: version
+        run: |
+          git pull origin main || true
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Creating manifest for version: $VERSION"
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -360,7 +497,7 @@ jobs:
 
       - name: Create and push multi-arch manifest (GHCR)
         run: |
-          VERSION="${{ needs.detect-changes.outputs.version }}"
+          VERSION="${{ steps.version.outputs.version }}"
 
           # Create manifest for latest tag on GHCR
           docker manifest create ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:latest \
@@ -380,7 +517,7 @@ jobs:
 
       - name: Create and push multi-arch manifest (Docker Hub)
         run: |
-          VERSION="${{ needs.detect-changes.outputs.version }}"
+          VERSION="${{ steps.version.outputs.version }}"
 
           # Create manifest for latest tag on Docker Hub
           docker manifest create ${{ env.DOCKERHUB_IMAGE_NAME }}:latest \
@@ -404,13 +541,23 @@ jobs:
     needs: [detect-changes, docker-manifest]
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.force_build == 'true')
+      (github.event_name == 'workflow_dispatch')
     permissions:
       contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Get latest version
+        id: version
+        run: |
+          git pull origin main || true
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Creating release for version: $VERSION"
 
       - name: Create GitHub Release
         env:
@@ -418,7 +565,7 @@ jobs:
           GHCR_IMAGE: ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}
           DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE_NAME }}
         run: |
-          VERSION="${{ needs.detect-changes.outputs.version }}"
+          VERSION="${{ steps.version.outputs.version }}"
           DATE=$(date +%Y-%m-%d)
           REPO="${{ github.repository }}"
 
