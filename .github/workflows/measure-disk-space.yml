@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'scripts/ubuntu-24-server-install.sh'
+      - 'scripts/measure-disk-space.sh'
+      - 'scripts/update-readme-sizes.sh'
       - 'Dockerfile'
       - '.github/workflows/measure-disk-space.yml'
   # Allow manual trigger
@@ -69,12 +71,13 @@ jobs:
       - name: Run disk space measurement
         id: measure
         run: |
+          set -o pipefail
           echo "=== Starting disk space measurement ==="
 
           # Make script executable
           chmod +x scripts/measure-disk-space.sh
 
-          # Run measurement script with sudo
+          # Run measurement script with sudo (pipefail ensures script failures propagate through tee)
           sudo ./scripts/measure-disk-space.sh --json-output data/disk-space-measurements.json 2>&1 | tee measurement.log
 
           echo "=== Measurement complete ==="
