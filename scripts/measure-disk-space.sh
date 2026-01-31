@@ -94,6 +94,8 @@ EOF
 }
 
 # Add component measurement to JSON
+# Uses Python for reliable JSON manipulation, avoiding sed issues with special
+# characters in component names (e.g., "C/C++ Tools"). See docs/case-studies/issue-35.
 # Args: component_name category size_bytes size_mb
 add_measurement() {
   local name="$1"
@@ -101,42 +103,39 @@ add_measurement() {
   local size_bytes="$3"
   local size_mb="$4"
 
-  # Read current JSON
-  local current_json
-  current_json=$(cat "$JSON_OUTPUT_FILE")
+  python3 -c "
+import json, sys
+with open('$JSON_OUTPUT_FILE', 'r') as f:
+    data = json.load(f)
+data['components'].append({
+    'name': sys.argv[1],
+    'category': sys.argv[2],
+    'size_bytes': int(sys.argv[3]),
+    'size_mb': int(sys.argv[4])
+})
+with open('$JSON_OUTPUT_FILE', 'w') as f:
+    json.dump(data, f)
+" "$name" "$category" "$size_bytes" "$size_mb"
 
-  # Create new component entry
-  local new_component="{\"name\": \"$name\", \"category\": \"$category\", \"size_bytes\": $size_bytes, \"size_mb\": $size_mb}"
-
-  # Check if components array is empty
-  if echo "$current_json" | grep -q '"components": \[\]'; then
-    # First component - replace empty array
-    # Use | as sed delimiter to avoid issues with / in component names (e.g., "C/C++ Tools")
-    current_json=$(echo "$current_json" | sed "s|\"components\": \[\]|\"components\": [$new_component]|")
-  else
-    # Append to existing array
-    # Use | as sed delimiter to avoid issues with / in component names
-    current_json=$(echo "$current_json" | sed "s|\]$|,$new_component]|")
-  fi
-
-  echo "$current_json" > "$JSON_OUTPUT_FILE"
   log_success "Recorded: $name - ${size_mb}MB"
 }
 
 # Finalize JSON output with timestamp and total
+# Uses Python for reliable JSON manipulation.
 finalize_json_output() {
   local total_mb="$1"
-  local timestamp
-  timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-  # Update timestamp and total
-  # Use | as sed delimiter for consistency with add_measurement function
-  local current_json
-  current_json=$(cat "$JSON_OUTPUT_FILE")
-  current_json=$(echo "$current_json" | sed "s|\"generated_at\": \"\"|\"generated_at\": \"$timestamp\"|")
-  current_json=$(echo "$current_json" | sed "s|\"total_size_mb\": 0|\"total_size_mb\": $total_mb|")
+  python3 -c "
+import json
+from datetime import datetime, timezone
+with open('$JSON_OUTPUT_FILE', 'r') as f:
+    data = json.load(f)
+data['generated_at'] = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+data['total_size_mb'] = int('$total_mb')
+with open('$JSON_OUTPUT_FILE', 'w') as f:
+    json.dump(data, f)
+"
 
-  echo "$current_json" > "$JSON_OUTPUT_FILE"
   log_success "Finalized JSON output with total: ${total_mb}MB"
 }
 
