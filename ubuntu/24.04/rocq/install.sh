@@ -25,8 +25,21 @@ log_step "Installing Rocq/Coq via Opam"
 if ! command_exists opam; then
   log_info "Installing Opam (OCaml package manager)..."
 
-  bash -c "sh <(curl -fsSL https://opam.ocaml.org/install.sh) --no-backup" <<< "y" || {
-    maybe_sudo apt install -y opam || true
+  # Install opam binary to user-writable location
+  OPAM_BIN_DIR="$HOME/.local/bin"
+  mkdir -p "$OPAM_BIN_DIR"
+  export PATH="$OPAM_BIN_DIR:$PATH"
+  # The install script asks: 1) path [/usr/local/bin], 2) create dir? [Y/n]
+  printf '%s\n%s\n' "$OPAM_BIN_DIR" "Y" | bash -c "sh <(curl -fsSL https://opam.ocaml.org/install.sh) --no-backup" || {
+    # Fallback: download opam binary directly
+    ARCH="$(uname -m)"
+    case "$ARCH" in
+      x86_64)  OPAM_ARCH="x86_64" ;;
+      aarch64) OPAM_ARCH="arm64" ;;
+      *)       OPAM_ARCH="$ARCH" ;;
+    esac
+    curl -fsSL "https://github.com/ocaml/opam/releases/latest/download/opam-2.3.0-${OPAM_ARCH}-linux" -o "$OPAM_BIN_DIR/opam" && \
+      chmod +x "$OPAM_BIN_DIR/opam" || true
   }
 
   if command_exists opam; then
@@ -80,6 +93,12 @@ if command_exists opam; then
       echo 'test -r $HOME/.opam/opam-init/init.sh && . $HOME/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true'
     } >> "$HOME/.bashrc"
   fi
+fi
+
+# Ensure .opam directory exists (required for COPY --from in full-sandbox)
+if [ ! -d "$HOME/.opam" ]; then
+  log_warning "Opam directory not found - creating minimal structure"
+  mkdir -p "$HOME/.opam"
 fi
 
 log_success "Rocq/Coq installation complete"
