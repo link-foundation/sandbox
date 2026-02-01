@@ -1,12 +1,23 @@
-FROM ubuntu:24.04
+ARG ESSENTIALS_IMAGE=konard/sandbox-essentials:latest
+FROM ${ESSENTIALS_IMAGE}
 
 # Full Sandbox environment Docker image
-# Contains common language runtimes without any AI-specific tools
-# This image is meant to be used as a base for other projects that need language runtimes.
-#
+# Contains all language runtimes and development tools.
 # This is the "full-sandbox" image (konard/sandbox or konard/sandbox-full).
+#
+# Architecture: JS sandbox → essentials-sandbox → full-sandbox (this image)
+#
 # For a lighter image with just essentials, see ubuntu/24.04/essentials-sandbox/Dockerfile.
+# For just JavaScript, see ubuntu/24.04/js/Dockerfile.
 # For individual language images, see ubuntu/24.04/<language>/Dockerfile.
+#
+# Build from repository root:
+#   docker build -t sandbox .
+#
+# Build with specific essentials image:
+#   docker build --build-arg ESSENTIALS_IMAGE=konard/sandbox-essentials:latest -t sandbox .
+
+USER root
 
 # Set non-interactive frontend for apt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -16,22 +27,18 @@ WORKDIR /workspace
 
 # Copy the modular installation scripts
 COPY ubuntu/24.04/common.sh /tmp/sandbox-scripts/common.sh
-COPY ubuntu/24.04/essentials-sandbox/install.sh /tmp/sandbox-scripts/essentials-sandbox/install.sh
 COPY ubuntu/24.04/full-sandbox/install.sh /tmp/sandbox-scripts/full-sandbox/install.sh
-
-# Copy the legacy installation script (used by full-sandbox/install.sh)
-COPY scripts/ubuntu-24-server-install.sh /tmp/ubuntu-24-server-install.sh
-
-# Make scripts executable and run the full installation
-# Pass DOCKER_BUILD=1 environment variable to indicate Docker build environment
-RUN chmod +x /tmp/ubuntu-24-server-install.sh && \
-    DOCKER_BUILD=1 bash /tmp/ubuntu-24-server-install.sh && \
-    rm -f /tmp/ubuntu-24-server-install.sh && \
-    rm -rf /tmp/sandbox-scripts
 
 # Copy entrypoint script for proper environment initialization
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Make scripts executable and run the full installation
+# Pass DOCKER_BUILD=1 environment variable to indicate Docker build environment
+RUN chmod +x /tmp/sandbox-scripts/full-sandbox/install.sh && \
+    chmod +x /tmp/sandbox-scripts/common.sh && \
+    chmod +x /usr/local/bin/entrypoint.sh && \
+    DOCKER_BUILD=1 bash /tmp/sandbox-scripts/full-sandbox/install.sh && \
+    rm -rf /tmp/sandbox-scripts
 
 # Switch to sandbox user
 USER sandbox
