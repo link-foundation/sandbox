@@ -77,30 +77,43 @@ See [Case Study: Docker ARM64 Build Timeout](docs/case-studies/issue-7/README.md
 
 ## Build Pipeline
 
+The CI/CD pipeline uses per-image change detection for efficiency. Only images whose
+scripts or Dockerfiles changed are rebuilt. Unchanged images reuse the latest published version.
+
 ```
-┌─────────────────┐
-│ detect-changes  │
-│ (ubuntu-latest) │
-└────────┬────────┘
+┌──────────────────┐
+│  detect-changes  │  (per-image granularity)
+│  (ubuntu-latest) │
+└────────┬─────────┘
          │
-         ├─────────────────────────┐
-         │                         │
-         ▼                         ▼
-┌─────────────────┐     ┌─────────────────────┐
-│docker-build-push│     │docker-build-push-   │
-│    (amd64)      │     │      arm64          │
-│ ubuntu-latest   │     │ ubuntu-24.04-arm    │
-└────────┬────────┘     │ (NATIVE - NO EMU)   │
-         │              └──────────┬──────────┘
-         │                         │
-         └──────────┬──────────────┘
-                    │
-                    ▼
-          ┌─────────────────┐
-          │ docker-manifest │
-          │ (multi-arch)    │
-          └─────────────────┘
+         ▼
+┌──────────────────┐  ← built first (base layer)
+│  build-js        │
+│  (amd64 + arm64) │  (parallel per arch)
+└────────┬─────────┘
+         │
+         ▼
+┌────────────────────────┐
+│  build-essentials      │  ← built on JS sandbox
+│  (amd64 + arm64)       │  (parallel per arch)
+└────────┬───────────────┘
+         │
+         ▼
+┌────────────────────────┐
+│  docker-build-push     │  ← full sandbox built on essentials
+│  (amd64 + arm64)       │  (sequential: amd64 first, then arm64)
+└────────┬───────────────┘
+         │
+         ▼
+┌──────────────────┐
+│ docker-manifest  │  ← multi-arch manifests for js, essentials, full
+│ (multi-arch)     │
+└──────────────────┘
 ```
+
+Each layer only rebuilds if its own scripts/Dockerfiles changed, or if a dependency
+(common.sh, base image) changed. When JS sandbox hasn't changed, essentials and full
+sandbox reuse the latest published JS image.
 
 ## File Structure
 
@@ -195,9 +208,16 @@ The sandbox follows a layered modular architecture:
 │  │        essentials-sandbox           │    │
 │  │  (konard/sandbox-essentials)        │    │
 │  │                                     │    │
-│  │  git, gh, glab, Node.js, Bun,      │    │
-│  │  Deno, gh-setup-git-identity,      │    │
-│  │  glab-setup-git-identity           │    │
+│  │  ┌───────────────────────────┐     │    │
+│  │  │      JS sandbox           │     │    │
+│  │  │  (konard/sandbox-js)      │     │    │
+│  │  │                           │     │    │
+│  │  │  Node.js, Bun, Deno, npm │     │    │
+│  │  └───────────────────────────┘     │    │
+│  │                                     │    │
+│  │  + git, gh, glab,                  │    │
+│  │    gh-setup-git-identity,          │    │
+│  │    glab-setup-git-identity         │    │
 │  └─────────────────────────────────────┘    │
 │                                             │
 │  + Python, Go, Rust, Java, Kotlin, .NET,    │

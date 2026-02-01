@@ -1,8 +1,11 @@
 FROM ubuntu:24.04
-# Build: docker build -f ubuntu/24.04/js/Dockerfile -t sandbox-js .
 
 # JavaScript/TypeScript sandbox: Node.js (NVM), Bun, Deno
 # Includes: gh-setup-git-identity, glab-setup-git-identity
+# Published as: konard/sandbox-js
+#
+# Build from repository root:
+#   docker build -f ubuntu/24.04/js/Dockerfile -t sandbox-js .
 
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /workspace
@@ -18,11 +21,11 @@ RUN useradd -m -s /bin/bash sandbox && \
     usermod -aG sudo sandbox
 
 # Copy and run install script
+COPY ubuntu/24.04/common.sh /tmp/common.sh
 COPY ubuntu/24.04/js/install.sh /tmp/install.sh
-COPY ubuntu/24.04/common.sh /common.sh
-RUN chmod +x /tmp/install.sh && \
+RUN chmod +x /tmp/install.sh /tmp/common.sh && \
     su - sandbox -c "bash /tmp/install.sh" && \
-    rm -f /tmp/install.sh
+    rm -f /tmp/install.sh /tmp/common.sh
 
 USER sandbox
 WORKDIR /home/sandbox

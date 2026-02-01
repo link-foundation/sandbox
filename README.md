@@ -42,12 +42,19 @@ This sandbox provides a pre-configured development environment with common langu
 
 ## Modular Architecture
 
-The sandbox is split into modular components, allowing you to use only what you need:
+The sandbox is split into layered modular components, allowing you to use only what you need:
+
+```
+JS sandbox (konard/sandbox-js)
+  → Essentials sandbox (konard/sandbox-essentials)
+    → Full sandbox (konard/sandbox)
+```
 
 | Image | Description | Contents |
 |-------|-------------|----------|
 | `konard/sandbox` | Full sandbox (all languages) | Everything below |
-| `konard/sandbox-essentials` | Essentials only | git, gh, glab, Node.js, Bun, Deno, git identity tools |
+| `konard/sandbox-essentials` | Essentials (git identity tools) | JS sandbox + git, gh, glab, gh-setup-git-identity, glab-setup-git-identity |
+| `konard/sandbox-js` | JavaScript only | Node.js, Bun, Deno, npm |
 
 ### Per-Language Install Scripts & Dockerfiles
 
@@ -85,6 +92,12 @@ curl -fsSL https://raw.githubusercontent.com/link-foundation/sandbox/main/ubuntu
 
 ```bash
 docker pull ghcr.io/link-foundation/sandbox:latest
+```
+
+### Pull the JS image
+
+```bash
+docker pull ghcr.io/link-foundation/sandbox-js:latest
 ```
 
 ### Pull the essentials image

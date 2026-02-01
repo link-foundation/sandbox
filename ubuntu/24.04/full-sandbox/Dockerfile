@@ -1,26 +1,30 @@
-FROM ubuntu:24.04
+ARG ESSENTIALS_IMAGE=konard/sandbox-essentials:latest
+FROM ${ESSENTIALS_IMAGE}
 
 # Full Sandbox Docker image
 # Contains all language runtimes and development tools
-# Built on top of essentials-sandbox install script
+# Built on top of essentials-sandbox (which is built on top of JS sandbox)
 # Published as: konard/sandbox (or konard/sandbox-full)
 #
 # Build from repository root:
 #   docker build -f ubuntu/24.04/full-sandbox/Dockerfile -t sandbox-full .
+#
+# Build with specific essentials image:
+#   docker build -f ubuntu/24.04/full-sandbox/Dockerfile \
+#     --build-arg ESSENTIALS_IMAGE=konard/sandbox-essentials:latest -t sandbox-full .
+
+USER root
 
 ENV DEBIAN_FRONTEND=noninteractive
-WORKDIR /workspace
 
 # Copy all install scripts from repo root context
 COPY ubuntu/24.04/common.sh /tmp/sandbox-scripts/common.sh
-COPY ubuntu/24.04/essentials-sandbox/install.sh /tmp/sandbox-scripts/essentials-sandbox/install.sh
 COPY ubuntu/24.04/full-sandbox/install.sh /tmp/sandbox-scripts/full-sandbox/install.sh
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # Make scripts executable and run the full installation
 RUN chmod +x /tmp/sandbox-scripts/full-sandbox/install.sh && \
     chmod +x /tmp/sandbox-scripts/common.sh && \
-    chmod +x /tmp/sandbox-scripts/essentials-sandbox/install.sh && \
     chmod +x /usr/local/bin/entrypoint.sh && \
     DOCKER_BUILD=1 bash /tmp/sandbox-scripts/full-sandbox/install.sh && \
     rm -rf /tmp/sandbox-scripts

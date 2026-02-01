@@ -2,10 +2,12 @@
 set -euo pipefail
 
 # Full Sandbox Installation Script
-# Installs all supported language runtimes and development tools.
-# This is the complete sandbox - equivalent to the original ubuntu-24-server-install.sh
+# Installs all additional language runtimes and development tools
+# on top of the essentials-sandbox (which already includes JS + git identity tools).
 #
-# Architecture: Runs the essentials-sandbox install first, then adds all languages.
+# Architecture:
+#   JS sandbox → essentials-sandbox → full-sandbox (this script)
+#
 # Each language installer is a standalone script under ubuntu/24.04/<language>/install.sh.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -23,21 +25,11 @@ else
   maybe_sudo() { if [ "$EUID" -eq 0 ]; then "$@"; elif command -v sudo &>/dev/null; then sudo "$@"; else "$@"; fi; }
 fi
 
-log_step "Installing Full Sandbox"
+log_step "Installing Full Sandbox (on top of essentials)"
 
-# --- Step 1: Run essentials-sandbox install ---
-log_step "Phase 1: Installing essentials sandbox"
-if [ -f "$SCRIPT_DIR/../essentials-sandbox/install.sh" ]; then
-  bash "$SCRIPT_DIR/../essentials-sandbox/install.sh"
-else
-  log_error "essentials-sandbox/install.sh not found at $SCRIPT_DIR/../essentials-sandbox/install.sh"
-  exit 1
-fi
+# --- Install additional system packages ---
+log_step "Installing additional system packages"
 
-# --- Step 2: Install additional system packages ---
-log_step "Phase 2: Installing additional system packages"
-
-# Re-source common.sh after essentials may have modified apt
 maybe_sudo apt update -y || true
 
 # .NET SDK
@@ -79,8 +71,8 @@ maybe_sudo apt install -y \
   libffi-dev liblzma-dev
 log_success "Python build dependencies installed"
 
-# --- Step 3: Prepare Homebrew directory ---
-log_step "Phase 3: Preparing Homebrew directory"
+# --- Prepare Homebrew directory ---
+log_step "Preparing Homebrew directory"
 if [ ! -d /home/linuxbrew/.linuxbrew ]; then
   maybe_sudo mkdir -p /home/linuxbrew/.linuxbrew
   if id "sandbox" &>/dev/null; then
@@ -92,8 +84,8 @@ else
   fi
 fi
 
-# --- Step 4: Install all language runtimes as sandbox user ---
-log_step "Phase 4: Installing language runtimes as sandbox user"
+# --- Install all language runtimes as sandbox user ---
+log_step "Installing language runtimes as sandbox user"
 
 cat > /tmp/full-sandbox-user-setup.sh <<'EOF_FULL_SETUP'
 #!/usr/bin/env bash
@@ -106,7 +98,7 @@ log_note() { echo "[i] $1"; }
 log_step() { echo "==> $1"; }
 command_exists() { command -v "$1" &>/dev/null; }
 
-# Ensure JS tools are available (installed by essentials)
+# Ensure JS tools are available (installed by essentials/JS sandbox)
 export BUN_INSTALL="$HOME/.bun"
 export DENO_INSTALL="$HOME/.deno"
 export NVM_DIR="$HOME/.nvm"
