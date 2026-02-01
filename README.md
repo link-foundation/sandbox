@@ -40,12 +40,57 @@ This sandbox provides a pre-configured development environment with common langu
 - **GitHub CLI (gh)**
 - **Homebrew**
 
+## Modular Architecture
+
+The sandbox is split into modular components, allowing you to use only what you need:
+
+| Image | Description | Contents |
+|-------|-------------|----------|
+| `konard/sandbox` | Full sandbox (all languages) | Everything below |
+| `konard/sandbox-essentials` | Essentials only | git, gh, glab, Node.js, Bun, Deno, git identity tools |
+
+### Per-Language Install Scripts & Dockerfiles
+
+Each language has its own standalone `install.sh` and `Dockerfile` under `ubuntu/24.04/<language>/`:
+
+| Language | Directory | Key Tools |
+|----------|-----------|-----------|
+| JavaScript/TypeScript | `ubuntu/24.04/js/` | NVM, Node.js, Bun, Deno, npm |
+| Python | `ubuntu/24.04/python/` | Pyenv, latest stable Python |
+| Go | `ubuntu/24.04/go/` | Latest stable Go |
+| Rust | `ubuntu/24.04/rust/` | rustup, Cargo |
+| Java | `ubuntu/24.04/java/` | SDKMAN, Eclipse Temurin 21 |
+| Kotlin | `ubuntu/24.04/kotlin/` | SDKMAN, Kotlin |
+| .NET | `ubuntu/24.04/dotnet/` | .NET SDK 8.0 |
+| R | `ubuntu/24.04/r/` | R base |
+| Ruby | `ubuntu/24.04/ruby/` | rbenv, latest Ruby 3.x |
+| PHP | `ubuntu/24.04/php/` | Homebrew, PHP 8.3 |
+| Perl | `ubuntu/24.04/perl/` | Perlbrew, latest Perl |
+| Swift | `ubuntu/24.04/swift/` | Swift 6.x |
+| Lean | `ubuntu/24.04/lean/` | elan, Lean prover |
+| Rocq/Coq | `ubuntu/24.04/rocq/` | Opam, Rocq prover |
+| C/C++ | `ubuntu/24.04/cpp/` | CMake, Clang, LLVM, LLD |
+| Assembly | `ubuntu/24.04/assembly/` | NASM, FASM (x86_64) |
+
+Each install script can be run standalone on Ubuntu 24.04:
+
+```bash
+# Install just Go on your Ubuntu 24.04 system
+curl -fsSL https://raw.githubusercontent.com/link-foundation/sandbox/main/ubuntu/24.04/go/install.sh | bash
+```
+
 ## Usage
 
-### Pull the image
+### Pull the full image
 
 ```bash
 docker pull ghcr.io/link-foundation/sandbox:latest
+```
+
+### Pull the essentials image
+
+```bash
+docker pull ghcr.io/link-foundation/sandbox-essentials:latest
 ```
 
 ### Run interactively

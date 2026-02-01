@@ -4,15 +4,18 @@ FROM ubuntu:24.04
 # Contains all language runtimes and development tools
 # Built on top of essentials-sandbox install script
 # Published as: konard/sandbox (or konard/sandbox-full)
+#
+# Build from repository root:
+#   docker build -f ubuntu/24.04/full-sandbox/Dockerfile -t sandbox-full .
 
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /workspace
 
-# Copy the entire ubuntu/24.04 directory for access to all install scripts
-COPY . /tmp/sandbox-scripts/
-
-# Copy entrypoint script
-COPY ../../scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+# Copy all install scripts from repo root context
+COPY ubuntu/24.04/common.sh /tmp/sandbox-scripts/common.sh
+COPY ubuntu/24.04/essentials-sandbox/install.sh /tmp/sandbox-scripts/essentials-sandbox/install.sh
+COPY ubuntu/24.04/full-sandbox/install.sh /tmp/sandbox-scripts/full-sandbox/install.sh
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # Make scripts executable and run the full installation
 RUN chmod +x /tmp/sandbox-scripts/full-sandbox/install.sh && \

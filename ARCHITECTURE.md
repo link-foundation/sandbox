@@ -108,23 +108,115 @@ See [Case Study: Docker ARM64 Build Timeout](docs/case-studies/issue-7/README.md
 sandbox/
 ├── .github/
 │   └── workflows/
-│       └── release.yml          # CI/CD workflow
-├── docs/
-│   └── case-studies/
-│       └── issue-7/             # ARM64 timeout analysis
+│       └── release.yml              # CI/CD workflow
+├── ubuntu/
+│   └── 24.04/
+│       ├── common.sh                # Shared functions for all install scripts
+│       ├── js/                      # JavaScript/TypeScript (Node.js, Bun, Deno)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── python/                  # Python (Pyenv)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── go/                      # Go
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── rust/                    # Rust (rustup)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── java/                    # Java (SDKMAN, Temurin)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── kotlin/                  # Kotlin (SDKMAN)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── dotnet/                  # .NET SDK 8.0
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── r/                       # R language
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── ruby/                    # Ruby (rbenv)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── php/                     # PHP 8.3 (Homebrew)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── perl/                    # Perl (Perlbrew)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── swift/                   # Swift 6.x
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── lean/                    # Lean (elan)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── rocq/                    # Rocq/Coq (Opam)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── cpp/                     # C/C++ (CMake, Clang, LLVM)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── assembly/                # Assembly (NASM, FASM)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── essentials-sandbox/      # Minimal sandbox (git identity tools)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       └── full-sandbox/            # Complete sandbox (all languages)
+│           ├── install.sh
+│           └── Dockerfile
 ├── scripts/
-│   └── ...                      # Build scripts
-├── data/
-│   └── ...                      # Data files
-├── experiments/
-│   └── ...                      # Experimental scripts
-├── Dockerfile                   # Main container definition
-├── README.md                    # Project overview
-├── ARCHITECTURE.md              # This file
-├── REQUIREMENTS.md              # Project requirements
-├── LICENSE                      # MIT License
-└── package.json                 # Node.js metadata
+│   ├── ubuntu-24-server-install.sh  # Legacy full installation script
+│   ├── entrypoint.sh                # Container entrypoint
+│   ├── measure-disk-space.sh        # Disk space measurement
+│   └── ...                          # Other scripts
+├── docs/
+│   └── case-studies/                # Case studies
+├── data/                            # Data files
+├── experiments/                     # Experimental scripts
+├── Dockerfile                       # Root Dockerfile (full sandbox)
+├── README.md                        # Project overview
+├── ARCHITECTURE.md                  # This file
+├── REQUIREMENTS.md                  # Project requirements
+└── LICENSE                          # MIT License
 ```
+
+## Modular Design
+
+The sandbox follows a layered modular architecture:
+
+```
+┌─────────────────────────────────────────────┐
+│              full-sandbox                    │
+│  (konard/sandbox or konard/sandbox-full)     │
+│                                             │
+│  ┌─────────────────────────────────────┐    │
+│  │        essentials-sandbox           │    │
+│  │  (konard/sandbox-essentials)        │    │
+│  │                                     │    │
+│  │  git, gh, glab, Node.js, Bun,      │    │
+│  │  Deno, gh-setup-git-identity,      │    │
+│  │  glab-setup-git-identity           │    │
+│  └─────────────────────────────────────┘    │
+│                                             │
+│  + Python, Go, Rust, Java, Kotlin, .NET,    │
+│    R, Ruby, PHP, Perl, Swift, Lean, Rocq,   │
+│    C/C++, Assembly                          │
+└─────────────────────────────────────────────┘
+
+Each language also available as standalone:
+┌────┐ ┌────────┐ ┌────┐ ┌──────┐ ┌──────┐
+│ JS │ │ Python │ │ Go │ │ Rust │ │ ... │
+└────┘ └────────┘ └────┘ └──────┘ └──────┘
+```
+
+### Benefits
+
+1. **Configurable disk usage**: Users can choose only the languages they need
+2. **Parallel CI/CD**: Each language image can be built and tested independently
+3. **Faster iteration**: Changes to one language only rebuild that image
+4. **Standalone scripts**: Each `install.sh` works directly on Ubuntu 24.04 via `curl | bash`
 
 ## Design Decisions
 
