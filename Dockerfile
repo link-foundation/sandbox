@@ -1,8 +1,12 @@
 FROM ubuntu:24.04
 
-# Sandbox environment Docker image
+# Full Sandbox environment Docker image
 # Contains common language runtimes without any AI-specific tools
 # This image is meant to be used as a base for other projects that need language runtimes.
+#
+# This is the "full-sandbox" image (konard/sandbox or konard/sandbox-full).
+# For a lighter image with just essentials, see ubuntu/24.04/essentials-sandbox/Dockerfile.
+# For individual language images, see ubuntu/24.04/<language>/Dockerfile.
 
 # Set non-interactive frontend for apt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -10,14 +14,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Set working directory
 WORKDIR /workspace
 
-# Copy the installation script
+# Copy the modular installation scripts
+COPY ubuntu/24.04/common.sh /tmp/sandbox-scripts/common.sh
+COPY ubuntu/24.04/essentials-sandbox/install.sh /tmp/sandbox-scripts/essentials-sandbox/install.sh
+COPY ubuntu/24.04/full-sandbox/install.sh /tmp/sandbox-scripts/full-sandbox/install.sh
+
+# Copy the legacy installation script (used by full-sandbox/install.sh)
 COPY scripts/ubuntu-24-server-install.sh /tmp/ubuntu-24-server-install.sh
 
-# Make the script executable and run it
+# Make scripts executable and run the full installation
 # Pass DOCKER_BUILD=1 environment variable to indicate Docker build environment
 RUN chmod +x /tmp/ubuntu-24-server-install.sh && \
     DOCKER_BUILD=1 bash /tmp/ubuntu-24-server-install.sh && \
-    rm -f /tmp/ubuntu-24-server-install.sh
+    rm -f /tmp/ubuntu-24-server-install.sh && \
+    rm -rf /tmp/sandbox-scripts
 
 # Copy entrypoint script for proper environment initialization
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh

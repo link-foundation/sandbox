@@ -7,6 +7,7 @@ on:
     paths:
       - 'Dockerfile'
       - 'scripts/**'
+      - 'ubuntu/**'
       - '.github/workflows/release.yml'
       - '.changeset/**'
       - 'VERSION'
@@ -93,7 +94,7 @@ jobs:
 
           # Check if there are code changes (Dockerfile, scripts, etc.)
           git fetch origin "$GITHUB_BASE_REF" 2>/dev/null || true
-          CODE_CHANGES=$(git diff --name-only "origin/${GITHUB_BASE_REF}...HEAD" | grep -E '^(Dockerfile|scripts/|\.github/workflows/)' || true)
+          CODE_CHANGES=$(git diff --name-only "origin/${GITHUB_BASE_REF}...HEAD" | grep -E '^(Dockerfile|scripts/|ubuntu/|\.github/workflows/)' || true)
 
           if [ -z "$CODE_CHANGES" ]; then
             echo "No code changes detected, changeset not required"
@@ -210,6 +211,7 @@ jobs:
     outputs:
       docker-changed: ${{ steps.changes.outputs.docker }}
       scripts-changed: ${{ steps.changes.outputs.scripts }}
+      ubuntu-changed: ${{ steps.changes.outputs.ubuntu }}
       workflow-changed: ${{ steps.changes.outputs.workflow }}
       version-changed: ${{ steps.changes.outputs.version }}
       should-build: ${{ steps.should-build.outputs.result }}
@@ -264,6 +266,13 @@ jobs:
             echo "scripts=false" >> $GITHUB_OUTPUT
           fi
 
+          # Check for ubuntu/ modular scripts changes
+          if echo "$CHANGED_FILES" | grep -qE '^ubuntu/'; then
+            echo "ubuntu=true" >> $GITHUB_OUTPUT
+          else
+            echo "ubuntu=false" >> $GITHUB_OUTPUT
+          fi
+
           # Check for workflow changes
           if echo "$CHANGED_FILES" | grep -qE '^\.github/workflows/'; then
             echo "workflow=true" >> $GITHUB_OUTPUT
@@ -301,6 +310,9 @@ jobs:
           elif [ "${{ steps.changes.outputs.scripts }}" = "true" ]; then
             echo "result=true" >> $GITHUB_OUTPUT
             echo "Build triggered by: scripts changes"
+          elif [ "${{ steps.changes.outputs.ubuntu }}" = "true" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "Build triggered by: ubuntu modular scripts changes"
           elif [ "${{ steps.changes.outputs.workflow }}" = "true" ]; then
             echo "result=true" >> $GITHUB_OUTPUT
             echo "Build triggered by: workflow changes"
