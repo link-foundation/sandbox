@@ -1,4 +1,5 @@
 FROM ubuntu:24.04
+# Build: docker build -f ubuntu/24.04/js/Dockerfile -t sandbox-js .
 
 # JavaScript/TypeScript sandbox: Node.js (NVM), Bun, Deno
 # Includes: gh-setup-git-identity, glab-setup-git-identity
@@ -17,7 +18,8 @@ RUN useradd -m -s /bin/bash sandbox && \
     usermod -aG sudo sandbox
 
 # Copy and run install script
-COPY install.sh /tmp/install.sh
+COPY ubuntu/24.04/js/install.sh /tmp/install.sh
+COPY ubuntu/24.04/common.sh /common.sh
 RUN chmod +x /tmp/install.sh && \
     su - sandbox -c "bash /tmp/install.sh" && \
     rm -f /tmp/install.sh
@@ -32,7 +34,4 @@ ENV PATH="/home/sandbox/.deno/bin:/home/sandbox/.bun/bin:${PATH}"
 
 SHELL ["/bin/bash", "-c"]
 
-# Entrypoint loads NVM
-COPY --from=entrypoint /usr/local/bin/entrypoint.sh /usr/local/bin/entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/bin/bash"]

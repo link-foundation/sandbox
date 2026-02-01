@@ -1,4 +1,5 @@
 FROM ubuntu:24.04
+# Build: docker build -f ubuntu/24.04/python/Dockerfile -t sandbox-python .
 
 # Python sandbox: Pyenv + latest stable Python
 
@@ -17,7 +18,8 @@ RUN useradd -m -s /bin/bash sandbox && \
     passwd -d sandbox && \
     usermod -aG sudo sandbox
 
-COPY install.sh /tmp/install.sh
+COPY ubuntu/24.04/python/install.sh /tmp/install.sh
+COPY ubuntu/24.04/common.sh /common.sh
 RUN chmod +x /tmp/install.sh && \
     su - sandbox -c "bash /tmp/install.sh" && \
     rm -f /tmp/install.sh

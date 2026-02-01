@@ -1,4 +1,5 @@
 FROM ubuntu:24.04
+# Build: docker build -f ubuntu/24.04/php/Dockerfile -t sandbox-php .
 
 # PHP sandbox: PHP 8.3 via Homebrew
 
@@ -15,7 +16,8 @@ RUN useradd -m -s /bin/bash sandbox && \
     mkdir -p /home/linuxbrew/.linuxbrew && \
     chown -R sandbox:sandbox /home/linuxbrew
 
-COPY install.sh /tmp/install.sh
+COPY ubuntu/24.04/php/install.sh /tmp/install.sh
+COPY ubuntu/24.04/common.sh /common.sh
 RUN chmod +x /tmp/install.sh && \
     su - sandbox -c "bash /tmp/install.sh" && \
     rm -f /tmp/install.sh
