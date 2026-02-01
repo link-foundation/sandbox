@@ -1,7 +1,7 @@
 FROM ubuntu:24.04
 
 # JavaScript/TypeScript sandbox: Node.js (NVM), Bun, Deno
-# Includes: gh-setup-git-identity, glab-setup-git-identity
+# Standalone JS image without essentials overhead
 # Published as: konard/sandbox-js
 #
 # Build from repository root:
@@ -12,7 +12,7 @@ WORKDIR /workspace
 
 # Install minimal system prerequisites
 RUN apt update -y && \
-    apt install -y curl git sudo ca-certificates && \
+    apt install -y curl git sudo ca-certificates unzip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create sandbox user

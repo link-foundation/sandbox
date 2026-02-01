@@ -70,7 +70,19 @@ for pair in "microsoft-edge:microsoft-edge-stable" "google-chrome:google-chrome-
 done
 
 maybe_sudo apt update -y || true
-maybe_sudo apt install -y wget curl unzip zip git sudo ca-certificates gnupg build-essential expect screen
+
+# Core system tools
+maybe_sudo apt install -y \
+  wget curl unzip zip git sudo ca-certificates gnupg \
+  build-essential expect screen
+
+# Common development libraries used by multiple language runtimes
+# (Python, Ruby, Rust, Go, etc. all benefit from these)
+maybe_sudo apt install -y \
+  libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev \
+  libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \
+  libffi-dev liblzma-dev libyaml-dev
+
 log_success "System prerequisites installed"
 
 # --- GitHub CLI ---

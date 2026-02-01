@@ -58,18 +58,13 @@ log_info "Installing R statistical language..."
 maybe_sudo apt install -y r-base
 log_success "R language installed"
 
-# Ruby build dependencies
-log_info "Installing Ruby build dependencies..."
-maybe_sudo apt install -y libyaml-dev
-log_success "Ruby build dependencies installed"
+# Note: Common build dependencies (build-essential, libssl-dev, zlib1g-dev,
+# libyaml-dev, etc.) are already installed in the essentials-sandbox layer.
 
-# Python build dependencies
-log_info "Installing Python build dependencies..."
-maybe_sudo apt install -y \
-  libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev \
-  libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \
-  libffi-dev liblzma-dev
-log_success "Python build dependencies installed"
+# Bubblewrap (needed by Rocq/Opam)
+log_info "Installing bubblewrap..."
+maybe_sudo apt install -y bubblewrap
+log_success "Bubblewrap installed"
 
 # --- Prepare Homebrew directory ---
 log_step "Preparing Homebrew directory"
@@ -234,7 +229,6 @@ fi
 # --- Rocq/Coq (Opam) ---
 log_step "Installing Rocq/Coq"
 if ! command_exists opam; then
-  sudo apt install -y bubblewrap || true
   bash -c "sh <(curl -fsSL https://opam.ocaml.org/install.sh) --no-backup" <<< "y" || {
     sudo apt install -y opam || true
   }

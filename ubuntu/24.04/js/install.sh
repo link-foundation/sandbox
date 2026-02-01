@@ -76,26 +76,4 @@ log_info "Updating npm to latest version..."
 npm install -g npm@latest --no-fund --silent
 log_success "npm updated to latest version"
 
-# --- gh-setup-git-identity ---
-if command_exists bun; then
-  if ! command_exists gh-setup-git-identity; then
-    log_info "Installing gh-setup-git-identity..."
-    bun install -g gh-setup-git-identity
-    log_success "gh-setup-git-identity installed"
-  else
-    log_info "gh-setup-git-identity already installed."
-  fi
-fi
-
-# --- glab-setup-git-identity ---
-if command_exists bun; then
-  if ! command_exists glab-setup-git-identity; then
-    log_info "Installing glab-setup-git-identity..."
-    bun install -g glab-setup-git-identity
-    log_success "glab-setup-git-identity installed"
-  else
-    log_info "glab-setup-git-identity already installed."
-  fi
-fi
-
 log_success "JavaScript/TypeScript runtimes installation complete"
