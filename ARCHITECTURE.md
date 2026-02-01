@@ -77,30 +77,55 @@ See [Case Study: Docker ARM64 Build Timeout](docs/case-studies/issue-7/README.md
 
 ## Build Pipeline
 
+The CI/CD pipeline uses per-image change detection for efficiency. Only images whose
+scripts or Dockerfiles changed are rebuilt. Unchanged images reuse the latest published version.
+
+All language images are built in parallel, and the full sandbox assembles them via
+multi-stage `COPY --from` once all are ready.
+
 ```
-┌─────────────────┐
-│ detect-changes  │
-│ (ubuntu-latest) │
-└────────┬────────┘
+┌──────────────────┐
+│  detect-changes  │  (per-image + per-language granularity)
+│  (ubuntu-latest) │
+└────────┬─────────┘
          │
-         ├─────────────────────────┐
-         │                         │
-         ▼                         ▼
-┌─────────────────┐     ┌─────────────────────┐
-│docker-build-push│     │docker-build-push-   │
-│    (amd64)      │     │      arm64          │
-│ ubuntu-latest   │     │ ubuntu-24.04-arm    │
-└────────┬────────┘     │ (NATIVE - NO EMU)   │
-         │              └──────────┬──────────┘
-         │                         │
-         └──────────┬──────────────┘
-                    │
-                    ▼
-          ┌─────────────────┐
-          │ docker-manifest │
-          │ (multi-arch)    │
-          └─────────────────┘
+         ▼
+┌──────────────────┐  ← built first (base layer)
+│  build-js        │
+│  (amd64 + arm64) │  (parallel per arch)
+└────────┬─────────┘
+         │
+         ▼
+┌────────────────────────┐
+│  build-essentials      │  ← built on JS sandbox
+│  (amd64 + arm64)       │  (parallel per arch)
+└────────┬───────────────┘
+         │
+         ▼
+┌────────────────────────────────────────────────────┐
+│  build-languages (matrix: 11 languages)            │  ← ALL in parallel
+│  python, go, rust, java, kotlin, ruby, php, perl,  │
+│  swift, lean, rocq                                 │
+│  (amd64 + arm64 per language)                      │
+└────────────────────┬───────────────────────────────┘
+                     │
+                     ▼
+┌────────────────────────┐
+│  docker-build-push     │  ← full sandbox: COPY --from all language images
+│  (amd64 + arm64)       │  (multi-stage assembly, waits for all languages)
+└────────┬───────────────┘
+         │
+         ▼
+┌──────────────────┐
+│ manifests        │  ← multi-arch manifests for js, essentials, languages, full
+│ (multi-arch)     │
+└──────────────────┘
 ```
+
+Each image only rebuilds if its own scripts/Dockerfiles changed, or if a dependency
+(common.sh, essentials) changed. The full sandbox uses `COPY --from` to merge
+pre-built language runtimes from all language images, plus `apt install` for
+system-level packages (.NET, R, C/C++, Assembly).
 
 ## File Structure
 
@@ -108,23 +133,122 @@ See [Case Study: Docker ARM64 Build Timeout](docs/case-studies/issue-7/README.md
 sandbox/
 ├── .github/
 │   └── workflows/
-│       └── release.yml          # CI/CD workflow
-├── docs/
-│   └── case-studies/
-│       └── issue-7/             # ARM64 timeout analysis
+│       └── release.yml              # CI/CD workflow
+├── ubuntu/
+│   └── 24.04/
+│       ├── common.sh                # Shared functions for all install scripts
+│       ├── js/                      # JavaScript/TypeScript (Node.js, Bun, Deno)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── python/                  # Python (Pyenv)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── go/                      # Go
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── rust/                    # Rust (rustup)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── java/                    # Java (SDKMAN, Temurin)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── kotlin/                  # Kotlin (SDKMAN)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── dotnet/                  # .NET SDK 8.0
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── r/                       # R language
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── ruby/                    # Ruby (rbenv)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── php/                     # PHP 8.3 (Homebrew)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── perl/                    # Perl (Perlbrew)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── swift/                   # Swift 6.x
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── lean/                    # Lean (elan)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── rocq/                    # Rocq/Coq (Opam)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── cpp/                     # C/C++ (CMake, Clang, LLVM)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── assembly/                # Assembly (NASM, FASM)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       ├── essentials-sandbox/      # Minimal sandbox (git identity tools)
+│       │   ├── install.sh
+│       │   └── Dockerfile
+│       └── full-sandbox/            # Complete sandbox (all languages)
+│           ├── install.sh
+│           └── Dockerfile
 ├── scripts/
-│   └── ...                      # Build scripts
-├── data/
-│   └── ...                      # Data files
-├── experiments/
-│   └── ...                      # Experimental scripts
-├── Dockerfile                   # Main container definition
-├── README.md                    # Project overview
-├── ARCHITECTURE.md              # This file
-├── REQUIREMENTS.md              # Project requirements
-├── LICENSE                      # MIT License
-└── package.json                 # Node.js metadata
+│   ├── ubuntu-24-server-install.sh  # Legacy full installation script
+│   ├── entrypoint.sh                # Container entrypoint
+│   ├── measure-disk-space.sh        # Disk space measurement
+│   └── ...                          # Other scripts
+├── docs/
+│   └── case-studies/                # Case studies
+├── data/                            # Data files
+├── experiments/                     # Experimental scripts
+├── Dockerfile                       # Root Dockerfile (full sandbox)
+├── README.md                        # Project overview
+├── ARCHITECTURE.md                  # This file
+├── REQUIREMENTS.md                  # Project requirements
+└── LICENSE                          # MIT License
 ```
+
+## Modular Design
+
+The sandbox follows a modular architecture where all language images depend on
+`essentials-sandbox`, and the full sandbox assembles them via multi-stage `COPY --from`:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  JS sandbox (konard/sandbox-js)                             │
+│  └─ Node.js, Bun, Deno, npm                                │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Essentials sandbox (konard/sandbox-essentials)              │
+│  └─ + git, gh, glab, identity tools, dev libraries          │
+└──┬──────┬──────┬──────┬──────┬──────┬──────┬──────┬────┬──┬─┘
+   │      │      │      │      │      │      │      │    │  │
+   ▼      ▼      ▼      ▼      ▼      ▼      ▼      ▼    ▼  ▼
+ Python  Go   Rust  Java  Kotlin Ruby  PHP  Perl Swift Lean Rocq
+   │      │      │      │      │      │      │      │    │  │
+   └──────┴──────┴──────┴──────┴──────┴──────┴──────┴────┴──┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Full sandbox (konard/sandbox)                               │
+│  └─ COPY --from all language images                          │
+│  └─ + apt: .NET, R, C/C++, Assembly (system packages)       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Each language image is also available as a standalone Docker image
+(e.g., `konard/sandbox-python`, `konard/sandbox-go`, etc.), each with
+essentials pre-installed (JS, git, gh, glab, dev libraries).
+
+### Benefits
+
+1. **Configurable disk usage**: Users can choose only the languages they need
+2. **Parallel CI/CD**: All language images are built in parallel
+3. **Faster iteration**: Changes to one language only rebuild that image
+4. **Efficient assembly**: Full sandbox uses `COPY --from` to merge pre-built files
+5. **No dependency conflicts**: Each language builds in isolation on essentials
+6. **Standalone scripts**: Each `install.sh` works directly on Ubuntu 24.04 via `curl | bash`
 
 ## Design Decisions
 

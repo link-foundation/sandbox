@@ -1,21 +1,24 @@
-# Full Sandbox environment Docker image
-# Contains all language runtimes and development tools.
-# This is the "full-sandbox" image (konard/sandbox or konard/sandbox-full).
+# Full Sandbox Docker image - Multi-stage assembly
+# Copies pre-built language runtimes from individual language images
+# Published as: konard/sandbox (or konard/sandbox-full)
 #
 # Architecture:
 #   essentials-sandbox (base for all language images)
-#     ├─ sandbox-python, sandbox-go, sandbox-rust, ... (built in parallel)
-#     └─ full-sandbox (merges all language images via COPY --from)
+#     ├─ sandbox-python   (built in parallel)
+#     ├─ sandbox-go       (built in parallel)
+#     ├─ sandbox-rust     (built in parallel)
+#     ├─ sandbox-java     (built in parallel)
+#     ├─ sandbox-kotlin   (built in parallel)
+#     ├─ sandbox-ruby     (built in parallel)
+#     ├─ sandbox-php      (built in parallel)
+#     ├─ sandbox-perl     (built in parallel)
+#     ├─ sandbox-swift    (built in parallel)
+#     ├─ sandbox-lean     (built in parallel)
+#     ├─ sandbox-rocq     (built in parallel)
+#     └─ full-sandbox     (merges all + adds dotnet, r, cpp, assembly via apt)
 #
 # Build from repository root:
-#   docker build -t sandbox .
-#
-# Build with specific images:
-#   docker build --build-arg ESSENTIALS_IMAGE=konard/sandbox-essentials:latest -t sandbox .
-#
-# For a lighter image with just essentials, see ubuntu/24.04/essentials-sandbox/Dockerfile.
-# For just JavaScript, see ubuntu/24.04/js/Dockerfile.
-# For individual language images, see ubuntu/24.04/<language>/Dockerfile.
+#   docker build -f ubuntu/24.04/full-sandbox/Dockerfile -t sandbox-full .
 
 # === Build arguments (all declared before first FROM for global scope) ===
 ARG ESSENTIALS_IMAGE=konard/sandbox-essentials:latest
@@ -31,6 +34,7 @@ ARG SWIFT_IMAGE=konard/sandbox-swift:latest
 ARG LEAN_IMAGE=konard/sandbox-lean:latest
 ARG ROCQ_IMAGE=konard/sandbox-rocq:latest
 
+# === Language image stages (for COPY --from) ===
 FROM ${PYTHON_IMAGE} AS python-stage
 FROM ${GO_IMAGE} AS go-stage
 FROM ${RUST_IMAGE} AS rust-stage
@@ -48,7 +52,6 @@ FROM ${ESSENTIALS_IMAGE}
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
-WORKDIR /workspace
 
 # Copy entrypoint script
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
@@ -85,7 +88,9 @@ COPY --from=rust-stage --chown=sandbox:sandbox /home/sandbox/.rustup /home/sandb
 # Java (SDKMAN)
 COPY --from=java-stage --chown=sandbox:sandbox /home/sandbox/.sdkman /home/sandbox/.sdkman
 
-# Kotlin (SDKMAN - merge Kotlin candidate into Java's SDKMAN)
+# Kotlin (SDKMAN - merge with Java's SDKMAN)
+# Kotlin stage has its own SDKMAN with Kotlin installed
+# We copy only the Kotlin candidate from the kotlin stage
 COPY --from=kotlin-stage --chown=sandbox:sandbox /home/sandbox/.sdkman/candidates/kotlin /home/sandbox/.sdkman/candidates/kotlin
 
 # Ruby (rbenv)
@@ -107,6 +112,7 @@ COPY --from=lean-stage --chown=sandbox:sandbox /home/sandbox/.elan /home/sandbox
 COPY --from=rocq-stage --chown=sandbox:sandbox /home/sandbox/.opam /home/sandbox/.opam
 
 # --- Copy bashrc configurations from language stages ---
+# We need the bashrc entries for environment initialization
 COPY --from=python-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-python
 COPY --from=go-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-go
 COPY --from=rust-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-rust
@@ -137,7 +143,6 @@ RUN cp /home/sandbox/.bashrc /tmp/.bashrc-base && \
     chown sandbox:sandbox /home/sandbox/.bashrc && \
     rm -f /tmp/.bashrc-*
 
-# Switch to sandbox user
 USER sandbox
 WORKDIR /home/sandbox
 
@@ -162,5 +167,6 @@ ENV CAML_LD_LIBRARY_PATH="/home/sandbox/.opam/default/lib/stublibs:/home/sandbox
 ENV OCAML_TOPLEVEL_PATH="/home/sandbox/.opam/default/lib/toplevel"
 
 SHELL ["/bin/bash", "-c"]
+
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/bin/bash"]

@@ -40,12 +40,92 @@ This sandbox provides a pre-configured development environment with common langu
 - **GitHub CLI (gh)**
 - **Homebrew**
 
+## Modular Architecture
+
+The sandbox is split into modular components, allowing you to use only what you need:
+
+```
+JS sandbox (konard/sandbox-js)
+  └─ Essentials sandbox (konard/sandbox-essentials)
+       ├─ sandbox-python     (built in parallel)
+       ├─ sandbox-go         (built in parallel)
+       ├─ sandbox-rust       (built in parallel)
+       ├─ sandbox-java       (built in parallel)
+       ├─ sandbox-kotlin     (built in parallel)
+       ├─ sandbox-ruby       (built in parallel)
+       ├─ sandbox-php        (built in parallel)
+       ├─ sandbox-perl       (built in parallel)
+       ├─ sandbox-swift      (built in parallel)
+       ├─ sandbox-lean       (built in parallel)
+       └─ sandbox-rocq       (built in parallel)
+            └─ Full sandbox (konard/sandbox) ← merges all via COPY --from
+```
+
+| Image | Description | Base Image |
+|-------|-------------|------------|
+| `konard/sandbox` | Full sandbox (all languages) | Assembled from all language images |
+| `konard/sandbox-essentials` | Essentials (git identity tools) | Built on JS sandbox |
+| `konard/sandbox-js` | JavaScript only | Ubuntu 24.04 |
+| `konard/sandbox-python` | Python (pyenv) | Built on essentials |
+| `konard/sandbox-go` | Go (latest stable) | Built on essentials |
+| `konard/sandbox-rust` | Rust (rustup + cargo) | Built on essentials |
+| `konard/sandbox-java` | Java 21 (SDKMAN + Temurin) | Built on essentials |
+| `konard/sandbox-kotlin` | Kotlin (SDKMAN) | Built on essentials |
+| `konard/sandbox-ruby` | Ruby (rbenv) | Built on essentials |
+| `konard/sandbox-php` | PHP 8.3 (Homebrew) | Built on essentials |
+| `konard/sandbox-perl` | Perl (Perlbrew) | Built on essentials |
+| `konard/sandbox-swift` | Swift 6.x | Built on essentials |
+| `konard/sandbox-lean` | Lean (elan) | Built on essentials |
+| `konard/sandbox-rocq` | Rocq/Coq (Opam) | Built on essentials |
+
+### Per-Language Install Scripts & Dockerfiles
+
+Each language has its own standalone `install.sh` and `Dockerfile` under `ubuntu/24.04/<language>/`:
+
+| Language | Directory | Key Tools |
+|----------|-----------|-----------|
+| JavaScript/TypeScript | `ubuntu/24.04/js/` | NVM, Node.js, Bun, Deno, npm |
+| Python | `ubuntu/24.04/python/` | Pyenv, latest stable Python |
+| Go | `ubuntu/24.04/go/` | Latest stable Go |
+| Rust | `ubuntu/24.04/rust/` | rustup, Cargo |
+| Java | `ubuntu/24.04/java/` | SDKMAN, Eclipse Temurin 21 |
+| Kotlin | `ubuntu/24.04/kotlin/` | SDKMAN, Kotlin |
+| .NET | `ubuntu/24.04/dotnet/` | .NET SDK 8.0 |
+| R | `ubuntu/24.04/r/` | R base |
+| Ruby | `ubuntu/24.04/ruby/` | rbenv, latest Ruby 3.x |
+| PHP | `ubuntu/24.04/php/` | Homebrew, PHP 8.3 |
+| Perl | `ubuntu/24.04/perl/` | Perlbrew, latest Perl |
+| Swift | `ubuntu/24.04/swift/` | Swift 6.x |
+| Lean | `ubuntu/24.04/lean/` | elan, Lean prover |
+| Rocq/Coq | `ubuntu/24.04/rocq/` | Opam, Rocq prover |
+| C/C++ | `ubuntu/24.04/cpp/` | CMake, Clang, LLVM, LLD |
+| Assembly | `ubuntu/24.04/assembly/` | NASM, FASM (x86_64) |
+
+Each install script can be run standalone on Ubuntu 24.04:
+
+```bash
+# Install just Go on your Ubuntu 24.04 system
+curl -fsSL https://raw.githubusercontent.com/link-foundation/sandbox/main/ubuntu/24.04/go/install.sh | bash
+```
+
 ## Usage
 
-### Pull the image
+### Pull the full image
 
 ```bash
 docker pull ghcr.io/link-foundation/sandbox:latest
+```
+
+### Pull the JS image
+
+```bash
+docker pull ghcr.io/link-foundation/sandbox-js:latest
+```
+
+### Pull the essentials image
+
+```bash
+docker pull ghcr.io/link-foundation/sandbox-essentials:latest
 ```
 
 ### Run interactively
