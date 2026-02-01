@@ -7,8 +7,8 @@ FROM ${ESSENTIALS_IMAGE}
 
 USER sandbox
 
-COPY ubuntu/24.04/common.sh /tmp/common.sh
-COPY ubuntu/24.04/rust/install.sh /tmp/install.sh
+COPY --chown=sandbox:sandbox ubuntu/24.04/common.sh /tmp/common.sh
+COPY --chown=sandbox:sandbox ubuntu/24.04/rust/install.sh /tmp/install.sh
 RUN chmod +x /tmp/install.sh /tmp/common.sh && \
     bash /tmp/install.sh && \
     rm -f /tmp/install.sh /tmp/common.sh
