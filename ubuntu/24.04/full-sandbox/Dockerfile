@@ -20,7 +20,8 @@
 # Build from repository root:
 #   docker build -f ubuntu/24.04/full-sandbox/Dockerfile -t sandbox-full .
 
-# === Language image stages (for COPY --from) ===
+# === Build arguments (all declared before first FROM for global scope) ===
+ARG ESSENTIALS_IMAGE=konard/sandbox-essentials:latest
 ARG PYTHON_IMAGE=konard/sandbox-python:latest
 ARG GO_IMAGE=konard/sandbox-go:latest
 ARG RUST_IMAGE=konard/sandbox-rust:latest
@@ -33,6 +34,7 @@ ARG SWIFT_IMAGE=konard/sandbox-swift:latest
 ARG LEAN_IMAGE=konard/sandbox-lean:latest
 ARG ROCQ_IMAGE=konard/sandbox-rocq:latest
 
+# === Language image stages (for COPY --from) ===
 FROM ${PYTHON_IMAGE} AS python-stage
 FROM ${GO_IMAGE} AS go-stage
 FROM ${RUST_IMAGE} AS rust-stage
@@ -46,7 +48,6 @@ FROM ${LEAN_IMAGE} AS lean-stage
 FROM ${ROCQ_IMAGE} AS rocq-stage
 
 # === Final assembly image ===
-ARG ESSENTIALS_IMAGE=konard/sandbox-essentials:latest
 FROM ${ESSENTIALS_IMAGE}
 
 USER root

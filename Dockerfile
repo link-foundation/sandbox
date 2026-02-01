@@ -17,7 +17,8 @@
 # For just JavaScript, see ubuntu/24.04/js/Dockerfile.
 # For individual language images, see ubuntu/24.04/<language>/Dockerfile.
 
-# === Language image stages (for COPY --from) ===
+# === Build arguments (all declared before first FROM for global scope) ===
+ARG ESSENTIALS_IMAGE=konard/sandbox-essentials:latest
 ARG PYTHON_IMAGE=konard/sandbox-python:latest
 ARG GO_IMAGE=konard/sandbox-go:latest
 ARG RUST_IMAGE=konard/sandbox-rust:latest
@@ -43,7 +44,6 @@ FROM ${LEAN_IMAGE} AS lean-stage
 FROM ${ROCQ_IMAGE} AS rocq-stage
 
 # === Final assembly image ===
-ARG ESSENTIALS_IMAGE=konard/sandbox-essentials:latest
 FROM ${ESSENTIALS_IMAGE}
 
 USER root
