@@ -389,78 +389,55 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image (test)
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: false
-          tags: ${{ env.GHCR_IMAGE_NAME }}:test
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Test Docker image
+      - name: Build layered images (JS → essentials → full)
         run: |
-          echo "Building image for testing..."
-          docker build -t sandbox-test .
+          echo "=== Building JS sandbox ==="
+          docker build -f ubuntu/24.04/js/Dockerfile -t sandbox-js .
 
           echo ""
-          echo "=== Testing installed tools ==="
+          echo "=== Building essentials sandbox (on JS) ==="
+          docker build -f ubuntu/24.04/essentials-sandbox/Dockerfile \
+            --build-arg JS_IMAGE=sandbox-js -t sandbox-essentials .
+
+          echo ""
+          echo "=== Building full sandbox (on essentials) ==="
+          docker build --build-arg ESSENTIALS_IMAGE=sandbox-essentials -t sandbox-test .
+
+      - name: Test JS sandbox
+        run: |
+          echo "=== Testing JS sandbox ==="
+          docker run --rm sandbox-js bash -c '. $HOME/.nvm/nvm.sh && node --version' || echo "Node.js test failed"
+          docker run --rm sandbox-js bash -c 'export PATH=$HOME/.bun/bin:$PATH && bun --version' || echo "Bun test failed"
+          docker run --rm sandbox-js bash -c 'export PATH=$HOME/.deno/bin:$PATH && deno --version' || echo "Deno test failed"
+          echo "=== JS sandbox tests completed ==="
+
+      - name: Test essentials sandbox
+        run: |
+          echo "=== Testing essentials sandbox ==="
+          docker run --rm sandbox-essentials gh --version || echo "GitHub CLI test failed"
+          docker run --rm sandbox-essentials glab --version || echo "GitLab CLI test failed"
+          docker run --rm sandbox-essentials gh-setup-git-identity --version || echo "gh-setup-git-identity test failed"
+          docker run --rm sandbox-essentials glab-setup-git-identity --version || echo "glab-setup-git-identity test failed"
+          echo "=== Essentials sandbox tests completed ==="
+
+      - name: Test full sandbox
+        run: |
+          echo "=== Testing full sandbox ==="
           echo "Note: Using entrypoint script which initializes all environments"
 
-          echo ""
-          echo "Testing Node.js..."
           docker run --rm sandbox-test node --version || echo "Node.js test failed"
-
-          echo ""
-          echo "Testing Python..."
           docker run --rm sandbox-test python --version || echo "Python test failed"
-
-          echo ""
-          echo "Testing Go..."
           docker run --rm sandbox-test go version || echo "Go test failed"
-
-          echo ""
-          echo "Testing Rust..."
           docker run --rm sandbox-test rustc --version || echo "Rust test failed"
-
-          echo ""
-          echo "Testing Java..."
           docker run --rm sandbox-test java -version || echo "Java test failed"
-
-          echo ""
-          echo "Testing Bun..."
           docker run --rm sandbox-test bun --version || echo "Bun test failed"
-
-          echo ""
-          echo "Testing Deno..."
           docker run --rm sandbox-test deno --version || echo "Deno test failed"
-
-          echo ""
-          echo "Testing GitHub CLI..."
           docker run --rm sandbox-test gh --version || echo "GitHub CLI test failed"
-
-          echo ""
-          echo "Testing GitLab CLI..."
           docker run --rm sandbox-test glab --version || echo "GitLab CLI test failed"
-
-          echo ""
-          echo "Testing gh-setup-git-identity..."
           docker run --rm sandbox-test gh-setup-git-identity --version || echo "gh-setup-git-identity test failed"
-
-          echo ""
-          echo "Testing glab-setup-git-identity..."
           docker run --rm sandbox-test glab-setup-git-identity --version || echo "glab-setup-git-identity test failed"
-
-          echo ""
-          echo "Testing Lean..."
           docker run --rm sandbox-test lean --version || echo "Lean test failed"
-
-          echo ""
-          echo "Testing Perl..."
           docker run --rm sandbox-test perl --version || echo "Perl test failed"
-
-          echo ""
-          echo "Testing PHP..."
           docker run --rm sandbox-test php --version || echo "PHP test failed"
 
           echo ""
