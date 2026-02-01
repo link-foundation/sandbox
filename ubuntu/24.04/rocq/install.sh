@@ -5,6 +5,8 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SCRIPT_DIR/../common.sh" ]; then
   source "$SCRIPT_DIR/../common.sh"
+elif [ -f "/tmp/common.sh" ]; then
+  source "/tmp/common.sh"
 else
   set -euo pipefail
   log_info() { echo "[*] $1"; }
@@ -17,10 +19,11 @@ fi
 
 log_step "Installing Rocq/Coq via Opam"
 
+# Note: bubblewrap is provided by essentials-sandbox or the Dockerfile.
+
 # --- Opam ---
 if ! command_exists opam; then
   log_info "Installing Opam (OCaml package manager)..."
-  maybe_sudo apt install -y bubblewrap || true
 
   bash -c "sh <(curl -fsSL https://opam.ocaml.org/install.sh) --no-backup" <<< "y" || {
     maybe_sudo apt install -y opam || true

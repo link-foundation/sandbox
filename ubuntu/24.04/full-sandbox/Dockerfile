@@ -1,33 +1,146 @@
-ARG ESSENTIALS_IMAGE=konard/sandbox-essentials:latest
-FROM ${ESSENTIALS_IMAGE}
-
-# Full Sandbox Docker image
-# Contains all language runtimes and development tools
-# Built on top of essentials-sandbox (which is built on top of JS sandbox)
+# Full Sandbox Docker image - Multi-stage assembly
+# Copies pre-built language runtimes from individual language images
 # Published as: konard/sandbox (or konard/sandbox-full)
+#
+# Architecture:
+#   essentials-sandbox (base for all language images)
+#     ├─ sandbox-python   (built in parallel)
+#     ├─ sandbox-go       (built in parallel)
+#     ├─ sandbox-rust     (built in parallel)
+#     ├─ sandbox-java     (built in parallel)
+#     ├─ sandbox-kotlin   (built in parallel)
+#     ├─ sandbox-ruby     (built in parallel)
+#     ├─ sandbox-php      (built in parallel)
+#     ├─ sandbox-perl     (built in parallel)
+#     ├─ sandbox-swift    (built in parallel)
+#     ├─ sandbox-lean     (built in parallel)
+#     ├─ sandbox-rocq     (built in parallel)
+#     └─ full-sandbox     (merges all + adds dotnet, r, cpp, assembly via apt)
 #
 # Build from repository root:
 #   docker build -f ubuntu/24.04/full-sandbox/Dockerfile -t sandbox-full .
-#
-# Build with specific essentials image:
-#   docker build -f ubuntu/24.04/full-sandbox/Dockerfile \
-#     --build-arg ESSENTIALS_IMAGE=konard/sandbox-essentials:latest -t sandbox-full .
+
+# === Language image stages (for COPY --from) ===
+ARG PYTHON_IMAGE=konard/sandbox-python:latest
+ARG GO_IMAGE=konard/sandbox-go:latest
+ARG RUST_IMAGE=konard/sandbox-rust:latest
+ARG JAVA_IMAGE=konard/sandbox-java:latest
+ARG KOTLIN_IMAGE=konard/sandbox-kotlin:latest
+ARG RUBY_IMAGE=konard/sandbox-ruby:latest
+ARG PHP_IMAGE=konard/sandbox-php:latest
+ARG PERL_IMAGE=konard/sandbox-perl:latest
+ARG SWIFT_IMAGE=konard/sandbox-swift:latest
+ARG LEAN_IMAGE=konard/sandbox-lean:latest
+ARG ROCQ_IMAGE=konard/sandbox-rocq:latest
+
+FROM ${PYTHON_IMAGE} AS python-stage
+FROM ${GO_IMAGE} AS go-stage
+FROM ${RUST_IMAGE} AS rust-stage
+FROM ${JAVA_IMAGE} AS java-stage
+FROM ${KOTLIN_IMAGE} AS kotlin-stage
+FROM ${RUBY_IMAGE} AS ruby-stage
+FROM ${PHP_IMAGE} AS php-stage
+FROM ${PERL_IMAGE} AS perl-stage
+FROM ${SWIFT_IMAGE} AS swift-stage
+FROM ${LEAN_IMAGE} AS lean-stage
+FROM ${ROCQ_IMAGE} AS rocq-stage
+
+# === Final assembly image ===
+ARG ESSENTIALS_IMAGE=konard/sandbox-essentials:latest
+FROM ${ESSENTIALS_IMAGE}
 
 USER root
-
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Copy all install scripts from repo root context
-COPY ubuntu/24.04/common.sh /tmp/sandbox-scripts/common.sh
-COPY ubuntu/24.04/full-sandbox/install.sh /tmp/sandbox-scripts/full-sandbox/install.sh
+# Copy entrypoint script
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Make scripts executable and run the full installation
-RUN chmod +x /tmp/sandbox-scripts/full-sandbox/install.sh && \
-    chmod +x /tmp/sandbox-scripts/common.sh && \
-    chmod +x /usr/local/bin/entrypoint.sh && \
-    DOCKER_BUILD=1 bash /tmp/sandbox-scripts/full-sandbox/install.sh && \
-    rm -rf /tmp/sandbox-scripts
+# --- Install system-level packages (cannot be COPY'd from images) ---
+RUN apt-get update -y && \
+    apt-get install -y \
+      dotnet-sdk-8.0 \
+      r-base \
+      cmake clang llvm lld \
+      nasm \
+      bubblewrap && \
+    # FASM only available on x86_64
+    if [ "$(uname -m)" = "x86_64" ]; then apt-get install -y fasm; fi && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- Prepare directories for COPY --from ---
+RUN mkdir -p /home/linuxbrew/.linuxbrew && \
+    chown -R sandbox:sandbox /home/linuxbrew
+
+# --- Copy user-home language runtimes from pre-built images ---
+
+# Python (pyenv)
+COPY --from=python-stage --chown=sandbox:sandbox /home/sandbox/.pyenv /home/sandbox/.pyenv
+
+# Go
+COPY --from=go-stage --chown=sandbox:sandbox /home/sandbox/.go /home/sandbox/.go
+
+# Rust (cargo + rustup)
+COPY --from=rust-stage --chown=sandbox:sandbox /home/sandbox/.cargo /home/sandbox/.cargo
+COPY --from=rust-stage --chown=sandbox:sandbox /home/sandbox/.rustup /home/sandbox/.rustup
+
+# Java (SDKMAN)
+COPY --from=java-stage --chown=sandbox:sandbox /home/sandbox/.sdkman /home/sandbox/.sdkman
+
+# Kotlin (SDKMAN - merge with Java's SDKMAN)
+# Kotlin stage has its own SDKMAN with Kotlin installed
+# We copy only the Kotlin candidate from the kotlin stage
+COPY --from=kotlin-stage --chown=sandbox:sandbox /home/sandbox/.sdkman/candidates/kotlin /home/sandbox/.sdkman/candidates/kotlin
+
+# Ruby (rbenv)
+COPY --from=ruby-stage --chown=sandbox:sandbox /home/sandbox/.rbenv /home/sandbox/.rbenv
+
+# PHP (Homebrew)
+COPY --from=php-stage --chown=sandbox:sandbox /home/linuxbrew/.linuxbrew /home/linuxbrew/.linuxbrew
+
+# Perl (Perlbrew)
+COPY --from=perl-stage --chown=sandbox:sandbox /home/sandbox/.perl5 /home/sandbox/.perl5
+
+# Swift
+COPY --from=swift-stage --chown=sandbox:sandbox /home/sandbox/.swift /home/sandbox/.swift
+
+# Lean (elan)
+COPY --from=lean-stage --chown=sandbox:sandbox /home/sandbox/.elan /home/sandbox/.elan
+
+# Rocq/Coq (Opam)
+COPY --from=rocq-stage --chown=sandbox:sandbox /home/sandbox/.opam /home/sandbox/.opam
+
+# --- Copy bashrc configurations from language stages ---
+# We need the bashrc entries for environment initialization
+COPY --from=python-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-python
+COPY --from=go-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-go
+COPY --from=rust-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-rust
+COPY --from=java-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-java
+COPY --from=kotlin-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-kotlin
+COPY --from=ruby-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-ruby
+COPY --from=php-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-php
+COPY --from=perl-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-perl
+COPY --from=swift-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-swift
+COPY --from=lean-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-lean
+COPY --from=rocq-stage --chown=sandbox:sandbox /home/sandbox/.bashrc /tmp/.bashrc-rocq
+
+# Merge bashrc configurations: take the essentials bashrc as base,
+# then append unique lines from each language stage
+RUN cp /home/sandbox/.bashrc /tmp/.bashrc-base && \
+    for lang_bashrc in /tmp/.bashrc-python /tmp/.bashrc-go /tmp/.bashrc-rust \
+      /tmp/.bashrc-java /tmp/.bashrc-kotlin /tmp/.bashrc-ruby /tmp/.bashrc-php \
+      /tmp/.bashrc-perl /tmp/.bashrc-swift /tmp/.bashrc-lean /tmp/.bashrc-rocq; do \
+      if [ -f "$lang_bashrc" ]; then \
+        while IFS= read -r line; do \
+          if [ -n "$line" ] && ! grep -qxF "$line" /tmp/.bashrc-base 2>/dev/null; then \
+            echo "$line" >> /tmp/.bashrc-base; \
+          fi; \
+        done < "$lang_bashrc"; \
+      fi; \
+    done && \
+    cp /tmp/.bashrc-base /home/sandbox/.bashrc && \
+    chown sandbox:sandbox /home/sandbox/.bashrc && \
+    rm -f /tmp/.bashrc-*
 
 USER sandbox
 WORKDIR /home/sandbox
@@ -45,9 +158,9 @@ ENV PERLBREW_ROOT="/home/sandbox/.perl5"
 ENV RBENV_ROOT="/home/sandbox/.rbenv"
 
 # PATH for tools that don't need special initialization
-ENV PATH="/home/sandbox/.rbenv/bin:/home/sandbox/.rbenv/shims:/home/sandbox/.swift/usr/bin:/home/sandbox/.elan/bin:/home/sandbox/.opam/default/bin:/home/linuxbrew/.linuxbrew/opt/php@8.3/bin:/home/linuxbrew/.linuxbrew/opt/php@8.3/sbin:/home/sandbox/.cargo/bin:/home/sandbox/.deno/bin:/home/sandbox/.bun/bin:/home/sandbox/.go/bin:/home/sandbox/.go/path/bin:/home/linuxbrew/.linuxbrew/bin:${PATH}"
+ENV PATH="/home/sandbox/.pyenv/bin:/home/sandbox/.pyenv/shims:/home/sandbox/.rbenv/bin:/home/sandbox/.rbenv/shims:/home/sandbox/.swift/usr/bin:/home/sandbox/.elan/bin:/home/sandbox/.opam/default/bin:/home/linuxbrew/.linuxbrew/opt/php@8.3/bin:/home/linuxbrew/.linuxbrew/opt/php@8.3/sbin:/home/sandbox/.cargo/bin:/home/sandbox/.deno/bin:/home/sandbox/.bun/bin:/home/sandbox/.go/bin:/home/sandbox/.go/path/bin:/home/linuxbrew/.linuxbrew/bin:${PATH}"
 
-# Opam environment variables
+# Opam environment variables for Rocq/Coq theorem prover
 ENV OPAM_SWITCH_PREFIX="/home/sandbox/.opam/default"
 ENV CAML_LD_LIBRARY_PATH="/home/sandbox/.opam/default/lib/stublibs:/home/sandbox/.opam/default/lib/ocaml/stublibs:/home/sandbox/.opam/default/lib/ocaml"
 ENV OCAML_TOPLEVEL_PATH="/home/sandbox/.opam/default/lib/toplevel"

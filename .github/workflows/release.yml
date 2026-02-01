@@ -222,6 +222,20 @@ jobs:
       essentials-changed: ${{ steps.image-changes.outputs.essentials }}
       full-changed: ${{ steps.image-changes.outputs.full }}
       common-changed: ${{ steps.image-changes.outputs.common }}
+      # Per-language change detection
+      python-changed: ${{ steps.language-changes.outputs.python }}
+      go-changed: ${{ steps.language-changes.outputs.go }}
+      rust-changed: ${{ steps.language-changes.outputs.rust }}
+      java-changed: ${{ steps.language-changes.outputs.java }}
+      kotlin-changed: ${{ steps.language-changes.outputs.kotlin }}
+      ruby-changed: ${{ steps.language-changes.outputs.ruby }}
+      php-changed: ${{ steps.language-changes.outputs.php }}
+      perl-changed: ${{ steps.language-changes.outputs.perl }}
+      swift-changed: ${{ steps.language-changes.outputs.swift }}
+      lean-changed: ${{ steps.language-changes.outputs.lean }}
+      rocq-changed: ${{ steps.language-changes.outputs.rocq }}
+      cpp-changed: ${{ steps.language-changes.outputs.cpp }}
+      assembly-changed: ${{ steps.language-changes.outputs.assembly }}
 
     steps:
       - uses: actions/checkout@v4
@@ -331,6 +345,19 @@ jobs:
             echo "common=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Detect per-language changes
+        id: language-changes
+        run: |
+          CHANGED_FILES=$(cat /tmp/changed-files.txt)
+
+          for lang in python go rust java kotlin ruby php perl swift lean rocq cpp assembly; do
+            if echo "$CHANGED_FILES" | grep -qE "^ubuntu/24\.04/${lang}/"; then
+              echo "${lang}=true" >> $GITHUB_OUTPUT
+            else
+              echo "${lang}=false" >> $GITHUB_OUTPUT
+            fi
+          done
+
       - name: Determine if build is needed
         id: should-build
         run: |
@@ -389,7 +416,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build layered images (JS → essentials → full)
+      - name: Build layered images (JS -> essentials -> languages -> full)
         run: |
           echo "=== Building JS sandbox ==="
           docker build -f ubuntu/24.04/js/Dockerfile -t sandbox-js .
@@ -400,8 +427,31 @@ jobs:
             --build-arg JS_IMAGE=sandbox-js -t sandbox-essentials .
 
           echo ""
-          echo "=== Building full sandbox (on essentials) ==="
-          docker build --build-arg ESSENTIALS_IMAGE=sandbox-essentials -t sandbox-test .
+          echo "=== Building language images (on essentials) ==="
+          for lang in python go rust java kotlin ruby php perl swift lean rocq; do
+            echo ""
+            echo "--- Building ${lang} sandbox ---"
+            docker build -f "ubuntu/24.04/${lang}/Dockerfile" \
+              --build-arg ESSENTIALS_IMAGE=sandbox-essentials \
+              -t "sandbox-${lang}" .
+          done
+
+          echo ""
+          echo "=== Building full sandbox (multi-stage from all language images) ==="
+          docker build -f ubuntu/24.04/full-sandbox/Dockerfile \
+            --build-arg ESSENTIALS_IMAGE=sandbox-essentials \
+            --build-arg PYTHON_IMAGE=sandbox-python \
+            --build-arg GO_IMAGE=sandbox-go \
+            --build-arg RUST_IMAGE=sandbox-rust \
+            --build-arg JAVA_IMAGE=sandbox-java \
+            --build-arg KOTLIN_IMAGE=sandbox-kotlin \
+            --build-arg RUBY_IMAGE=sandbox-ruby \
+            --build-arg PHP_IMAGE=sandbox-php \
+            --build-arg PERL_IMAGE=sandbox-perl \
+            --build-arg SWIFT_IMAGE=sandbox-swift \
+            --build-arg LEAN_IMAGE=sandbox-lean \
+            --build-arg ROCQ_IMAGE=sandbox-rocq \
+            -t sandbox-test .
 
       - name: Test JS sandbox
         run: |
@@ -904,15 +954,305 @@ jobs:
 
           echo "Essentials sandbox multi-arch manifests pushed for latest and ${VERSION}"
 
+  # === BUILD LANGUAGE IMAGES (amd64) ===
+  # All language images are built in parallel on top of essentials sandbox
+  build-languages-amd64:
+    runs-on: ubuntu-24.04
+    needs: [detect-changes, build-essentials-amd64]
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, go, rust, java, kotlin, ruby, php, perl, swift, lean, rocq]
+    if: |
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      (needs.build-essentials-amd64.result == 'success' || needs.build-essentials-amd64.result == 'skipped') &&
+      (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
+        (github.event_name == 'workflow_dispatch')
+      )
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Check if this language needs building
+        id: check-lang
+        run: |
+          LANG="${{ matrix.language }}"
+          LANG_CHANGED="${{ needs.detect-changes.outputs[format('{0}-changed', matrix.language)] }}"
+          ESSENTIALS_CHANGED="${{ needs.detect-changes.outputs.essentials-changed }}"
+          COMMON_CHANGED="${{ needs.detect-changes.outputs.common-changed }}"
+          VERSION_CHANGED="${{ needs.detect-changes.outputs.version-changed }}"
+          JS_CHANGED="${{ needs.detect-changes.outputs.js-changed }}"
+
+          if [ "$LANG_CHANGED" = "true" ] || \
+             [ "$ESSENTIALS_CHANGED" = "true" ] || \
+             [ "$COMMON_CHANGED" = "true" ] || \
+             [ "$JS_CHANGED" = "true" ] || \
+             [ "$VERSION_CHANGED" = "true" ] || \
+             [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "Building ${LANG}: change detected or workflow_dispatch"
+          else
+            echo "should_build=false" >> $GITHUB_OUTPUT
+            echo "Skipping ${LANG}: no relevant changes"
+          fi
+
+      - name: Checkout repository
+        if: steps.check-lang.outputs.should_build == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Get latest version
+        if: steps.check-lang.outputs.should_build == 'true'
+        id: version
+        run: |
+          git pull origin main || true
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        if: steps.check-lang.outputs.should_build == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: steps.check-lang.outputs.should_build == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        if: steps.check-lang.outputs.should_build == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKERHUB_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Determine essentials base image
+        if: steps.check-lang.outputs.should_build == 'true'
+        id: essentials-base
+        run: |
+          if [ "${{ needs.build-essentials-amd64.outputs.built }}" = "true" ]; then
+            echo "image=${{ env.DOCKERHUB_IMAGE_NAME }}-essentials:${{ steps.version.outputs.version }}-amd64" >> $GITHUB_OUTPUT
+          else
+            echo "image=${{ env.DOCKERHUB_IMAGE_NAME }}-essentials:latest-amd64" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push ${{ matrix.language }} sandbox (amd64)
+        if: steps.check-lang.outputs.should_build == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ubuntu/24.04/${{ matrix.language }}/Dockerfile
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            ESSENTIALS_IMAGE=${{ steps.essentials-base.outputs.image }}
+          tags: |
+            ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}-${{ matrix.language }}:latest-amd64
+            ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}-${{ matrix.language }}:${{ steps.version.outputs.version }}-amd64
+            ${{ env.DOCKERHUB_IMAGE_NAME }}-${{ matrix.language }}:latest-amd64
+            ${{ env.DOCKERHUB_IMAGE_NAME }}-${{ matrix.language }}:${{ steps.version.outputs.version }}-amd64
+          provenance: false
+          cache-from: type=gha,scope=${{ matrix.language }}-amd64
+          cache-to: type=gha,scope=${{ matrix.language }}-amd64,mode=max
+
+  # === BUILD LANGUAGE IMAGES (arm64) ===
+  build-languages-arm64:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 120
+    needs: [detect-changes, build-essentials-arm64]
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, go, rust, java, kotlin, ruby, php, perl, swift, lean, rocq]
+    if: |
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      (needs.build-essentials-arm64.result == 'success' || needs.build-essentials-arm64.result == 'skipped') &&
+      (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
+        (github.event_name == 'workflow_dispatch')
+      )
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Check if this language needs building
+        id: check-lang
+        run: |
+          LANG="${{ matrix.language }}"
+          LANG_CHANGED="${{ needs.detect-changes.outputs[format('{0}-changed', matrix.language)] }}"
+          ESSENTIALS_CHANGED="${{ needs.detect-changes.outputs.essentials-changed }}"
+          COMMON_CHANGED="${{ needs.detect-changes.outputs.common-changed }}"
+          VERSION_CHANGED="${{ needs.detect-changes.outputs.version-changed }}"
+          JS_CHANGED="${{ needs.detect-changes.outputs.js-changed }}"
+
+          if [ "$LANG_CHANGED" = "true" ] || \
+             [ "$ESSENTIALS_CHANGED" = "true" ] || \
+             [ "$COMMON_CHANGED" = "true" ] || \
+             [ "$JS_CHANGED" = "true" ] || \
+             [ "$VERSION_CHANGED" = "true" ] || \
+             [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "Building ${LANG}: change detected or workflow_dispatch"
+          else
+            echo "should_build=false" >> $GITHUB_OUTPUT
+            echo "Skipping ${LANG}: no relevant changes"
+          fi
+
+      - name: Checkout repository
+        if: steps.check-lang.outputs.should_build == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Get latest version
+        if: steps.check-lang.outputs.should_build == 'true'
+        id: version
+        run: |
+          git pull origin main || true
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        if: steps.check-lang.outputs.should_build == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: steps.check-lang.outputs.should_build == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        if: steps.check-lang.outputs.should_build == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKERHUB_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Determine essentials base image
+        if: steps.check-lang.outputs.should_build == 'true'
+        id: essentials-base
+        run: |
+          if [ "${{ needs.build-essentials-arm64.outputs.built }}" = "true" ]; then
+            echo "image=${{ env.DOCKERHUB_IMAGE_NAME }}-essentials:${{ steps.version.outputs.version }}-arm64" >> $GITHUB_OUTPUT
+          else
+            echo "image=${{ env.DOCKERHUB_IMAGE_NAME }}-essentials:latest-arm64" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push ${{ matrix.language }} sandbox (arm64)
+        if: steps.check-lang.outputs.should_build == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ubuntu/24.04/${{ matrix.language }}/Dockerfile
+          platforms: linux/arm64
+          push: true
+          build-args: |
+            ESSENTIALS_IMAGE=${{ steps.essentials-base.outputs.image }}
+          tags: |
+            ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}-${{ matrix.language }}:latest-arm64
+            ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}-${{ matrix.language }}:${{ steps.version.outputs.version }}-arm64
+            ${{ env.DOCKERHUB_IMAGE_NAME }}-${{ matrix.language }}:latest-arm64
+            ${{ env.DOCKERHUB_IMAGE_NAME }}-${{ matrix.language }}:${{ steps.version.outputs.version }}-arm64
+          provenance: false
+          cache-from: type=gha,scope=${{ matrix.language }}-arm64
+          cache-to: type=gha,scope=${{ matrix.language }}-arm64,mode=max
+
+  # === CREATE LANGUAGE MULTI-ARCH MANIFESTS ===
+  languages-manifest:
+    runs-on: ubuntu-24.04
+    needs: [detect-changes, build-languages-amd64, build-languages-arm64]
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, go, rust, java, kotlin, ruby, php, perl, swift, lean, rocq]
+    if: |
+      always() &&
+      needs.detect-changes.result == 'success' &&
+      needs.build-languages-amd64.result == 'success' &&
+      needs.build-languages-arm64.result == 'success'
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Get latest version
+        id: version
+        run: |
+          git pull origin main || true
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKERHUB_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push ${{ matrix.language }} multi-arch manifests
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          LANG="${{ matrix.language }}"
+
+          # GHCR
+          docker manifest create ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}-${LANG}:latest \
+            --amend ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}-${LANG}:latest-amd64 \
+            --amend ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}-${LANG}:latest-arm64
+          docker manifest push ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}-${LANG}:latest
+
+          docker manifest create ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}-${LANG}:${VERSION} \
+            --amend ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}-${LANG}:${VERSION}-amd64 \
+            --amend ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}-${LANG}:${VERSION}-arm64
+          docker manifest push ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}-${LANG}:${VERSION}
+
+          # Docker Hub
+          docker manifest create ${{ env.DOCKERHUB_IMAGE_NAME }}-${LANG}:latest \
+            --amend ${{ env.DOCKERHUB_IMAGE_NAME }}-${LANG}:latest-amd64 \
+            --amend ${{ env.DOCKERHUB_IMAGE_NAME }}-${LANG}:latest-arm64
+          docker manifest push ${{ env.DOCKERHUB_IMAGE_NAME }}-${LANG}:latest
+
+          docker manifest create ${{ env.DOCKERHUB_IMAGE_NAME }}-${LANG}:${VERSION} \
+            --amend ${{ env.DOCKERHUB_IMAGE_NAME }}-${LANG}:${VERSION}-amd64 \
+            --amend ${{ env.DOCKERHUB_IMAGE_NAME }}-${LANG}:${VERSION}-arm64
+          docker manifest push ${{ env.DOCKERHUB_IMAGE_NAME }}-${LANG}:${VERSION}
+
+          echo "${LANG} sandbox multi-arch manifests pushed for latest and ${VERSION}"
+
   # === BUILD AND PUSH FULL SANDBOX (MAIN - amd64) ===
   docker-build-push:
     runs-on: ubuntu-24.04
-    needs: [detect-changes, build-essentials-amd64]
+    needs: [detect-changes, build-languages-amd64, build-essentials-amd64]
     # Run on push to main with changes, OR on workflow_dispatch
     if: |
       always() &&
       needs.detect-changes.result == 'success' &&
       (needs.build-essentials-amd64.result == 'success' || needs.build-essentials-amd64.result == 'skipped') &&
+      (needs.build-languages-amd64.result == 'success' || needs.build-languages-amd64.result == 'skipped') &&
       (
         (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
         (github.event_name == 'workflow_dispatch')
@@ -956,14 +1296,28 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Determine essentials base image
-        id: essentials-base
+      - name: Determine base images
+        id: base-images
         run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Essentials base image
           if [ "${{ needs.build-essentials-amd64.outputs.built }}" = "true" ]; then
-            echo "image=${{ env.DOCKERHUB_IMAGE_NAME }}-essentials:${{ steps.version.outputs.version }}-amd64" >> $GITHUB_OUTPUT
+            echo "essentials=${{ env.DOCKERHUB_IMAGE_NAME }}-essentials:${VERSION}-amd64" >> $GITHUB_OUTPUT
           else
-            echo "image=${{ env.DOCKERHUB_IMAGE_NAME }}-essentials:latest-amd64" >> $GITHUB_OUTPUT
+            echo "essentials=${{ env.DOCKERHUB_IMAGE_NAME }}-essentials:latest-amd64" >> $GITHUB_OUTPUT
           fi
+
+          # Language images - use version tag if languages were built, otherwise latest
+          for lang in python go rust java kotlin ruby php perl swift lean rocq; do
+            LANG_UPPER=$(echo "$lang" | tr '[:lower:]' '[:upper:]')
+            # If the language matrix ran successfully, use versioned tag
+            if [ "${{ needs.build-languages-amd64.result }}" = "success" ]; then
+              echo "${lang}=${{ env.DOCKERHUB_IMAGE_NAME }}-${lang}:${VERSION}-amd64" >> $GITHUB_OUTPUT
+            else
+              echo "${lang}=${{ env.DOCKERHUB_IMAGE_NAME }}-${lang}:latest-amd64" >> $GITHUB_OUTPUT
+            fi
+          done
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -1002,7 +1356,18 @@ jobs:
           platforms: linux/amd64
           push: true
           build-args: |
-            ESSENTIALS_IMAGE=${{ steps.essentials-base.outputs.image }}
+            ESSENTIALS_IMAGE=${{ steps.base-images.outputs.essentials }}
+            PYTHON_IMAGE=${{ steps.base-images.outputs.python }}
+            GO_IMAGE=${{ steps.base-images.outputs.go }}
+            RUST_IMAGE=${{ steps.base-images.outputs.rust }}
+            JAVA_IMAGE=${{ steps.base-images.outputs.java }}
+            KOTLIN_IMAGE=${{ steps.base-images.outputs.kotlin }}
+            RUBY_IMAGE=${{ steps.base-images.outputs.ruby }}
+            PHP_IMAGE=${{ steps.base-images.outputs.php }}
+            PERL_IMAGE=${{ steps.base-images.outputs.perl }}
+            SWIFT_IMAGE=${{ steps.base-images.outputs.swift }}
+            LEAN_IMAGE=${{ steps.base-images.outputs.lean }}
+            ROCQ_IMAGE=${{ steps.base-images.outputs.rocq }}
           tags: |
             ${{ steps.meta.outputs.tags }}
             ${{ steps.meta-amd64.outputs.tags }}
@@ -1016,11 +1381,12 @@ jobs:
   docker-build-push-arm64:
     runs-on: ubuntu-24.04-arm  # Native ARM64 runner (free for public repos since Jan 2025)
     timeout-minutes: 120       # Safety timeout to prevent runaway builds
-    needs: [detect-changes, build-essentials-arm64, docker-build-push]
+    needs: [detect-changes, build-languages-arm64, build-essentials-arm64, docker-build-push]
     if: |
       always() &&
       needs.detect-changes.result == 'success' &&
       (needs.build-essentials-arm64.result == 'success' || needs.build-essentials-arm64.result == 'skipped') &&
+      (needs.build-languages-arm64.result == 'success' || needs.build-languages-arm64.result == 'skipped') &&
       needs.docker-build-push.result == 'success' &&
       (
         (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.should-build == 'true') ||
@@ -1064,14 +1430,26 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Determine essentials base image
-        id: essentials-base
+      - name: Determine base images
+        id: base-images
         run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Essentials base image
           if [ "${{ needs.build-essentials-arm64.outputs.built }}" = "true" ]; then
-            echo "image=${{ env.DOCKERHUB_IMAGE_NAME }}-essentials:${{ steps.version.outputs.version }}-arm64" >> $GITHUB_OUTPUT
+            echo "essentials=${{ env.DOCKERHUB_IMAGE_NAME }}-essentials:${VERSION}-arm64" >> $GITHUB_OUTPUT
           else
-            echo "image=${{ env.DOCKERHUB_IMAGE_NAME }}-essentials:latest-arm64" >> $GITHUB_OUTPUT
+            echo "essentials=${{ env.DOCKERHUB_IMAGE_NAME }}-essentials:latest-arm64" >> $GITHUB_OUTPUT
           fi
+
+          # Language images
+          for lang in python go rust java kotlin ruby php perl swift lean rocq; do
+            if [ "${{ needs.build-languages-arm64.result }}" = "success" ]; then
+              echo "${lang}=${{ env.DOCKERHUB_IMAGE_NAME }}-${lang}:${VERSION}-arm64" >> $GITHUB_OUTPUT
+            else
+              echo "${lang}=${{ env.DOCKERHUB_IMAGE_NAME }}-${lang}:latest-arm64" >> $GITHUB_OUTPUT
+            fi
+          done
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -1097,7 +1475,18 @@ jobs:
           platforms: linux/arm64
           push: true
           build-args: |
-            ESSENTIALS_IMAGE=${{ steps.essentials-base.outputs.image }}
+            ESSENTIALS_IMAGE=${{ steps.base-images.outputs.essentials }}
+            PYTHON_IMAGE=${{ steps.base-images.outputs.python }}
+            GO_IMAGE=${{ steps.base-images.outputs.go }}
+            RUST_IMAGE=${{ steps.base-images.outputs.rust }}
+            JAVA_IMAGE=${{ steps.base-images.outputs.java }}
+            KOTLIN_IMAGE=${{ steps.base-images.outputs.kotlin }}
+            RUBY_IMAGE=${{ steps.base-images.outputs.ruby }}
+            PHP_IMAGE=${{ steps.base-images.outputs.php }}
+            PERL_IMAGE=${{ steps.base-images.outputs.perl }}
+            SWIFT_IMAGE=${{ steps.base-images.outputs.swift }}
+            LEAN_IMAGE=${{ steps.base-images.outputs.lean }}
+            ROCQ_IMAGE=${{ steps.base-images.outputs.rocq }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           provenance: false  # Prevents unknown/unknown platform in registry
@@ -1192,7 +1581,7 @@ jobs:
   # === CREATE GITHUB RELEASE ===
   create-release:
     runs-on: ubuntu-24.04
-    needs: [detect-changes, docker-manifest, js-manifest, essentials-manifest]
+    needs: [detect-changes, docker-manifest, js-manifest, essentials-manifest, languages-manifest]
     if: |
       always() &&
       needs.detect-changes.result == 'success' &&
@@ -1243,6 +1632,19 @@ jobs:
           ### JS Sandbox (konard/sandbox-js)
           - [\`${DOCKERHUB_IMAGE}-js:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-js) (multi-arch)
 
+          ### Language Sandboxes
+          - [\`${DOCKERHUB_IMAGE}-python:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-python) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}-go:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-go) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}-rust:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-rust) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}-java:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-java) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}-kotlin:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-kotlin) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}-ruby:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-ruby) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}-php:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-php) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}-perl:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-perl) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}-swift:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-swift) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}-lean:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-lean) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}-rocq:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-rocq) (multi-arch)
+
           ### GitHub Container Registry (GHCR)
           - [\`${GHCR_IMAGE}:${VERSION}\`](https://github.com/${REPO}/pkgs/container/sandbox) (multi-arch)
           - [\`${GHCR_IMAGE}-essentials:${VERSION}\`](https://github.com/${REPO}/pkgs/container/sandbox-essentials) (multi-arch)
@@ -1253,7 +1655,11 @@ jobs:
           \`\`\`
           JS sandbox (konard/sandbox-js)
             → Essentials sandbox (konard/sandbox-essentials)
-              → Full sandbox (konard/sandbox)
+              ├─ sandbox-python  ├─ sandbox-go    ├─ sandbox-rust
+              ├─ sandbox-java    ├─ sandbox-kotlin ├─ sandbox-ruby
+              ├─ sandbox-php     ├─ sandbox-perl   ├─ sandbox-swift
+              ├─ sandbox-lean    └─ sandbox-rocq
+              → Full sandbox (konard/sandbox) [merges all language images]
           \`\`\`
 
           ## Quick Start

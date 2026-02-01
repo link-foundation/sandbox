@@ -42,19 +42,41 @@ This sandbox provides a pre-configured development environment with common langu
 
 ## Modular Architecture
 
-The sandbox is split into layered modular components, allowing you to use only what you need:
+The sandbox is split into modular components, allowing you to use only what you need:
 
 ```
 JS sandbox (konard/sandbox-js)
-  → Essentials sandbox (konard/sandbox-essentials)
-    → Full sandbox (konard/sandbox)
+  └─ Essentials sandbox (konard/sandbox-essentials)
+       ├─ sandbox-python     (built in parallel)
+       ├─ sandbox-go         (built in parallel)
+       ├─ sandbox-rust       (built in parallel)
+       ├─ sandbox-java       (built in parallel)
+       ├─ sandbox-kotlin     (built in parallel)
+       ├─ sandbox-ruby       (built in parallel)
+       ├─ sandbox-php        (built in parallel)
+       ├─ sandbox-perl       (built in parallel)
+       ├─ sandbox-swift      (built in parallel)
+       ├─ sandbox-lean       (built in parallel)
+       └─ sandbox-rocq       (built in parallel)
+            └─ Full sandbox (konard/sandbox) ← merges all via COPY --from
 ```
 
-| Image | Description | Contents |
-|-------|-------------|----------|
-| `konard/sandbox` | Full sandbox (all languages) | Everything below |
-| `konard/sandbox-essentials` | Essentials (git identity tools) | JS sandbox + git, gh, glab, gh-setup-git-identity, glab-setup-git-identity |
-| `konard/sandbox-js` | JavaScript only | Node.js, Bun, Deno, npm |
+| Image | Description | Base Image |
+|-------|-------------|------------|
+| `konard/sandbox` | Full sandbox (all languages) | Assembled from all language images |
+| `konard/sandbox-essentials` | Essentials (git identity tools) | Built on JS sandbox |
+| `konard/sandbox-js` | JavaScript only | Ubuntu 24.04 |
+| `konard/sandbox-python` | Python (pyenv) | Built on essentials |
+| `konard/sandbox-go` | Go (latest stable) | Built on essentials |
+| `konard/sandbox-rust` | Rust (rustup + cargo) | Built on essentials |
+| `konard/sandbox-java` | Java 21 (SDKMAN + Temurin) | Built on essentials |
+| `konard/sandbox-kotlin` | Kotlin (SDKMAN) | Built on essentials |
+| `konard/sandbox-ruby` | Ruby (rbenv) | Built on essentials |
+| `konard/sandbox-php` | PHP 8.3 (Homebrew) | Built on essentials |
+| `konard/sandbox-perl` | Perl (Perlbrew) | Built on essentials |
+| `konard/sandbox-swift` | Swift 6.x | Built on essentials |
+| `konard/sandbox-lean` | Lean (elan) | Built on essentials |
+| `konard/sandbox-rocq` | Rocq/Coq (Opam) | Built on essentials |
 
 ### Per-Language Install Scripts & Dockerfiles
 

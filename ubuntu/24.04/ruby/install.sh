@@ -5,6 +5,8 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SCRIPT_DIR/../common.sh" ]; then
   source "$SCRIPT_DIR/../common.sh"
+elif [ -f "/tmp/common.sh" ]; then
+  source "/tmp/common.sh"
 else
   set -euo pipefail
   log_info() { echo "[*] $1"; }
@@ -16,10 +18,7 @@ fi
 
 log_step "Installing Ruby via rbenv"
 
-# Install build dependencies
-log_info "Installing Ruby build dependencies..."
-maybe_sudo apt install -y libyaml-dev
-log_success "Ruby build dependencies installed"
+# Note: Build dependencies (libyaml-dev, libssl-dev, etc.) are provided by essentials-sandbox.
 
 if [ ! -d "$HOME/.rbenv" ]; then
   log_info "Installing rbenv (Ruby version manager)..."

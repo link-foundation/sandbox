@@ -80,9 +80,12 @@ See [Case Study: Docker ARM64 Build Timeout](docs/case-studies/issue-7/README.md
 The CI/CD pipeline uses per-image change detection for efficiency. Only images whose
 scripts or Dockerfiles changed are rebuilt. Unchanged images reuse the latest published version.
 
+All language images are built in parallel, and the full sandbox assembles them via
+multi-stage `COPY --from` once all are ready.
+
 ```
 ┌──────────────────┐
-│  detect-changes  │  (per-image granularity)
+│  detect-changes  │  (per-image + per-language granularity)
 │  (ubuntu-latest) │
 └────────┬─────────┘
          │
@@ -99,21 +102,30 @@ scripts or Dockerfiles changed are rebuilt. Unchanged images reuse the latest pu
 └────────┬───────────────┘
          │
          ▼
+┌────────────────────────────────────────────────────┐
+│  build-languages (matrix: 11 languages)            │  ← ALL in parallel
+│  python, go, rust, java, kotlin, ruby, php, perl,  │
+│  swift, lean, rocq                                 │
+│  (amd64 + arm64 per language)                      │
+└────────────────────┬───────────────────────────────┘
+                     │
+                     ▼
 ┌────────────────────────┐
-│  docker-build-push     │  ← full sandbox built on essentials
-│  (amd64 + arm64)       │  (sequential: amd64 first, then arm64)
+│  docker-build-push     │  ← full sandbox: COPY --from all language images
+│  (amd64 + arm64)       │  (multi-stage assembly, waits for all languages)
 └────────┬───────────────┘
          │
          ▼
 ┌──────────────────┐
-│ docker-manifest  │  ← multi-arch manifests for js, essentials, full
+│ manifests        │  ← multi-arch manifests for js, essentials, languages, full
 │ (multi-arch)     │
 └──────────────────┘
 ```
 
-Each layer only rebuilds if its own scripts/Dockerfiles changed, or if a dependency
-(common.sh, base image) changed. When JS sandbox hasn't changed, essentials and full
-sandbox reuse the latest published JS image.
+Each image only rebuilds if its own scripts/Dockerfiles changed, or if a dependency
+(common.sh, essentials) changed. The full sandbox uses `COPY --from` to merge
+pre-built language runtimes from all language images, plus `apt install` for
+system-level packages (.NET, R, C/C++, Assembly).
 
 ## File Structure
 
@@ -197,46 +209,46 @@ sandbox/
 
 ## Modular Design
 
-The sandbox follows a layered modular architecture:
+The sandbox follows a modular architecture where all language images depend on
+`essentials-sandbox`, and the full sandbox assembles them via multi-stage `COPY --from`:
 
 ```
-┌─────────────────────────────────────────────┐
-│              full-sandbox                    │
-│  (konard/sandbox or konard/sandbox-full)     │
-│                                             │
-│  ┌─────────────────────────────────────┐    │
-│  │        essentials-sandbox           │    │
-│  │  (konard/sandbox-essentials)        │    │
-│  │                                     │    │
-│  │  ┌───────────────────────────┐     │    │
-│  │  │      JS sandbox           │     │    │
-│  │  │  (konard/sandbox-js)      │     │    │
-│  │  │                           │     │    │
-│  │  │  Node.js, Bun, Deno, npm │     │    │
-│  │  └───────────────────────────┘     │    │
-│  │                                     │    │
-│  │  + git, gh, glab,                  │    │
-│  │    gh-setup-git-identity,          │    │
-│  │    glab-setup-git-identity         │    │
-│  └─────────────────────────────────────┘    │
-│                                             │
-│  + Python, Go, Rust, Java, Kotlin, .NET,    │
-│    R, Ruby, PHP, Perl, Swift, Lean, Rocq,   │
-│    C/C++, Assembly                          │
-└─────────────────────────────────────────────┘
-
-Each language also available as standalone:
-┌────┐ ┌────────┐ ┌────┐ ┌──────┐ ┌──────┐
-│ JS │ │ Python │ │ Go │ │ Rust │ │ ... │
-└────┘ └────────┘ └────┘ └──────┘ └──────┘
+┌─────────────────────────────────────────────────────────────┐
+│  JS sandbox (konard/sandbox-js)                             │
+│  └─ Node.js, Bun, Deno, npm                                │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Essentials sandbox (konard/sandbox-essentials)              │
+│  └─ + git, gh, glab, identity tools, dev libraries          │
+└──┬──────┬──────┬──────┬──────┬──────┬──────┬──────┬────┬──┬─┘
+   │      │      │      │      │      │      │      │    │  │
+   ▼      ▼      ▼      ▼      ▼      ▼      ▼      ▼    ▼  ▼
+ Python  Go   Rust  Java  Kotlin Ruby  PHP  Perl Swift Lean Rocq
+   │      │      │      │      │      │      │      │    │  │
+   └──────┴──────┴──────┴──────┴──────┴──────┴──────┴────┴──┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Full sandbox (konard/sandbox)                               │
+│  └─ COPY --from all language images                          │
+│  └─ + apt: .NET, R, C/C++, Assembly (system packages)       │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+Each language image is also available as a standalone Docker image
+(e.g., `konard/sandbox-python`, `konard/sandbox-go`, etc.), each with
+essentials pre-installed (JS, git, gh, glab, dev libraries).
 
 ### Benefits
 
 1. **Configurable disk usage**: Users can choose only the languages they need
-2. **Parallel CI/CD**: Each language image can be built and tested independently
+2. **Parallel CI/CD**: All language images are built in parallel
 3. **Faster iteration**: Changes to one language only rebuild that image
-4. **Standalone scripts**: Each `install.sh` works directly on Ubuntu 24.04 via `curl | bash`
+4. **Efficient assembly**: Full sandbox uses `COPY --from` to merge pre-built files
+5. **No dependency conflicts**: Each language builds in isolation on essentials
+6. **Standalone scripts**: Each `install.sh` works directly on Ubuntu 24.04 via `curl | bash`
 
 ## Design Decisions
 

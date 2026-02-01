@@ -1,24 +1,18 @@
-FROM ubuntu:24.04
-# Build: docker build -f ubuntu/24.04/dotnet/Dockerfile -t sandbox-dotnet .
+ARG ESSENTIALS_IMAGE=konard/sandbox-essentials:latest
+FROM ${ESSENTIALS_IMAGE}
+# Build: docker build -f ubuntu/24.04/dotnet/Dockerfile --build-arg ESSENTIALS_IMAGE=sandbox-essentials -t sandbox-dotnet .
 
 # .NET sandbox: .NET SDK 8.0
+# Built on top of essentials-sandbox (inherits JS, git, gh, glab, dev libraries)
 
-ENV DEBIAN_FRONTEND=noninteractive
-WORKDIR /workspace
+USER root
 
-RUN apt update -y && \
-    apt install -y curl git sudo ca-certificates && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN useradd -m -s /bin/bash sandbox && \
-    passwd -d sandbox && \
-    usermod -aG sudo sandbox
-
+COPY ubuntu/24.04/common.sh /tmp/common.sh
 COPY ubuntu/24.04/dotnet/install.sh /tmp/install.sh
-COPY ubuntu/24.04/common.sh /common.sh
-RUN chmod +x /tmp/install.sh && \
+RUN chmod +x /tmp/install.sh /tmp/common.sh && \
     bash /tmp/install.sh && \
-    rm -f /tmp/install.sh
+    rm -f /tmp/install.sh /tmp/common.sh && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 USER sandbox
 WORKDIR /home/sandbox
