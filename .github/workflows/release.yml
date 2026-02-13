@@ -1628,27 +1628,36 @@ jobs:
 
           ### Essentials Sandbox (konard/sandbox-essentials)
           - [\`${DOCKERHUB_IMAGE}-essentials:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-essentials) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}-essentials:${VERSION}-amd64\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-essentials) (AMD64)
+          - [\`${DOCKERHUB_IMAGE}-essentials:${VERSION}-arm64\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-essentials) (ARM64)
 
           ### JS Sandbox (konard/sandbox-js)
           - [\`${DOCKERHUB_IMAGE}-js:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-js) (multi-arch)
+          - [\`${DOCKERHUB_IMAGE}-js:${VERSION}-amd64\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-js) (AMD64)
+          - [\`${DOCKERHUB_IMAGE}-js:${VERSION}-arm64\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-js) (ARM64)
 
           ### Language Sandboxes
-          - [\`${DOCKERHUB_IMAGE}-python:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-python) (multi-arch)
-          - [\`${DOCKERHUB_IMAGE}-go:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-go) (multi-arch)
-          - [\`${DOCKERHUB_IMAGE}-rust:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-rust) (multi-arch)
-          - [\`${DOCKERHUB_IMAGE}-java:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-java) (multi-arch)
-          - [\`${DOCKERHUB_IMAGE}-kotlin:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-kotlin) (multi-arch)
-          - [\`${DOCKERHUB_IMAGE}-ruby:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-ruby) (multi-arch)
-          - [\`${DOCKERHUB_IMAGE}-php:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-php) (multi-arch)
-          - [\`${DOCKERHUB_IMAGE}-perl:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-perl) (multi-arch)
-          - [\`${DOCKERHUB_IMAGE}-swift:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-swift) (multi-arch)
-          - [\`${DOCKERHUB_IMAGE}-lean:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-lean) (multi-arch)
-          - [\`${DOCKERHUB_IMAGE}-rocq:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-rocq) (multi-arch)
+          Each language sandbox is available in multi-arch, AMD64, and ARM64 variants:
+
+          | Language | Multi-arch | AMD64 | ARM64 |
+          |----------|------------|-------|-------|
+          | Python | [\`${DOCKERHUB_IMAGE}-python:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-python) | \`${VERSION}-amd64\` | \`${VERSION}-arm64\` |
+          | Go | [\`${DOCKERHUB_IMAGE}-go:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-go) | \`${VERSION}-amd64\` | \`${VERSION}-arm64\` |
+          | Rust | [\`${DOCKERHUB_IMAGE}-rust:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-rust) | \`${VERSION}-amd64\` | \`${VERSION}-arm64\` |
+          | Java | [\`${DOCKERHUB_IMAGE}-java:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-java) | \`${VERSION}-amd64\` | \`${VERSION}-arm64\` |
+          | Kotlin | [\`${DOCKERHUB_IMAGE}-kotlin:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-kotlin) | \`${VERSION}-amd64\` | \`${VERSION}-arm64\` |
+          | Ruby | [\`${DOCKERHUB_IMAGE}-ruby:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-ruby) | \`${VERSION}-amd64\` | \`${VERSION}-arm64\` |
+          | PHP | [\`${DOCKERHUB_IMAGE}-php:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-php) | \`${VERSION}-amd64\` | \`${VERSION}-arm64\` |
+          | Perl | [\`${DOCKERHUB_IMAGE}-perl:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-perl) | \`${VERSION}-amd64\` | \`${VERSION}-arm64\` |
+          | Swift | [\`${DOCKERHUB_IMAGE}-swift:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-swift) | \`${VERSION}-amd64\` | \`${VERSION}-arm64\` |
+          | Lean | [\`${DOCKERHUB_IMAGE}-lean:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-lean) | \`${VERSION}-amd64\` | \`${VERSION}-arm64\` |
+          | Rocq | [\`${DOCKERHUB_IMAGE}-rocq:${VERSION}\`](https://hub.docker.com/r/${DOCKERHUB_IMAGE}-rocq) | \`${VERSION}-amd64\` | \`${VERSION}-arm64\` |
 
           ### GitHub Container Registry (GHCR)
-          - [\`${GHCR_IMAGE}:${VERSION}\`](https://github.com/${REPO}/pkgs/container/sandbox) (multi-arch)
-          - [\`${GHCR_IMAGE}-essentials:${VERSION}\`](https://github.com/${REPO}/pkgs/container/sandbox-essentials) (multi-arch)
-          - [\`${GHCR_IMAGE}-js:${VERSION}\`](https://github.com/${REPO}/pkgs/container/sandbox-js) (multi-arch)
+          All images are also available on GHCR with the same tag patterns:
+          - [\`${GHCR_IMAGE}:${VERSION}\`](https://github.com/${REPO}/pkgs/container/sandbox) (multi-arch, AMD64: \`${VERSION}-amd64\`, ARM64: \`${VERSION}-arm64\`)
+          - [\`${GHCR_IMAGE}-essentials:${VERSION}\`](https://github.com/${REPO}/pkgs/container/sandbox-essentials) (multi-arch, AMD64: \`${VERSION}-amd64\`, ARM64: \`${VERSION}-arm64\`)
+          - [\`${GHCR_IMAGE}-js:${VERSION}\`](https://github.com/${REPO}/pkgs/container/sandbox-js) (multi-arch, AMD64: \`${VERSION}-amd64\`, ARM64: \`${VERSION}-arm64\`)
 
           ## Architecture
 
@@ -1664,9 +1673,18 @@ jobs:
 
           ## Quick Start
 
-          Pull from Docker Hub:
+          Pull multi-arch (auto-selects your platform):
           \`\`\`sh
           docker pull ${DOCKERHUB_IMAGE}:${VERSION}
+          \`\`\`
+
+          Pull specific architecture:
+          \`\`\`sh
+          # AMD64
+          docker pull ${DOCKERHUB_IMAGE}:${VERSION}-amd64
+
+          # ARM64 (Apple Silicon, Raspberry Pi, etc.)
+          docker pull ${DOCKERHUB_IMAGE}:${VERSION}-arm64
           \`\`\`
 
           Pull from GHCR:
