@@ -55,13 +55,17 @@ COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # --- Install system-level packages (cannot be COPY'd from images) ---
+# Issue #44: PHP is installed via apt here for reliability and speed
+# (Homebrew PHP can take 2+ hours when bottles are unavailable)
 RUN apt-get update -y && \
     apt-get install -y \
       dotnet-sdk-8.0 \
       r-base \
       cmake clang llvm lld \
       nasm \
-      bubblewrap && \
+      bubblewrap \
+      php8.3-cli php8.3-common php8.3-curl php8.3-mbstring \
+      php8.3-xml php8.3-zip php8.3-bcmath php8.3-opcache && \
     # FASM only available on x86_64
     if [ "$(uname -m)" = "x86_64" ]; then apt-get install -y fasm; fi && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -91,8 +95,11 @@ COPY --from=kotlin-stage --chown=sandbox:sandbox /home/sandbox/.sdkman/candidate
 # Ruby (rbenv)
 COPY --from=ruby-stage --chown=sandbox:sandbox /home/sandbox/.rbenv /home/sandbox/.rbenv
 
-# PHP (Homebrew)
+# PHP (apt or Homebrew - Issue #44: prefer apt for speed)
+# Copy Homebrew directory if it exists (for Homebrew-based PHP installs)
 COPY --from=php-stage --chown=sandbox:sandbox /home/linuxbrew/.linuxbrew /home/linuxbrew/.linuxbrew
+# Also copy system PHP if installed via apt (usr/lib/php and usr/share/php)
+# Note: apt-installed PHP binary is at /usr/bin/php which is already in PATH
 
 # Perl (Perlbrew)
 COPY --from=perl-stage --chown=sandbox:sandbox /home/sandbox/.perl5 /home/sandbox/.perl5
