@@ -1,5 +1,5 @@
 ---
-"sandbox": patch
+bump: patch
 ---
 
 Fix PHP Docker image build taking 2+ hours (Issue #44)
