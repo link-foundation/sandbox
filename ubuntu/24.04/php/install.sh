@@ -42,6 +42,7 @@ install_php_apt() {
 
   # Install PHP 8.3 CLI and common extensions
   # Using timeout to prevent hanging on problematic mirrors
+  # Note: php8.3-json is a virtual package provided by php8.3-cli in Ubuntu 24.04
   local apt_packages=(
     php8.3-cli
     php8.3-common
@@ -50,7 +51,6 @@ install_php_apt() {
     php8.3-xml
     php8.3-zip
     php8.3-bcmath
-    php8.3-json
     php8.3-opcache
   )
 
