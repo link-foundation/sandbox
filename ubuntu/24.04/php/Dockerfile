@@ -43,9 +43,7 @@ USER root
 RUN rm -f /tmp/install.sh /tmp/common.sh
 USER sandbox
 
-# Set PATH for PHP (covers both apt and Homebrew installations)
-# apt installs to /usr/bin, Homebrew to /home/linuxbrew/.linuxbrew/opt/php@8.3/bin
-ENV PATH="/home/linuxbrew/.linuxbrew/opt/php@8.3/bin:/home/linuxbrew/.linuxbrew/opt/php@8.3/sbin:/home/linuxbrew/.linuxbrew/bin:${PATH}"
+# No PATH modification needed - apt installs PHP to /usr/bin which is already in PATH
 
 SHELL ["/bin/bash", "-c"]
 CMD ["/bin/bash"]
