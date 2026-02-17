@@ -74,8 +74,7 @@ RUN apt-get update -y && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # --- Prepare directories for COPY --from ---
-RUN mkdir -p /home/linuxbrew/.linuxbrew && \
-    chown -R sandbox:sandbox /home/linuxbrew
+# Note: /home/linuxbrew is no longer needed since PHP is installed via apt (Issue #44)
 
 # --- Copy user-home language runtimes from pre-built images ---
 
@@ -100,10 +99,9 @@ COPY --from=kotlin-stage --chown=sandbox:sandbox /home/sandbox/.sdkman/candidate
 # Ruby (rbenv)
 COPY --from=ruby-stage --chown=sandbox:sandbox /home/sandbox/.rbenv /home/sandbox/.rbenv
 
-# PHP: Primary installation is via apt above (Issue #44)
-# This COPY is for backwards compatibility and cases where Homebrew extensions might be present
-# The apt-installed PHP at /usr/bin/php takes precedence in PATH
-COPY --from=php-stage --chown=sandbox:sandbox /home/linuxbrew/.linuxbrew /home/linuxbrew/.linuxbrew
+# PHP: Installed via apt above (Issue #44)
+# PHP packages are installed directly via apt (lines 70-71) for reliability and speed
+# No COPY needed from php-stage since apt provides /usr/bin/php
 
 # Perl (Perlbrew)
 COPY --from=perl-stage --chown=sandbox:sandbox /home/sandbox/.perl5 /home/sandbox/.perl5
@@ -165,7 +163,8 @@ ENV PERLBREW_ROOT="/home/sandbox/.perl5"
 ENV RBENV_ROOT="/home/sandbox/.rbenv"
 
 # PATH for tools that don't need special initialization
-ENV PATH="/home/sandbox/.pyenv/bin:/home/sandbox/.pyenv/shims:/home/sandbox/.rbenv/bin:/home/sandbox/.rbenv/shims:/home/sandbox/.swift/usr/bin:/home/sandbox/.elan/bin:/home/sandbox/.opam/default/bin:/home/linuxbrew/.linuxbrew/opt/php@8.3/bin:/home/linuxbrew/.linuxbrew/opt/php@8.3/sbin:/home/sandbox/.cargo/bin:/home/sandbox/.deno/bin:/home/sandbox/.bun/bin:/home/sandbox/.go/bin:/home/sandbox/.go/path/bin:/home/linuxbrew/.linuxbrew/bin:${PATH}"
+# Note: PHP is installed via apt to /usr/bin/php (already in PATH), so no Homebrew paths needed
+ENV PATH="/home/sandbox/.pyenv/bin:/home/sandbox/.pyenv/shims:/home/sandbox/.rbenv/bin:/home/sandbox/.rbenv/shims:/home/sandbox/.swift/usr/bin:/home/sandbox/.elan/bin:/home/sandbox/.opam/default/bin:/home/sandbox/.cargo/bin:/home/sandbox/.deno/bin:/home/sandbox/.bun/bin:/home/sandbox/.go/bin:/home/sandbox/.go/path/bin:${PATH}"
 
 # Opam environment variables for Rocq/Coq theorem prover
 ENV OPAM_SWITCH_PREFIX="/home/sandbox/.opam/default"
