@@ -16,7 +16,7 @@ The Docker image MUST include the following programming language runtimes:
 | Rust | Latest stable | rustup |
 | Java | 21 LTS | SDKMAN |
 | Kotlin | Latest stable | SDKMAN |
-| PHP | 8.3 | Homebrew |
+| PHP | 8.3 | Homebrew (preferred) / apt (fallback) |
 | Perl | Latest stable | Perlbrew |
 | Ruby | Latest stable | rbenv |
 | Swift | 6.x | Manual |
@@ -138,7 +138,22 @@ CI/CD workflows MUST NOT depend on:
 - Self-hosted runners
 - Paid services
 
-### C-3: Homebrew ARM64 Linux Limitation
+### C-3: PHP Installation Strategy (Issue #44)
+
+PHP MUST be installed using a **user-specific** method (Homebrew) when possible, with apt as fallback:
+
+| Priority | Method | Location | Tag Suffix | Mergeability |
+|----------|--------|----------|------------|--------------|
+| 1 (preferred) | Homebrew | `/home/linuxbrew/.linuxbrew` | `-local` | COPY --from supported |
+| 2 (fallback) | apt | `/usr/bin` (global) | `-global` | Must install via apt in full-sandbox |
+
+**Rationale**: User-specific installation allows Docker images to be merged via `COPY --from` in the full-sandbox. Global (apt) installation cannot be merged this way and requires reinstallation.
+
+**Timeout**: Homebrew PHP installation has a timeout (default: 30 minutes). If bottles are unavailable and source compilation is attempted, the timeout triggers fallback to apt.
+
+**Tagging**: PHP images include a method suffix tag (`-local` or `-global`) in addition to the standard tags. The `latest` tag references whichever method succeeded.
+
+### C-4: Homebrew ARM64 Linux Limitation
 
 Homebrew does not provide pre-built bottles for ARM64 Linux. Packages requiring compilation (like PHP) MUST:
 

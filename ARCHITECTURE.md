@@ -270,14 +270,24 @@ ARM64 and AMD64 builds run as separate jobs (not a single multi-platform build) 
 - Avoid emulation entirely
 - Enable parallel building when runners are available
 
-### 4. Homebrew for PHP
+### 4. PHP Installation: Homebrew with apt Fallback (Issue #44)
 
-PHP is installed via Homebrew because:
-- Provides consistent installation across architectures
-- Easier to manage PHP extensions
-- Works reliably on both AMD64 and ARM64
+PHP uses a **tiered installation strategy**:
 
-Note: This requires compilation on ARM64 Linux (no pre-built bottles), which is why native ARM64 runners are essential.
+1. **Homebrew (preferred/local)**: Installs to `/home/linuxbrew/.linuxbrew` as the sandbox user
+   - Provides user-specific installation that can be merged via `COPY --from` in Docker
+   - Subject to a 30-minute timeout to prevent 2+ hour source compilations
+   - A marker file (`~/.php-install-method`) records `local` on success
+
+2. **apt (fallback/global)**: Installs to `/usr/bin` system-wide
+   - Used when Homebrew bottles are unavailable and compilation would exceed timeout
+   - Cannot be merged via `COPY --from` — full-sandbox must reinstall via apt
+   - Marker file records `global`
+
+PHP images are tagged with `-local` or `-global` suffix to indicate the install method.
+The full-sandbox reads the marker file and adjusts accordingly:
+- If `local`: copies `/home/linuxbrew/.linuxbrew` from php-stage
+- If `global`: installs PHP packages via apt directly
 
 ## Performance Considerations
 
