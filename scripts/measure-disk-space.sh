@@ -641,11 +641,22 @@ EOF_SANDBOX
 
 chmod +x /tmp/sandbox-measure.sh
 
+# Resolve JSON output path to absolute before passing to sandbox user.
+# 'su - sandbox' and 'sudo -i -u sandbox' both create login shells that change
+# the working directory to the sandbox user's home (/home/sandbox). Relative
+# paths like 'data/disk-space-measurements.json' would then resolve to the wrong
+# location, causing "No such file or directory" errors.
+# See docs/case-studies/issue-46 for the full root cause analysis.
+JSON_OUTPUT_FILE_ABS="$(realpath "$JSON_OUTPUT_FILE")"
+# Ensure sandbox user can read/write the JSON file (root created it)
+chmod o+rw "$JSON_OUTPUT_FILE_ABS"
+chmod o+rx "$(dirname "$JSON_OUTPUT_FILE_ABS")"
+
 # Execute sandbox user measurements
 if [ "$EUID" -eq 0 ]; then
-  su - sandbox -c "bash /tmp/sandbox-measure.sh '$JSON_OUTPUT_FILE'"
+  su - sandbox -c "bash /tmp/sandbox-measure.sh '$JSON_OUTPUT_FILE_ABS'"
 else
-  sudo -i -u sandbox bash /tmp/sandbox-measure.sh "$JSON_OUTPUT_FILE"
+  sudo -i -u sandbox bash /tmp/sandbox-measure.sh "$JSON_OUTPUT_FILE_ABS"
 fi
 
 rm -f /tmp/sandbox-measure.sh
