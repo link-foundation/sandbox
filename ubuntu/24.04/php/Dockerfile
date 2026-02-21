@@ -51,10 +51,14 @@ RUN PHP_METHOD=$(cat /home/sandbox/.php-install-method 2>/dev/null || echo "unkn
       echo "[✓] PHP installed locally via Homebrew"; \
     fi
 
-# Verify PHP installation
-RUN php --version && \
-    echo "[✓] PHP verification passed" && \
-    echo "Install method: $(cat /home/sandbox/.php-install-method 2>/dev/null || echo 'unknown')"
+# Verify PHP installation (use full path for local, or /usr/bin/php for global)
+RUN PHP_METHOD=$(cat /home/sandbox/.php-install-method 2>/dev/null || echo "unknown") && \
+    if [ "$PHP_METHOD" = "local" ]; then \
+      /home/linuxbrew/.linuxbrew/opt/php@8.3/bin/php --version; \
+    else \
+      php --version; \
+    fi && \
+    echo "[✓] PHP verification passed (method: $PHP_METHOD)"
 
 # Cleanup temp files
 RUN rm -f /tmp/install.sh /tmp/common.sh
