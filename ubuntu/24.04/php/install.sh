@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
-# PHP 8.3 installation via Ubuntu packages (fast) with Homebrew fallback
+# PHP 8.3 installation: Homebrew (user-specific/local) with apt fallback (global)
 # Usage: curl -fsSL <url> | bash  OR  bash install.sh
 #
-# This script prioritizes apt packages for speed (completes in ~30 seconds)
-# Falls back to Homebrew only if apt installation fails
+# Strategy (Issue #44):
+#   1. Try Homebrew installation (user-specific, under /home/linuxbrew/.linuxbrew)
+#      with timeout to prevent 2+ hour source compilations
+#   2. If Homebrew fails/times out, mark as "global" for apt fallback
+#      (apt installation is handled by the Dockerfile as root)
 #
-# Issue #44: Homebrew PHP builds can take 2+ hours when bottles unavailable
+# Environment variables:
+#   PHP_HOMEBREW_TIMEOUT - Timeout in seconds for Homebrew install (default: 1800 = 30 min)
+#
+# Output:
+#   ~/.php-install-method - "local" if Homebrew succeeded, "global" if fallback needed
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SCRIPT_DIR/../common.sh" ]; then
@@ -23,68 +30,18 @@ else
   maybe_sudo() { if [ "$EUID" -eq 0 ]; then "$@"; elif command -v sudo &>/dev/null; then sudo "$@"; else "$@"; fi; }
 fi
 
+# Timeout for Homebrew PHP installation (default: 30 minutes)
+PHP_HOMEBREW_TIMEOUT="${PHP_HOMEBREW_TIMEOUT:-1800}"
+
 log_step "Installing PHP 8.3"
 
-# Track installation method
-PHP_INSTALL_METHOD=""
-
 # =============================================================================
-# Method 1: APT Installation (Preferred - Fast)
-# Ubuntu 24.04 includes PHP 8.3 in default repositories
-# =============================================================================
-install_php_apt() {
-  log_info "Attempting fast PHP installation via apt packages..."
-
-  # Update apt sources
-  maybe_sudo apt-get update -y || {
-    log_warning "apt update failed, trying anyway..."
-  }
-
-  # Install PHP 8.3 CLI and common extensions
-  # Using timeout to prevent hanging on problematic mirrors
-  # Note: php8.3-json is a virtual package provided by php8.3-cli in Ubuntu 24.04
-  local apt_packages=(
-    php8.3-cli
-    php8.3-common
-    php8.3-curl
-    php8.3-mbstring
-    php8.3-xml
-    php8.3-zip
-    php8.3-bcmath
-    php8.3-opcache
-  )
-
-  if maybe_sudo apt-get install -y "${apt_packages[@]}" 2>/dev/null; then
-    PHP_INSTALL_METHOD="apt"
-
-    # Verify installation
-    if command_exists php && php --version | grep -q "PHP 8\.3"; then
-      log_success "PHP 8.3 installed successfully via apt"
-
-      # Add PHP path configuration to bashrc (for consistency)
-      if ! grep -q "# PHP configuration" "$HOME/.bashrc" 2>/dev/null; then
-        cat >> "$HOME/.bashrc" << 'PHP_BASHRC_EOF'
-
-# PHP configuration (installed via apt)
-alias php-version='php --version'
-PHP_BASHRC_EOF
-      fi
-
-      return 0
-    fi
-  fi
-
-  log_warning "apt installation did not complete successfully"
-  return 1
-}
-
-# =============================================================================
-# Method 2: Homebrew Installation (Fallback - Slow if no bottles)
-# WARNING: Can take 2+ hours if pre-built bottles are unavailable
+# Homebrew Installation (Preferred - User-specific/Local)
+# Installs to /home/linuxbrew/.linuxbrew (can be COPY'd between Docker images)
 # =============================================================================
 install_php_homebrew() {
-  log_info "Falling back to Homebrew installation..."
-  log_warning "This may take 10+ minutes (or 2+ hours if building from source)"
+  log_info "Attempting PHP installation via Homebrew (user-specific)..."
+  log_info "Timeout: ${PHP_HOMEBREW_TIMEOUT} seconds"
 
   # Ensure Homebrew directory exists
   if [ ! -d /home/linuxbrew/.linuxbrew ]; then
@@ -96,7 +53,10 @@ install_php_homebrew() {
   # Install Homebrew if not present
   if ! command_exists brew; then
     log_info "Installing Homebrew..."
-    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" 2>&1 || true
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" 2>&1 || {
+      log_warning "Homebrew installation failed"
+      return 1
+    }
 
     if [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
       eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -112,27 +72,35 @@ install_php_homebrew() {
     eval "$(brew shellenv 2>/dev/null)" || true
   fi
 
-  # Install PHP via Homebrew
+  # Install PHP via Homebrew with timeout
   if command_exists brew; then
     if ! brew list --formula 2>/dev/null | grep -q "^php@"; then
       log_info "Installing PHP via Homebrew..."
 
       if ! brew tap | grep -q "shivammathur/php"; then
-        brew tap shivammathur/php || true
+        brew tap shivammathur/php || {
+          log_warning "Failed to tap shivammathur/php"
+          return 1
+        }
       fi
 
       if brew tap | grep -q "shivammathur/php"; then
         export HOMEBREW_NO_ANALYTICS=1
         export HOMEBREW_NO_AUTO_UPDATE=1
 
-        log_info "Installing PHP 8.3 (this may take a while)..."
+        log_info "Installing PHP 8.3 (timeout: ${PHP_HOMEBREW_TIMEOUT}s)..."
 
-        # Try with timeout to detect slow builds
-        if timeout 600 brew install shivammathur/php/php@8.3 2>&1; then
-          PHP_INSTALL_METHOD="homebrew"
+        # Use timeout to prevent 2+ hour source compilations
+        if timeout "${PHP_HOMEBREW_TIMEOUT}" brew install shivammathur/php/php@8.3 2>&1; then
+          log_success "Homebrew PHP install command completed"
         else
-          log_error "Homebrew PHP installation timed out or failed"
-          log_error "This likely means bottles are unavailable and source compilation is required"
+          local exit_code=$?
+          if [ "$exit_code" -eq 124 ]; then
+            log_warning "Homebrew PHP installation TIMED OUT after ${PHP_HOMEBREW_TIMEOUT}s"
+            log_warning "This indicates bottles are unavailable and source compilation was attempted"
+          else
+            log_warning "Homebrew PHP installation failed (exit code: $exit_code)"
+          fi
           return 1
         fi
 
@@ -146,23 +114,77 @@ install_php_homebrew() {
             if ! grep -q "php@8.3/bin" "$HOME/.bashrc" 2>/dev/null; then
               cat >> "$HOME/.bashrc" << 'PHP_PATH_EOF'
 
-# PHP 8.3 PATH configuration (Homebrew)
+# PHP 8.3 PATH configuration (Homebrew - user-specific/local)
 export PATH="$(brew --prefix)/opt/php@8.3/bin:$(brew --prefix)/opt/php@8.3/sbin:$PATH"
 PHP_PATH_EOF
             fi
           fi
 
-          log_success "PHP installed via Homebrew"
-          return 0
+          # Verify PHP works
+          if command_exists php && php --version | grep -q "PHP 8\.3"; then
+            log_success "PHP 8.3 installed via Homebrew (user-specific/local)"
+            echo "local" > "$HOME/.php-install-method"
+            return 0
+          else
+            log_warning "PHP installed but version check failed"
+            return 1
+          fi
+        else
+          log_warning "php@8.3 not found in Homebrew after install attempt"
+          return 1
         fi
       fi
     else
-      log_info "PHP already installed via Homebrew."
-      PHP_INSTALL_METHOD="homebrew"
+      log_info "PHP already installed via Homebrew"
+      echo "local" > "$HOME/.php-install-method"
       return 0
     fi
   fi
 
+  return 1
+}
+
+# =============================================================================
+# APT Installation (Fallback - Global)
+# Called when running as root (e.g., from Dockerfile) or with sudo
+# Installs to /usr/bin (system-wide, cannot be COPY'd between Docker images)
+# =============================================================================
+install_php_apt() {
+  log_info "Installing PHP via apt packages (global fallback)..."
+
+  maybe_sudo apt-get update -y || {
+    log_warning "apt update failed"
+  }
+
+  local apt_packages=(
+    php8.3-cli
+    php8.3-common
+    php8.3-curl
+    php8.3-mbstring
+    php8.3-xml
+    php8.3-zip
+    php8.3-bcmath
+    php8.3-opcache
+  )
+
+  if maybe_sudo apt-get install -y "${apt_packages[@]}" 2>/dev/null; then
+    if command_exists php && php --version | grep -q "PHP 8\.3"; then
+      log_success "PHP 8.3 installed via apt (global)"
+
+      if ! grep -q "# PHP configuration" "$HOME/.bashrc" 2>/dev/null; then
+        cat >> "$HOME/.bashrc" << 'PHP_BASHRC_EOF'
+
+# PHP configuration (installed via apt - global)
+alias php-version='php --version'
+PHP_BASHRC_EOF
+      fi
+
+      echo "global" > "$HOME/.php-install-method"
+      return 0
+    fi
+  fi
+
+  log_error "apt installation failed"
   return 1
 }
 
@@ -174,28 +196,42 @@ PHP_PATH_EOF
 if command_exists php && php --version 2>/dev/null | grep -q "PHP 8\."; then
   PHP_VERSION=$(php --version 2>/dev/null | head -n 1)
   log_success "PHP already installed: $PHP_VERSION"
+  if [ -f "$HOME/.php-install-method" ]; then
+    : # already set
+  elif command_exists brew && brew list --formula 2>/dev/null | grep -q "^php@"; then
+    echo "local" > "$HOME/.php-install-method"
+  else
+    echo "global" > "$HOME/.php-install-method"
+  fi
   exit 0
 fi
 
-# Try apt first (fast), then fallback to Homebrew
-if install_php_apt; then
-  log_success "PHP installation complete via apt (fast method)"
-elif install_php_homebrew; then
-  log_success "PHP installation complete via Homebrew (fallback method)"
-else
-  log_error "PHP installation failed via all methods"
-  log_error "Please check logs and try manual installation"
-  exit 1
+# Try Homebrew first (user-specific/local)
+if install_php_homebrew; then
+  log_success "PHP installation complete via Homebrew (local/user-specific)"
+  exit 0
 fi
 
-# Final verification
-if command_exists php; then
-  PHP_VERSION=$(php --version 2>/dev/null | head -n 1 || echo "unknown version")
-  log_success "PHP installed and available: $PHP_VERSION"
-  log_info "Installation method: $PHP_INSTALL_METHOD"
-else
-  log_error "PHP not found in PATH after installation"
-  exit 1
+# Homebrew failed - try apt if we have root or sudo
+if [ "$EUID" -eq 0 ] || sudo -n true 2>/dev/null; then
+  if install_php_apt; then
+    log_success "PHP installation complete via apt (global fallback)"
+    exit 0
+  fi
 fi
 
-log_success "PHP installation complete"
+# If we can't install via apt either (no root/sudo), just mark as global
+# The Dockerfile will handle the apt installation as root
+log_warning "Homebrew PHP failed, marking for apt fallback (will be handled by Dockerfile)"
+echo "global" > "$HOME/.php-install-method"
+
+# Add a placeholder bashrc entry
+if ! grep -q "# PHP configuration" "$HOME/.bashrc" 2>/dev/null; then
+  cat >> "$HOME/.bashrc" << 'PHP_BASHRC_EOF'
+
+# PHP configuration (installed via apt - global)
+alias php-version='php --version'
+PHP_BASHRC_EOF
+fi
+
+log_info "PHP marked as 'global' - apt installation deferred to Dockerfile"

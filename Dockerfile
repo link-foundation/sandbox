@@ -55,23 +55,17 @@ COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # --- Install system-level packages (cannot be COPY'd from images) ---
-# Issue #44: PHP is installed via apt here for reliability and speed
-# (Homebrew PHP can take 2+ hours when bottles are unavailable)
+# Note: PHP is NOT installed here unconditionally - it depends on the php-stage method
 RUN apt-get update -y && \
     apt-get install -y \
       dotnet-sdk-8.0 \
       r-base \
       cmake clang llvm lld \
       nasm \
-      bubblewrap \
-      php8.3-cli php8.3-common php8.3-curl php8.3-mbstring \
-      php8.3-xml php8.3-zip php8.3-bcmath php8.3-opcache && \
+      bubblewrap && \
     # FASM only available on x86_64
     if [ "$(uname -m)" = "x86_64" ]; then apt-get install -y fasm; fi && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# --- Prepare directories for COPY --from ---
-# Note: /home/linuxbrew is no longer needed since PHP uses apt (Issue #44)
 
 # --- Copy user-home language runtimes from pre-built images ---
 
@@ -94,9 +88,25 @@ COPY --from=kotlin-stage --chown=sandbox:sandbox /home/sandbox/.sdkman/candidate
 # Ruby (rbenv)
 COPY --from=ruby-stage --chown=sandbox:sandbox /home/sandbox/.rbenv /home/sandbox/.rbenv
 
-# PHP: Installed via apt above (Issue #44)
-# PHP packages are installed directly via apt (lines 67-68) for reliability and speed
-# No COPY needed from php-stage since apt provides /usr/bin/php
+# PHP: Copy marker file and handle local (Homebrew) vs global (apt) install (Issue #44)
+COPY --from=php-stage --chown=sandbox:sandbox /home/sandbox/.php-install-method /home/sandbox/.php-install-method
+RUN mkdir -p /home/linuxbrew/.linuxbrew && \
+    chown -R sandbox:sandbox /home/linuxbrew
+COPY --from=php-stage --chown=sandbox:sandbox /home/linuxbrew/.linuxbrew/ /home/linuxbrew/.linuxbrew/
+RUN PHP_METHOD=$(cat /home/sandbox/.php-install-method 2>/dev/null || echo "unknown") && \
+    echo "PHP install method from php-stage: $PHP_METHOD" && \
+    if [ "$PHP_METHOD" = "global" ]; then \
+      echo "Installing PHP globally via apt (matching php-stage method)..." && \
+      apt-get update -y && \
+      apt-get install -y \
+        php8.3-cli php8.3-common php8.3-curl php8.3-mbstring \
+        php8.3-xml php8.3-zip php8.3-bcmath php8.3-opcache && \
+      apt-get clean && rm -rf /var/lib/apt/lists/* && \
+      rm -rf /home/linuxbrew/.linuxbrew && \
+      echo "[✓] PHP installed globally via apt in full-sandbox"; \
+    else \
+      echo "[✓] PHP available via Homebrew (local/user-specific) from php-stage"; \
+    fi
 
 # Perl (Perlbrew)
 COPY --from=perl-stage --chown=sandbox:sandbox /home/sandbox/.perl5 /home/sandbox/.perl5
@@ -158,8 +168,8 @@ ENV PERLBREW_ROOT="/home/sandbox/.perl5"
 ENV RBENV_ROOT="/home/sandbox/.rbenv"
 
 # PATH for tools that don't need special initialization
-# Note: PHP is installed via apt to /usr/bin/php (already in PATH), so no Homebrew paths needed
-ENV PATH="/home/sandbox/.pyenv/bin:/home/sandbox/.pyenv/shims:/home/sandbox/.rbenv/bin:/home/sandbox/.rbenv/shims:/home/sandbox/.swift/usr/bin:/home/sandbox/.elan/bin:/home/sandbox/.opam/default/bin:/home/sandbox/.cargo/bin:/home/sandbox/.deno/bin:/home/sandbox/.bun/bin:/home/sandbox/.go/bin:/home/sandbox/.go/path/bin:${PATH}"
+# Includes Homebrew PHP paths (only effective if local install was used, harmless otherwise)
+ENV PATH="/home/linuxbrew/.linuxbrew/opt/php@8.3/bin:/home/linuxbrew/.linuxbrew/opt/php@8.3/sbin:/home/linuxbrew/.linuxbrew/bin:/home/sandbox/.pyenv/bin:/home/sandbox/.pyenv/shims:/home/sandbox/.rbenv/bin:/home/sandbox/.rbenv/shims:/home/sandbox/.swift/usr/bin:/home/sandbox/.elan/bin:/home/sandbox/.opam/default/bin:/home/sandbox/.cargo/bin:/home/sandbox/.deno/bin:/home/sandbox/.bun/bin:/home/sandbox/.go/bin:/home/sandbox/.go/path/bin:${PATH}"
 
 # Opam environment variables for Rocq/Coq theorem prover
 ENV OPAM_SWITCH_PREFIX="/home/sandbox/.opam/default"

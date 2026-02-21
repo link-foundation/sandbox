@@ -200,7 +200,42 @@ end
 | Duration | ~30 seconds | 2+ hours |
 | Homebrew Bottles | Used | Not used |
 
+## Solution: Tiered Installation with Timeout and Fallback
+
+### Approach (Implemented 2026-02-21)
+
+Rather than completely replacing Homebrew with apt, the solution preserves user-specific (Homebrew) installation as the preferred method with apt as a fallback:
+
+1. **Homebrew first (user-specific/local)**: Try installing PHP via Homebrew as the sandbox user
+   - Uses a configurable timeout (default: 30 minutes)
+   - If bottles are available, completes in seconds
+   - If source compilation starts and exceeds timeout, fails gracefully
+
+2. **apt fallback (global)**: If Homebrew fails or times out, install via apt packages
+   - Always fast (~30 seconds)
+   - Installs to `/usr/bin` (system-wide)
+
+3. **Marker file**: `~/.php-install-method` records `local` or `global`
+   - Used by full-sandbox to determine merge strategy
+   - Local: `COPY --from` the Homebrew directory
+   - Global: Install PHP via apt in full-sandbox
+
+4. **Tagging**: PHP images get `-local` or `-global` suffix tags
+   - `sandbox-php:latest-amd64` (always exists)
+   - `sandbox-php:latest-amd64-local` (only if Homebrew succeeded)
+   - `sandbox-php:latest-amd64-global` (only if apt fallback used)
+
+### Timeout Calculation
+
+Based on previous successful builds:
+- Cache hit: ~30 seconds
+- ARM64 with bottles: ~7.5 minutes
+- AMD64 source compilation: 2+ hours
+
+A 30-minute timeout allows ample time for bottle downloads and minor compilation,
+while catching full source compilations early.
+
 ---
 
-*Case study compiled: 2026-02-17*
+*Case study compiled: 2026-02-17, updated: 2026-02-21*
 *Investigation by: AI Issue Solver*
