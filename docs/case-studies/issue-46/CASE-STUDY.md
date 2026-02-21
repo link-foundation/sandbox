@@ -1,22 +1,34 @@
-# Case Study: Failing CI/CD Run — "No such file or directory" for JSON Measurements
+# Case Study: Failing CI/CD Run — Permission Denied for JSON Measurements
 
 **Issue**: [#46 - Fix failing CI/CD run](https://github.com/link-foundation/sandbox/issues/46)
-**CI Run**: [22261112919, Job 64399507098](https://github.com/link-foundation/sandbox/actions/runs/22261112919/job/64399507098)
+**CI Runs**:
+- [22261112919, Job 64399507098](https://github.com/link-foundation/sandbox/actions/runs/22261112919/job/64399507098) — First failure: "No such file or directory"
+- [22263724056](https://github.com/link-foundation/sandbox/actions/runs/22263724056/job/64405913545) — Second failure: "Permission denied"
+
 **Date**: 2026-02-21
-**Status**: Investigation Complete — Fix Applied
+**Status**: Investigation Complete — Fix Applied (v1.3.6)
 
 ## Executive Summary
 
-The "Measure Disk Space and Update README" workflow failed with:
+This issue has two related but distinct failures:
+
+### First Failure (Run 22261112919) — "No such file or directory"
 
 ```
 cat: data/disk-space-measurements.json: No such file or directory
 ##[error]Process completed with exit code 1.
 ```
 
-The root cause is that `su - sandbox` (login shell) changes the working directory to the sandbox user's home (`/home/sandbox`). The relative path `data/disk-space-measurements.json` then resolves to `/home/sandbox/data/disk-space-measurements.json` — a file that was never created there. The JSON file was correctly initialized in the runner's working directory (`/home/runner/work/sandbox/sandbox/data/disk-space-measurements.json`), but the sandbox-measure.sh script tried to read and write a different file.
+Root cause: `su - sandbox` (login shell) changes CWD to `/home/sandbox`. The relative path `data/disk-space-measurements.json` then resolves to `/home/sandbox/data/disk-space-measurements.json` — a path that was never created. **Fix**: Convert the relative JSON path to an absolute path using `realpath` before passing to `su - sandbox`. Applied in PR #47 (v1.3.5).
 
-**Fix**: Convert the relative JSON output path to an absolute path before passing it to `su - sandbox`.
+### Second Failure (Run 22263724056) — "Permission denied"
+
+```
+cat: /home/runner/work/sandbox/sandbox/data/disk-space-measurements.json: Permission denied
+##[error]Process completed with exit code 1.
+```
+
+Root cause: After applying the `realpath` fix, the absolute path was passed correctly, but the sandbox user still could not access the file. The GitHub Actions workspace directory `/home/runner/work/sandbox/sandbox/` is owned by `runner` and has permissions `750`, denying traverse access to the `sandbox` user (who is not in the `runner` group). The first fix granted `o+rx` only to the immediate parent `data/` directory, but not to the workspace root — so the kernel path traversal check still failed at `/home/runner/work/sandbox/sandbox/`. **Fix**: Copy the JSON file to `/tmp/` (world-accessible, mode `1777`) before running the sandbox user script, then copy it back. Applied in v1.3.6.
 
 ## Timeline of Events
 
@@ -97,13 +109,14 @@ This directory (`/home/sandbox/data/`) was never created, making the path comple
 
 ## Solution
 
-### Fix: Convert to Absolute Path Before `su - sandbox`
+### Fix 1 (v1.3.5, PR #47): Convert to Absolute Path Before `su - sandbox`
 
-The fix is to resolve the JSON output path to an absolute path before executing the sandbox user's sub-script. This ensures the path remains valid regardless of what working directory the sub-shell starts in.
+Resolve the JSON output path to an absolute path before executing the sandbox user's sub-script. This ensures the path remains valid regardless of what working directory the sub-shell starts in.
 
 ```bash
-# Convert JSON_OUTPUT_FILE to absolute path before passing to su
 JSON_OUTPUT_FILE_ABS="$(realpath "$JSON_OUTPUT_FILE")"
+chmod o+rw "$JSON_OUTPUT_FILE_ABS"
+chmod o+rx "$(dirname "$JSON_OUTPUT_FILE_ABS")"
 
 if [ "$EUID" -eq 0 ]; then
   su - sandbox -c "bash /tmp/sandbox-measure.sh '$JSON_OUTPUT_FILE_ABS'"
@@ -112,28 +125,54 @@ else
 fi
 ```
 
-Additionally, the `sandbox-measure.sh` script needs to create the parent directory if it doesn't exist, since the sandbox user may not have the `data/` directory in their home:
+This resolved the "No such file or directory" error but not the "Permission denied" error.
+
+### Fix 2 (v1.3.6, PR #48): Copy JSON File to `/tmp/` for Sandbox User Access
+
+The deeper problem is that the sandbox user cannot traverse the workspace directory tree. The GitHub Actions workspace root (`/home/runner/work/sandbox/sandbox/`) is owned by `runner` with permissions `750`. The `sandbox` user is not in the `runner` group, so they get `EACCES` when trying to traverse the directory — even if the file itself is world-readable.
+
+The fix copies the JSON file to `/tmp/` (world-accessible, mode `1777`), runs the sandbox user script against that copy, then copies it back:
 
 ```bash
-# At the start of sandbox-measure.sh
-mkdir -p "$(dirname "$JSON_OUTPUT_FILE")"
+JSON_OUTPUT_FILE_ABS="$(realpath "$JSON_OUTPUT_FILE")"
+JSON_TMP_COPY="$(mktemp /tmp/disk-space-measurements-XXXXXX.json)"
+cp "$JSON_OUTPUT_FILE_ABS" "$JSON_TMP_COPY"
+chmod o+rw "$JSON_TMP_COPY"
+
+if [ "$EUID" -eq 0 ]; then
+  su - sandbox -c "bash /tmp/sandbox-measure.sh '$JSON_TMP_COPY'"
+else
+  sudo -i -u sandbox bash /tmp/sandbox-measure.sh "$JSON_TMP_COPY"
+fi
+
+cp "$JSON_TMP_COPY" "$JSON_OUTPUT_FILE_ABS"
+rm -f "$JSON_TMP_COPY"
 ```
 
-### Why This Fix Is Correct
+### Why Fix 2 Is Correct
 
-- `realpath` converts relative paths to absolute paths using the current working directory
-- The absolute path `/home/runner/work/sandbox/sandbox/data/disk-space-measurements.json` is unambiguous and valid from any working directory
-- The sandbox user needs write access to this path — since the runner runs with elevated privileges and the outer script (running as root) creates the file, the sandbox user needs read/write access, which can be ensured by pre-creating the file with appropriate permissions
+For the sandbox user to access a file at `/home/runner/work/sandbox/sandbox/data/measurements.json`, they need execute (`x`) permission on **every directory** in the path:
+
+| Directory | Owner | Typical mode | Sandbox user can traverse? |
+|-----------|-------|-------------|---------------------------|
+| `/home/runner/` | runner | 755 | Yes (world x) |
+| `/home/runner/work/` | runner | 755 | Yes (world x) |
+| `/home/runner/work/sandbox/` | runner | 755 | Yes (world x) |
+| `/home/runner/work/sandbox/sandbox/` | runner | **750** | **No** (no world x) |
+| `.../data/` | root | was set to o+rx by Fix 1 | Yes |
+| `.../measurements.json` | root | was set to o+rw by Fix 1 | Yes |
+
+Fix 1 set `o+rx` on `data/` and `o+rw` on the file but missed `/home/runner/work/sandbox/sandbox/` which has no world-execute bit. Fix 2 sidesteps the issue entirely by using `/tmp/` which is world-accessible (`1777`).
 
 ### Alternative Approaches Considered
 
-1. **Use `su` without `-`** (no login shell): Would preserve the working directory but break user-space tool installations that expect a clean home environment. Not recommended.
+1. **Walk all ancestor directories and chmod**: `chmod o+rx` every directory from `/` to `data/`. This works but widens permissions on runner-owned directories unnecessarily and has a larger blast radius.
 
-2. **Pass absolute path directly from CLI**: Requires users to always specify absolute paths in the workflow, which is error-prone.
+2. **Use `su` without `-`** (no login shell): Would preserve the working directory but break user-space tool installations that expect a clean home environment. Not recommended.
 
-3. **Use `cd` inside `su -` command**: Adding `cd /path/to/workdir &&` before the script call would work but is fragile.
+3. **Pass absolute path directly from CLI**: Requires users to always specify absolute paths in the workflow, which is error-prone.
 
-4. **Write JSON to `/tmp/` instead of `data/`**: Would avoid the working directory issue but changes the documented output location.
+4. **Use `cd` inside `su -` command**: Adding `cd /path/to/workdir &&` before the script call would work but is fragile.
 
 ## Technical Details
 

@@ -648,16 +648,26 @@ chmod +x /tmp/sandbox-measure.sh
 # location, causing "No such file or directory" errors.
 # See docs/case-studies/issue-46 for the full root cause analysis.
 JSON_OUTPUT_FILE_ABS="$(realpath "$JSON_OUTPUT_FILE")"
-# Ensure sandbox user can read/write the JSON file (root created it)
-chmod o+rw "$JSON_OUTPUT_FILE_ABS"
-chmod o+rx "$(dirname "$JSON_OUTPUT_FILE_ABS")"
+# The sandbox user needs to read and write the JSON file, but the GitHub Actions
+# workspace directories (e.g. /home/runner/work/sandbox/sandbox/) are owned by
+# 'runner' and typically have mode 750, so 'sandbox' (not in the 'runner' group)
+# cannot traverse them even if the file itself is world-readable.
+# Solution: copy the JSON file to /tmp (world-accessible, mode 1777), run the
+# sandbox measurements against that copy, then copy the result back.
+JSON_TMP_COPY="$(mktemp /tmp/disk-space-measurements-XXXXXX.json)"
+cp "$JSON_OUTPUT_FILE_ABS" "$JSON_TMP_COPY"
+chmod o+rw "$JSON_TMP_COPY"
 
-# Execute sandbox user measurements
+# Execute sandbox user measurements against the /tmp copy
 if [ "$EUID" -eq 0 ]; then
-  su - sandbox -c "bash /tmp/sandbox-measure.sh '$JSON_OUTPUT_FILE_ABS'"
+  su - sandbox -c "bash /tmp/sandbox-measure.sh '$JSON_TMP_COPY'"
 else
-  sudo -i -u sandbox bash /tmp/sandbox-measure.sh "$JSON_OUTPUT_FILE_ABS"
+  sudo -i -u sandbox bash /tmp/sandbox-measure.sh "$JSON_TMP_COPY"
 fi
+
+# Copy the updated measurements back to the original location
+cp "$JSON_TMP_COPY" "$JSON_OUTPUT_FILE_ABS"
+rm -f "$JSON_TMP_COPY"
 
 rm -f /tmp/sandbox-measure.sh
 
