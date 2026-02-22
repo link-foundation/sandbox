@@ -158,6 +158,12 @@ jobs:
 
           git commit -m "chore: update component disk space measurements (${TOTAL_SIZE}MB total)"
 
+          # Pull-rebase before push to handle concurrent pushes that may have occurred
+          # during the ~18 minute measurement (e.g., version bump from release workflow).
+          # Measurement data (README.md, data/) and version bumps (VERSION) touch different
+          # files, so the rebase always succeeds cleanly. See docs/case-studies/issue-51.
+          git pull --rebase origin main
+
           git push origin main
 
           echo "Changes committed and pushed successfully"
