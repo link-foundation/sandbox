@@ -2,14 +2,15 @@
 # PHP 8.3 installation: Homebrew (user-specific/local) with apt fallback (global)
 # Usage: curl -fsSL <url> | bash  OR  bash install.sh
 #
-# Strategy (Issue #44):
+# Strategy (Issue #44, #53):
 #   1. Try Homebrew installation (user-specific, under /home/linuxbrew/.linuxbrew)
-#      with timeout to prevent 2+ hour source compilations
+#      with timeout to prevent 2+ hour source compilations or network hangs
 #   2. If Homebrew fails/times out, mark as "global" for apt fallback
 #      (apt installation is handled by the Dockerfile as root)
 #
 # Environment variables:
 #   PHP_HOMEBREW_TIMEOUT - Timeout in seconds for Homebrew install (default: 1800 = 30 min)
+#   PHP_VERBOSE          - Set to "1" to enable verbose output (default: 0)
 #
 # Output:
 #   ~/.php-install-method - "local" if Homebrew succeeded, "global" if fallback needed
@@ -33,15 +34,27 @@ fi
 # Timeout for Homebrew PHP installation (default: 30 minutes)
 PHP_HOMEBREW_TIMEOUT="${PHP_HOMEBREW_TIMEOUT:-1800}"
 
+# Verbose mode for debugging (Issue #53)
+PHP_VERBOSE="${PHP_VERBOSE:-0}"
+if [ "$PHP_VERBOSE" = "1" ]; then
+  export HOMEBREW_VERBOSE=1
+  log_info "Verbose mode enabled"
+fi
+
 log_step "Installing PHP 8.3"
+log_info "Timeout: ${PHP_HOMEBREW_TIMEOUT} seconds"
+log_info "Architecture: $(uname -m)"
+log_info "Timestamp: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
 # =============================================================================
 # Homebrew Installation (Preferred - User-specific/Local)
 # Installs to /home/linuxbrew/.linuxbrew (can be COPY'd between Docker images)
 # =============================================================================
 install_php_homebrew() {
+  local start_time=$(date +%s)
   log_info "Attempting PHP installation via Homebrew (user-specific)..."
   log_info "Timeout: ${PHP_HOMEBREW_TIMEOUT} seconds"
+  log_info "Start timestamp: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
   # Ensure Homebrew directory exists
   if [ ! -d /home/linuxbrew/.linuxbrew ]; then
@@ -89,10 +102,13 @@ install_php_homebrew() {
         export HOMEBREW_NO_AUTO_UPDATE=1
 
         log_info "Installing PHP 8.3 (timeout: ${PHP_HOMEBREW_TIMEOUT}s)..."
+        log_info "Phase: brew install starting at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
-        # Use timeout to prevent 2+ hour source compilations
-        if timeout "${PHP_HOMEBREW_TIMEOUT}" brew install shivammathur/php/php@8.3 2>&1; then
-          log_success "Homebrew PHP install command completed"
+        # Use timeout to prevent 2+ hour source compilations or network hangs (Issue #53)
+        # The timeout covers the entire install process including dependency installation
+        if timeout --signal=TERM --kill-after=60 "${PHP_HOMEBREW_TIMEOUT}" \
+             brew install shivammathur/php/php@8.3 2>&1; then
+          log_success "Homebrew PHP install command completed at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
         else
           local exit_code=$?
           if [ "$exit_code" -eq 124 ]; then
@@ -105,7 +121,11 @@ install_php_homebrew() {
         fi
 
         if brew list --formula 2>/dev/null | grep -q "^php@8.3$"; then
-          brew link --overwrite --force shivammathur/php/php@8.3 2>&1 | grep -v "Warning" || true
+          log_info "Phase: brew link starting at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          # Link with timeout to catch potential hangs (Issue #53)
+          timeout --signal=TERM --kill-after=30 300 \
+            brew link --overwrite --force shivammathur/php/php@8.3 2>&1 | grep -v "Warning" || true
+          log_info "Phase: brew link completed at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
           BREW_PREFIX=$(brew --prefix 2>/dev/null || echo "")
           if [[ -n "$BREW_PREFIX" && -d "$BREW_PREFIX/opt/php@8.3" ]]; then
@@ -121,8 +141,12 @@ PHP_PATH_EOF
           fi
 
           # Verify PHP works
+          log_info "Phase: verification starting at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
           if command_exists php && php --version | grep -q "PHP 8\.3"; then
+            local end_time=$(date +%s)
+            local duration=$((end_time - start_time))
             log_success "PHP 8.3 installed via Homebrew (user-specific/local)"
+            log_info "Total Homebrew installation time: ${duration} seconds"
             echo "local" > "$HOME/.php-install-method"
             return 0
           else

@@ -16,9 +16,14 @@ FROM ${ESSENTIALS_IMAGE}
 #   - "global": Install PHP via apt in full-sandbox directly
 
 # Build argument for Homebrew timeout (in seconds)
-# Default: 1800 (30 minutes) - enough for bottle install + some compilation,
-# but short enough to fail fast if full source compilation is needed
-ARG PHP_HOMEBREW_TIMEOUT=1800
+# Default: 1200 (20 minutes) - enough for bottle install + dependencies,
+# but short enough to fail fast if source compilation or network hang occurs (Issue #53)
+# Reduced from 1800 (30 min) to 1200 (20 min) based on analysis showing
+# successful ARM64 builds complete in ~8 minutes with bottles
+ARG PHP_HOMEBREW_TIMEOUT=1200
+
+# Enable verbose output for debugging hangs (Issue #53)
+ARG PHP_VERBOSE=0
 
 # --- Step 1: Prepare directories ---
 USER root
@@ -33,7 +38,8 @@ COPY --chown=sandbox:sandbox ubuntu/24.04/php/install.sh /tmp/install.sh
 RUN chmod +x /tmp/install.sh /tmp/common.sh
 
 # Run install script - tries Homebrew with timeout, writes marker file
-RUN PHP_HOMEBREW_TIMEOUT=${PHP_HOMEBREW_TIMEOUT} bash /tmp/install.sh
+# PHP_VERBOSE=1 enables detailed logging to debug potential hangs (Issue #53)
+RUN PHP_HOMEBREW_TIMEOUT=${PHP_HOMEBREW_TIMEOUT} PHP_VERBOSE=${PHP_VERBOSE} bash /tmp/install.sh
 
 # --- Step 3: Handle global fallback (apt install as root if needed) ---
 USER root
