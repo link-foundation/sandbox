@@ -338,18 +338,25 @@ add_measurement() {
   local size_bytes="$3"
   local size_mb="$4"
 
-  local current_json
-  current_json=$(cat "$JSON_OUTPUT_FILE")
-  local new_component="{\"name\": \"$name\", \"category\": \"$category\", \"size_bytes\": $size_bytes, \"size_mb\": $size_mb}"
+  # Use Python for reliable JSON manipulation, matching the outer script.
+  # sed-based approaches fail silently on compact (single-line) JSON produced by
+  # python3's json.dump(), because the pattern \]$ does not match when the line
+  # ends with } (the root object close) rather than ] (the array close).
+  # See docs/case-studies/issue-49 for the full root cause analysis.
+  python3 -c "
+import json, sys
+with open('$JSON_OUTPUT_FILE', 'r') as f:
+    data = json.load(f)
+data['components'].append({
+    'name': sys.argv[1],
+    'category': sys.argv[2],
+    'size_bytes': int(sys.argv[3]),
+    'size_mb': int(sys.argv[4])
+})
+with open('$JSON_OUTPUT_FILE', 'w') as f:
+    json.dump(data, f)
+" "$name" "$category" "$size_bytes" "$size_mb"
 
-  # Use | as sed delimiter to avoid issues with / in component names (e.g., "C/C++ Tools")
-  if echo "$current_json" | grep -q '"components": \[\]'; then
-    current_json=$(echo "$current_json" | sed "s|\"components\": \[\]|\"components\": [$new_component]|")
-  else
-    current_json=$(echo "$current_json" | sed "s|\]$|,$new_component]|")
-  fi
-
-  echo "$current_json" > "$JSON_OUTPUT_FILE"
   log_success "Recorded: $name - ${size_mb}MB"
 }
 
