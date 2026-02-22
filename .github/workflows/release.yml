@@ -963,6 +963,7 @@ jobs:
   # All language images are built in parallel on top of essentials sandbox
   build-languages-amd64:
     runs-on: ubuntu-24.04
+    timeout-minutes: 45    # Issue #53: Add timeout to fail fast on hangs (normal builds take ~10-15 min)
     needs: [detect-changes, build-essentials-amd64]
     strategy:
       fail-fast: false
@@ -1099,7 +1100,7 @@ jobs:
   # === BUILD LANGUAGE IMAGES (arm64) ===
   build-languages-arm64:
     runs-on: ubuntu-24.04-arm
-    timeout-minutes: 120
+    timeout-minutes: 45    # Issue #53: Reduced from 120 to 45 min - fail fast on network hangs
     needs: [detect-changes, build-essentials-arm64]
     strategy:
       fail-fast: false
