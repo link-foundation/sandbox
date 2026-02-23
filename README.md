@@ -189,36 +189,36 @@ The container runs as the `sandbox` user with home directory at `/home/sandbox`.
 
 _Last updated: 2026-02-22T02:06:37Z_
 
-**Total installation size: 7545 MB**
+**Total installation size: 7198 MB**
 
 | Component | Category | Size (MB) |
 |-----------|----------|-----------|
-| Swift 6.x | Runtime | 2532 |
-| Opam + Rocq/Coq | Runtime | 1246 |
-| SDKMAN + Java 21 | Runtime | 552 |
-| .NET SDK 8.0 | Runtime | 481 |
-| Pyenv + Python (latest) | Runtime | 369 |
-| Perlbrew + Perl (latest) | Runtime | 346 |
-| Go (latest) | Runtime | 268 |
-| NVM + Node.js 20 | Runtime | 219 |
-| Kotlin (via SDKMAN) | Runtime | 161 |
-| rbenv + Ruby (latest) | Runtime | 157 |
-| R Language | Runtime | 115 |
-| Deno | Runtime | 113 |
-| Bun | Runtime | 97 |
-| PHP 8.3 (via Homebrew) | Runtime | 52 |
-| Lean (via elan) | Runtime | 12 |
+| Swift 6.x | Runtime | 2655 |
+| Opam + Rocq/Coq | Runtime | 1307 |
+| SDKMAN + Java 21 | Runtime | 579 |
+| .NET SDK 8.0 | Runtime | 505 |
+| Pyenv + Python (latest) | Runtime | 388 |
+| Perlbrew + Perl (latest) | Runtime | 363 |
+| Go (latest) | Runtime | 282 |
+| NVM + Node.js 20 | Runtime | 230 |
+| Kotlin (via SDKMAN) | Runtime | 169 |
+| rbenv + Ruby (latest) | Runtime | 165 |
+| R Language | Runtime | 121 |
+| Deno | Runtime | 119 |
+| Bun | Runtime | 102 |
+| PHP 8.3 (via Homebrew) | Runtime | 55 |
+| Lean (via elan) | Runtime | 13 |
 | Rust (via rustup) | Runtime | 0 |
-| C/C++ Tools (CMake, Clang, LLVM, LLD) | Build Tools | 56 |
-| Assembly Tools (NASM, FASM) | Build Tools | 3 |
-| GitLab CLI | Development Tools | 27 |
+| C/C++ Tools (CMake, Clang, LLVM, LLD) | Build Tools | 59 |
+| Assembly Tools (NASM, FASM) | Build Tools | 4 |
+| GitLab CLI | Development Tools | 29 |
 | gh-setup-git-identity | Development Tools | 4 |
 | glab-setup-git-identity | Development Tools | 4 |
-| GitHub CLI | Development Tools | 0 |
+| GitHub CLI | Development Tools | 1 |
 | Homebrew | Package Manager | 0 |
-| Python Build Dependencies | Dependencies | 40 |
+| Python Build Dependencies | Dependencies | 43 |
 | Ruby Build Dependencies | Dependencies | 0 |
-| Essential Tools | System | 0 |
+| Essential Tools | System | 1 |
 
 _Note: Sizes are measured after cleanup and may vary based on system state and package versions._
 
