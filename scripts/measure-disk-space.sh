@@ -111,7 +111,7 @@ data['components'].append({
     'name': sys.argv[1],
     'category': sys.argv[2],
     'size_bytes': int(sys.argv[3]),
-    'size_mb': int(sys.argv[4])
+    'size_mb': float(sys.argv[4])
 })
 with open('$JSON_OUTPUT_FILE', 'w') as f:
     json.dump(data, f)
@@ -131,7 +131,7 @@ from datetime import datetime, timezone
 with open('$JSON_OUTPUT_FILE', 'r') as f:
     data = json.load(f)
 data['generated_at'] = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-data['total_size_mb'] = int('$total_mb')
+data['total_size_mb'] = float('$total_mb')
 with open('$JSON_OUTPUT_FILE', 'w') as f:
     json.dump(data, f)
 "
@@ -166,13 +166,19 @@ measure_install() {
 
     # Calculate difference
     local diff_bytes=$((end_bytes - start_bytes))
-    local diff_mb=$((diff_bytes / 1024 / 1024))
 
     # Handle negative values (can happen due to cleanup removing more than installed)
     if [ "$diff_bytes" -lt 0 ]; then
       diff_bytes=0
-      diff_mb=0
     fi
+
+    # Convert to MB with decimal precision (1 MB = 1,000,000 bytes).
+    # Integer floor division via / 1024 / 1024 truncates any component under
+    # 1 MiB to 0 MB, which is misleading (e.g. 741 KB shows as 0 MB).
+    # Use awk for floating-point division to get precise values (e.g. 0.74 MB).
+    # See docs/case-studies/issue-55 for full root cause analysis.
+    local diff_mb
+    diff_mb=$(awk "BEGIN {printf \"%.2f\", $diff_bytes / 1000000}")
 
     add_measurement "$name" "$category" "$diff_bytes" "$diff_mb"
     return 0
@@ -248,6 +254,7 @@ measure_apt_install ".NET SDK 8.0" "Runtime" dotnet-sdk-8.0
 measure_apt_install "C/C++ Tools (CMake, Clang, LLVM, LLD)" "Build Tools" cmake clang llvm lld
 measure_apt_install "Assembly Tools (NASM, FASM)" "Build Tools" nasm fasm
 measure_apt_install "R Language" "Runtime" r-base
+measure_apt_install "Bubblewrap" "Dependencies" bubblewrap
 measure_apt_install "Ruby Build Dependencies" "Dependencies" libyaml-dev
 measure_apt_install "Python Build Dependencies" "Dependencies" \
   libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev \
@@ -351,7 +358,7 @@ data['components'].append({
     'name': sys.argv[1],
     'category': sys.argv[2],
     'size_bytes': int(sys.argv[3]),
-    'size_mb': int(sys.argv[4])
+    'size_mb': float(sys.argv[4])
 })
 with open('$JSON_OUTPUT_FILE', 'w') as f:
     json.dump(data, f)
@@ -375,8 +382,12 @@ measure_install() {
     local end_bytes
     end_bytes=$(get_disk_usage_bytes)
     local diff_bytes=$((end_bytes - start_bytes))
-    local diff_mb=$((diff_bytes / 1024 / 1024))
-    [ "$diff_bytes" -lt 0 ] && { diff_bytes=0; diff_mb=0; }
+    [ "$diff_bytes" -lt 0 ] && diff_bytes=0
+    # Convert to MB with decimal precision. Use awk for floating-point division
+    # to get precise values (e.g. 0.74 MB instead of 0 or 1).
+    # See docs/case-studies/issue-55.
+    local diff_mb
+    diff_mb=$(awk "BEGIN {printf \"%.2f\", $diff_bytes / 1000000}")
     add_measurement "$name" "$category" "$diff_bytes" "$diff_mb"
   else
     log_warning "Installation of $name failed"
@@ -490,7 +501,20 @@ install_rust() {
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   [ -f "$HOME/.cargo/env" ] && \. "$HOME/.cargo/env"
 }
-measure_install "Rust (via rustup)" "Runtime" install_rust
+# Use du-based measurement for Rust because the df-delta method is unreliable:
+# rustup downloads files to /tmp then moves them to ~/.rustup and ~/.cargo,
+# which can show near-zero df delta due to move-vs-copy on same filesystem.
+# See docs/case-studies/issue-55 for full analysis.
+cleanup_for_measurement
+if install_rust; then
+  cleanup_for_measurement
+  rust_bytes=$(du -sb "$HOME/.rustup" "$HOME/.cargo" 2>/dev/null | awk '{sum+=$1} END{print sum+0}')
+  rust_mb=$(awk "BEGIN {printf \"%.2f\", $rust_bytes / 1000000}")
+  add_measurement "Rust (via rustup)" "Runtime" "$rust_bytes" "$rust_mb"
+else
+  log_warning "Installation of Rust (via rustup) failed"
+  add_measurement "Rust (via rustup)" "Runtime" 0 0
+fi
 
 # Load Rust
 [ -f "$HOME/.cargo/env" ] && \. "$HOME/.cargo/env"
@@ -555,7 +579,19 @@ install_homebrew() {
     eval "$("$HOME/.linuxbrew/bin/brew" shellenv)"
   fi
 }
-measure_install "Homebrew" "Package Manager" install_homebrew
+# Use du-based measurement for Homebrew because the outer script pre-creates
+# /home/linuxbrew/.linuxbrew before this runs, making the df-delta near-zero.
+# See docs/case-studies/issue-55 for full analysis.
+cleanup_for_measurement
+if install_homebrew; then
+  cleanup_for_measurement
+  brew_bytes=$(du -sb /home/linuxbrew/.linuxbrew "$HOME/.linuxbrew" 2>/dev/null | awk '{sum+=$1} END{print sum+0}')
+  brew_mb=$(awk "BEGIN {printf \"%.2f\", $brew_bytes / 1000000}")
+  add_measurement "Homebrew" "Package Manager" "$brew_bytes" "$brew_mb"
+else
+  log_warning "Installation of Homebrew failed"
+  add_measurement "Homebrew" "Package Manager" 0 0
+fi
 
 # Load Homebrew
 if [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
@@ -685,7 +721,7 @@ log_step "Finalizing Measurements"
 
 cleanup_for_measurement
 FINAL_MB=$(get_disk_usage_mb)
-TOTAL_MB=$((FINAL_MB - BASELINE_MB))
+TOTAL_MB=$(awk "BEGIN {printf \"%.2f\", $FINAL_MB - $BASELINE_MB}")
 
 finalize_json_output "$TOTAL_MB"
 
