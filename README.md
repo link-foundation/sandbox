@@ -187,39 +187,39 @@ The container runs as the `sandbox` user with home directory at `/home/sandbox`.
 <!-- COMPONENT_SIZES_START -->
 ## Component Sizes
 
-_Last updated: 2026-02-22T02:06:37Z_
+_Last updated: 2026-02-26T14:29:09Z_
 
-**Total installation size: 7198.0 MB**
+**Total installation size: 7548.0 MB**
 
 | Component | Category | Size (MB) |
 |-----------|----------|-----------|
 | Swift 6.x | Runtime | 2655.26 |
-| Opam + Rocq/Coq | Runtime | 1307.27 |
+| Opam + Rocq/Coq | Runtime | 1307.15 |
+| Rust (via rustup) | Runtime | 650.19 |
 | SDKMAN + Java 21 | Runtime | 579.1 |
-| .NET SDK 8.0 | Runtime | 504.91 |
-| Pyenv + Python (latest) | Runtime | 387.92 |
-| Perlbrew + Perl (latest) | Runtime | 362.91 |
-| Go (latest) | Runtime | 281.62 |
-| NVM + Node.js 20 | Runtime | 230.43 |
+| .NET SDK 8.0 | Runtime | 504.88 |
+| Pyenv + Python (latest) | Runtime | 387.76 |
+| Perlbrew + Perl (latest) | Runtime | 364.99 |
+| Go (latest) | Runtime | 281.64 |
+| NVM + Node.js 20 | Runtime | 230.57 |
 | Kotlin (via SDKMAN) | Runtime | 169.11 |
-| rbenv + Ruby (latest) | Runtime | 164.96 |
-| R Language | Runtime | 121.15 |
-| Deno | Runtime | 119.12 |
-| Bun | Runtime | 102.38 |
-| PHP 8.3 (via Homebrew) | Runtime | 55.08 |
-| Lean (via elan) | Runtime | 13.29 |
-| Rust (via rustup) | Runtime | 0.1 |
-| C/C++ Tools (CMake, Clang, LLVM, LLD) | Build Tools | 58.83 |
+| rbenv + Ruby (latest) | Runtime | 164.97 |
+| R Language | Runtime | 121.16 |
+| Deno | Runtime | 119.38 |
+| Bun | Runtime | 103.94 |
+| PHP 8.3 (via Homebrew) | Runtime | 55.03 |
+| Lean (via elan) | Runtime | 13.25 |
+| C/C++ Tools (CMake, Clang, LLVM, LLD) | Build Tools | 58.85 |
 | Assembly Tools (NASM, FASM) | Build Tools | 3.92 |
-| GitLab CLI | Development Tools | 29.19 |
+| GitLab CLI | Development Tools | 29.2 |
 | glab-setup-git-identity | Development Tools | 4.37 |
-| gh-setup-git-identity | Development Tools | 4.35 |
-| GitHub CLI | Development Tools | 0.55 |
-| Homebrew | Package Manager | 0.02 |
-| Python Build Dependencies | Dependencies | 42.52 |
-| Bubblewrap | Dependencies | 0.0 |
-| Ruby Build Dependencies | Dependencies | 0.0 |
-| Essential Tools | System | 0.74 |
+| gh-setup-git-identity | Development Tools | 4.36 |
+| GitHub CLI | Development Tools | 0.02 |
+| Homebrew | Package Manager | 178.14 |
+| Python Build Dependencies | Dependencies | 41.8 |
+| Bubblewrap | Dependencies | 0.17 |
+| Ruby Build Dependencies | Dependencies | 0.01 |
+| Essential Tools | System | 0.76 |
 
 _Note: Sizes are measured after cleanup and may vary based on system state and package versions._
 
