@@ -13,17 +13,18 @@ on:
       - 'VERSION'
   pull_request:
     types: [opened, synchronize, reopened]
-  # Manual release support - allows instant version bump and release
+  # Manual release support - allows instant version bump and release, or building current version
   workflow_dispatch:
     inputs:
       release_mode:
-        description: 'Release mode'
+        description: 'Release mode: build-only (no push/release), bump-and-release (bump version then build+release), release-only (build+release current VERSION without bumping)'
         required: true
         type: choice
         default: 'build-only'
         options:
           - build-only
           - bump-and-release
+          - release-only
       bump_type:
         description: 'Version bump type (only for bump-and-release mode)'
         required: false
@@ -361,17 +362,11 @@ jobs:
       - name: Determine if build is needed
         id: should-build
         run: |
-          # For workflow_dispatch with bump-and-release, always build
+          # For workflow_dispatch, always build (regardless of mode)
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            if [ "${{ github.event.inputs.release_mode }}" = "bump-and-release" ]; then
-              echo "result=true" >> $GITHUB_OUTPUT
-              echo "Build triggered by: manual bump-and-release"
-              exit 0
-            elif [ "${{ github.event.inputs.release_mode }}" = "build-only" ]; then
-              echo "result=true" >> $GITHUB_OUTPUT
-              echo "Build triggered by: manual build-only"
-              exit 0
-            fi
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "Build triggered by: manual dispatch (mode: ${{ github.event.inputs.release_mode }})"
+            exit 0
           fi
 
           # Trigger build on any relevant changes

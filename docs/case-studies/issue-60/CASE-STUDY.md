@@ -181,28 +181,38 @@ Sources confirming that GITHUB_TOKEN pushes don't trigger subsequent workflows:
 
 ---
 
-## Proposed Solutions
+## Solutions Implemented
 
-### Solution A (High Priority): Add `release-only` Mode to `workflow_dispatch`
+### Solution A (Implemented): Add `release-only` Mode to `workflow_dispatch`
 
-Add a new `release_mode` option `release-only` that builds and releases the **current HEAD version** without performing a version bump. This would allow:
+A new `release_mode` option `release-only` was added to the workflow. It builds and releases the **current HEAD version** without performing a version bump:
+
 ```
 workflow_dispatch → release_mode: release-only
-→ Reads current VERSION (1.3.11)
-→ Builds Docker images with 1.3.11 tags
+→ Skips version-bump job (only runs for bump-and-release)
+→ Reads current VERSION (e.g. 1.3.11)
+→ Builds all Docker images with 1.3.11 tags
 → Creates GitHub Release v1.3.11
 ```
 
-This directly addresses the "stuck version" problem without creating unwanted version increments.
+**What changed in `.github/workflows/release.yml`** (PR #61):
+- Added `release-only` as a third option in the `release_mode` input (alongside `build-only` and `bump-and-release`)
+- Updated `should-build` determination: any `workflow_dispatch` event (all three modes) always sets `should-build=true`
+- The `version-bump` job's existing `if: release_mode == 'bump-and-release'` condition already correctly skips it for `release-only`
+- All build, manifest, and `create-release` jobs already used `github.event_name == 'workflow_dispatch'` in their conditions, so they work for `release-only` without any additional changes
 
-### Solution B (High Priority): Add Retry Capability for Failed Builds
+This directly addresses the "stuck version" problem — if `apply-changesets` successfully bumped the version but the build failed, the user can now trigger `release-only` to retry the build and create the release without creating an unwanted extra version increment.
+
+## Proposed Future Solutions
+
+### Solution B (Future): Add Retry Capability for Failed Builds
 
 Implement automatic or semi-automatic retry for failed build runs:
 - **Option 1**: A scheduled monitoring workflow that detects failed `push`-triggered runs and re-runs failed jobs
 - **Option 2**: Clear documentation telling users to use `gh run rerun <run-id>` to retry a failed run
 - **Option 3**: Add retry configuration to build jobs using GitHub Actions' built-in retry (not native, but achievable with `nick-fields/retry` action)
 
-### Solution C (Medium Priority): Address Network Timeout Failures
+### Solution C (Future): Address Network Timeout Failures
 
 The network timeouts that caused the original failure:
 - Increase timeout settings on Docker build/push operations
@@ -210,7 +220,7 @@ The network timeouts that caused the original failure:
 - Consider caching strategies to reduce registry interaction
 - Already partially addressed in issue-53 (timeout reduction for ARM64 language builds)
 
-### Solution D (Low Priority): Use PAT for `apply-changesets` Push
+### Solution D (Future): Use PAT for `apply-changesets` Push
 
 Replace the GITHUB_TOKEN push in `apply-changesets.sh` with a PAT to enable triggering of subsequent workflows. This would cause a new `on: push` workflow run when the version bump is committed, eliminating the "orphaned version bump commit" problem.
 
