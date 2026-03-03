@@ -450,48 +450,85 @@ jobs:
 
       - name: Test JS sandbox
         run: |
+          set -e
           echo "=== Testing JS sandbox ==="
-          docker run --rm sandbox-js bash -c '. $HOME/.nvm/nvm.sh && node --version' || echo "Node.js test failed"
-          docker run --rm sandbox-js bash -c 'export PATH=$HOME/.bun/bin:$PATH && bun --version' || echo "Bun test failed"
-          docker run --rm sandbox-js bash -c 'export PATH=$HOME/.deno/bin:$PATH && deno --version' || echo "Deno test failed"
-          echo "=== JS sandbox tests completed ==="
+          docker run --rm sandbox-js bash -c '. $HOME/.nvm/nvm.sh && node --version'
+          docker run --rm sandbox-js bash -c 'export PATH=$HOME/.bun/bin:$PATH && bun --version'
+          docker run --rm sandbox-js bash -c 'export PATH=$HOME/.deno/bin:$PATH && deno --version'
+          echo "=== JS sandbox tests passed ==="
 
       - name: Test essentials sandbox
         run: |
+          set -e
           echo "=== Testing essentials sandbox ==="
-          docker run --rm sandbox-essentials gh --version || echo "GitHub CLI test failed"
-          docker run --rm sandbox-essentials glab --version || echo "GitLab CLI test failed"
-          docker run --rm sandbox-essentials gh-setup-git-identity --version || echo "gh-setup-git-identity test failed"
-          docker run --rm sandbox-essentials glab-setup-git-identity --version || echo "glab-setup-git-identity test failed"
-          echo "=== Essentials sandbox tests completed ==="
+          docker run --rm sandbox-essentials gh --version
+          docker run --rm sandbox-essentials glab --version
+          docker run --rm sandbox-essentials gh-setup-git-identity --version
+          docker run --rm sandbox-essentials glab-setup-git-identity --version
+          echo "=== Essentials sandbox tests passed ==="
 
       - name: Test full sandbox
         run: |
+          set -e
           echo "=== Testing full sandbox ==="
           echo "Note: Using entrypoint script which initializes all environments"
 
-          docker run --rm sandbox-test node --version || echo "Node.js test failed"
-          docker run --rm sandbox-test python --version || echo "Python test failed"
-          docker run --rm sandbox-test go version || echo "Go test failed"
-          docker run --rm sandbox-test rustc --version || echo "Rust test failed"
-          docker run --rm sandbox-test java -version || echo "Java test failed"
-          docker run --rm sandbox-test bun --version || echo "Bun test failed"
-          docker run --rm sandbox-test deno --version || echo "Deno test failed"
-          docker run --rm sandbox-test gh --version || echo "GitHub CLI test failed"
-          docker run --rm sandbox-test glab --version || echo "GitLab CLI test failed"
-          docker run --rm sandbox-test gh-setup-git-identity --version || echo "gh-setup-git-identity test failed"
-          docker run --rm sandbox-test glab-setup-git-identity --version || echo "glab-setup-git-identity test failed"
-          docker run --rm sandbox-test lean --version || echo "Lean test failed"
-          docker run --rm sandbox-test perl --version || echo "Perl test failed"
-          docker run --rm sandbox-test php --version || echo "PHP test failed"
+          # JavaScript/TypeScript runtimes
+          docker run --rm sandbox-test node --version
+          docker run --rm sandbox-test bun --version
+          docker run --rm sandbox-test deno --version
+
+          # Python (pyenv)
+          docker run --rm sandbox-test python3 --version
+          docker run --rm sandbox-test pip3 --version
+
+          # Go
+          docker run --rm sandbox-test go version
+
+          # Rust (rustup + cargo + rustc)
+          docker run --rm sandbox-test rustc --version
+          docker run --rm sandbox-test cargo --version
+          docker run --rm sandbox-test rustup --version
+
+          # Java/JVM (SDKMAN)
+          docker run --rm sandbox-test java -version
+          docker run --rm sandbox-test kotlin -version
+
+          # Ruby (rbenv)
+          docker run --rm sandbox-test ruby --version
+          docker run --rm sandbox-test gem --version
+
+          # PHP
+          docker run --rm sandbox-test php --version
+
+          # Perl (perlbrew)
+          docker run --rm sandbox-test perl --version
+
+          # Swift
+          docker run --rm sandbox-test swift --version
+
+          # Lean/Mathlib (elan)
+          docker run --rm sandbox-test lean --version
+
+          # Dotnet
+          docker run --rm sandbox-test dotnet --version
+
+          # R language
+          docker run --rm sandbox-test Rscript --version
+
+          # CLI tools
+          docker run --rm sandbox-test gh --version
+          docker run --rm sandbox-test glab --version
+          docker run --rm sandbox-test gh-setup-git-identity --version
+          docker run --rm sandbox-test glab-setup-git-identity --version
 
           echo ""
           echo "=== PHP install method check ==="
-          docker run --rm sandbox-php cat /home/sandbox/.php-install-method || echo "PHP method marker not found"
-          docker run --rm sandbox-test cat /home/sandbox/.php-install-method || echo "PHP method marker not found in full sandbox"
+          docker run --rm sandbox-php cat /home/sandbox/.php-install-method
+          docker run --rm sandbox-test cat /home/sandbox/.php-install-method
 
           echo ""
-          echo "=== All tests completed ==="
+          echo "=== All full sandbox tests passed ==="
 
   # === BUILD JS SANDBOX (amd64) ===
   # JS sandbox is the base layer - built first, other images depend on it
@@ -1448,6 +1485,64 @@ jobs:
           provenance: false  # Prevents unknown/unknown platform in registry
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # Smoke test the published image to verify all toolchains work (issue #62)
+      # Tests each toolchain command to catch cases where tools are missing/broken
+      - name: Smoke test released full sandbox (amd64)
+        run: |
+          set -e
+          VERSION="${{ steps.version.outputs.version }}"
+          IMAGE="${{ env.DOCKERHUB_IMAGE_NAME }}:${VERSION}"
+          echo "=== Smoke testing released image: ${IMAGE} ==="
+
+          # JavaScript/TypeScript runtimes
+          docker run --rm "${IMAGE}" node --version
+          docker run --rm "${IMAGE}" bun --version
+          docker run --rm "${IMAGE}" deno --version
+
+          # Python (pyenv)
+          docker run --rm "${IMAGE}" python3 --version
+          docker run --rm "${IMAGE}" pip3 --version
+
+          # Go
+          docker run --rm "${IMAGE}" go version
+
+          # Rust (rustup + cargo + rustc)
+          docker run --rm "${IMAGE}" rustc --version
+          docker run --rm "${IMAGE}" cargo --version
+          docker run --rm "${IMAGE}" rustup --version
+
+          # Java/JVM (SDKMAN)
+          docker run --rm "${IMAGE}" java -version
+          docker run --rm "${IMAGE}" kotlin -version
+
+          # Ruby (rbenv)
+          docker run --rm "${IMAGE}" ruby --version
+          docker run --rm "${IMAGE}" gem --version
+
+          # PHP
+          docker run --rm "${IMAGE}" php --version
+
+          # Perl (perlbrew)
+          docker run --rm "${IMAGE}" perl --version
+
+          # Swift
+          docker run --rm "${IMAGE}" swift --version
+
+          # Lean/Mathlib (elan)
+          docker run --rm "${IMAGE}" lean --version
+
+          # Dotnet
+          docker run --rm "${IMAGE}" dotnet --version
+
+          # R language
+          docker run --rm "${IMAGE}" Rscript --version
+
+          # CLI tools
+          docker run --rm "${IMAGE}" gh --version
+          docker run --rm "${IMAGE}" glab --version
+
+          echo "=== All smoke tests passed for ${IMAGE} ==="
 
   # === BUILD AND PUSH ARM64 IMAGE ===
   # Using native ARM64 runner for optimal build performance
