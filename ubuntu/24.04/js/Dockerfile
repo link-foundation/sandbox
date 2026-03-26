@@ -106,6 +106,7 @@ RUN groupadd sandbox && \
     useradd -m -g sandbox -d /workspace -s /bin/bash sandbox && \
     passwd -d sandbox && \
     usermod -aG sudo sandbox && \
+    chown sandbox:sandbox /workspace && \
     chmod 2775 /workspace
 
 # Copy and run install script
