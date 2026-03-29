@@ -227,7 +227,7 @@ log_success "Pre-flight checks passed"
 # --- Create sandbox user if missing ---
 if ! id "sandbox" &>/dev/null; then
   log_info "Creating sandbox user..."
-  useradd -m -s /bin/bash sandbox 2>/dev/null || adduser --disabled-password --gecos "" sandbox
+  useradd -m -d /workspace -s /bin/bash sandbox 2>/dev/null || adduser --disabled-password --gecos "" --home /workspace sandbox
   passwd -d sandbox 2>/dev/null || true
   usermod -aG sudo sandbox 2>/dev/null || true
 fi
@@ -706,7 +706,7 @@ chmod +x /tmp/sandbox-measure.sh
 
 # Resolve JSON output path to absolute before passing to sandbox user.
 # 'su - sandbox' and 'sudo -i -u sandbox' both create login shells that change
-# the working directory to the sandbox user's home (/home/sandbox). Relative
+# the working directory to the sandbox user's home (/workspace). Relative
 # paths like 'data/disk-space-measurements.json' would then resolve to the wrong
 # location, causing "No such file or directory" errors.
 # See docs/case-studies/issue-46 for the full root cause analysis.
