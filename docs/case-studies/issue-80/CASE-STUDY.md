@@ -1,4 +1,21 @@
-# Case Study: Issue #80 — `konard/super-box` (Docker‑in‑Box)
+# Case Study: Issue #80 — `konard/box-dind` family (Docker‑in‑Box)
+
+## Implementation Update (2026‑04‑28)
+
+The case study below was written with the working name `konard/super-box`. After review, the project owner picked the final naming and scope:
+
+- **Final name:** `dind-box` (suffix `-dind`), not `super-box`.
+- **Scope:** add a dind sibling for **every** existing image variant (`-js`, `-essentials`, every language box, and the full box). Image names follow the existing convention:
+  - `konard/box` → `konard/box-dind`
+  - `konard/box-essentials` → `konard/box-essentials-dind`
+  - `konard/box-js` → `konard/box-js-dind`
+  - `konard/box-<language>` → `konard/box-<language>-dind`
+- **Implementation:** a single generic recipe at [`ubuntu/24.04/dind/`](../../../ubuntu/24.04/dind/) (one `Dockerfile`, one `install.sh`, one `dind-entrypoint.sh`) that takes any base image as `--build-arg BASE_IMAGE=...` and produces the dind variant. The release workflow runs this recipe in a 14×2 (variant × arch) matrix and then assembles per‑variant multi‑arch manifests.
+- **Architecture, security model, and host‑isolation guarantees are unchanged** from sections 3–6 below: the default tag is nested DinD on `--privileged`, Sysbox is the recommended secure runtime, DooD is rejected as a default, and `docker ps -a` is naturally scoped per container because each container owns its own `dockerd`.
+
+The rest of this document is preserved as written so the original analysis remains auditable; references to `super-box` should be read as `box-dind`.
+
+---
 
 ## Executive Summary
 
