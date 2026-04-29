@@ -35,3 +35,13 @@ against the host Docker daemon (not buildx's `docker-container`
 driver) so that subsequent `FROM box-js` / `FROM box-essentials`
 references resolve against the locally-built images instead of
 trying to pull from `docker.io`.
+
+fix(kotlin): install Java 21 LTS alongside Kotlin in the standalone
+`box-kotlin` image (issue #82). `kotlinc` is a shell wrapper around
+`java`, so the language-only image previously failed
+`docker run --rm box-kotlin kotlin -version` with
+`line 102: java: command not found`. The full-box image was unaffected
+because Java was supplied by the `box-java` stage. Now
+`ubuntu/24.04/kotlin/install.sh` installs Java via SDKMAN before
+Kotlin, making the standalone `box-kotlin` image self-sufficient and
+unblocking the new per-language `pr-test / kotlin` matrix job.
