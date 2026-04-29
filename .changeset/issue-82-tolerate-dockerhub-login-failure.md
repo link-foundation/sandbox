@@ -10,3 +10,9 @@ login" step that emits a clear `::warning` annotation pointing at
 the rotation runbook in `README.md` and `docs/case-studies/issue-82`.
 GHCR pushes proceed on their existing credentials when Docker Hub is
 unavailable.
+
+ci(release): free ~30 GB of disk space before `docker-build-test` so
+the PR-CI smoke job stops failing with `no space left on device`
+while building the JS -> essentials -> 11 language images -> full-box
+chain on a single ubuntu-24.04 runner. Mirrors the existing
+`jlumbroso/free-disk-space` step in `docker-build-push` (issue #41).
