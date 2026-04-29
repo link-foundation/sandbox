@@ -155,7 +155,42 @@ Add a "Releasing" section to the project `README.md` and to `docs/case-studies/i
 * The new "Check Docker Hub login" step's loud error message reduces mean-time-to-diagnosis from "investigate 52 failing jobs" to "read one annotation in the run summary".
 * The README rotation runbook removes the "what do I do?" step from the on-call response.
 
+## Follow-up: second CI/CD bug surfaced by this PR's own CI
+
+After the initial fix in this PR (PAT-tolerance), the next PR-event run [`25075335426`](https://github.com/link-foundation/box/actions/runs/25075335426) failed in the `docker-build-test` job with a different error:
+
+```
+#37 ERROR: failed to copy files: copy file range failed: no space left on device
+##[warning]You are running out of disk space. The runner will stop working when the machine runs out of disk space. Free space left: 0 MB
+```
+
+The failure occurs at `Dockerfile:99` (`full-box`) on `COPY --from=ruby-stage --chown=box:box /home/box/.rbenv /home/box/.rbenv`, after the job has already built **JS → essentials → 11 language images → full-box** sequentially on a single `ubuntu-24.04` runner.
+
+### Root cause
+
+`docker-build-test` (PR-only smoke test, lines 403-564 of `release.yml`) does not free disk space before the build. The publish-jobs (`docker-build-push`, `docker-build-push-arm64`) already use `jlumbroso/free-disk-space@main` to reclaim ~30 GB before building (added in [issue #41](../../issue-41/CASE-STUDY.md)), but the PR-CI smoke test was missed. As more language images were added (most recently `dind` family in #80), cumulative disk usage from BuildKit's working set tipped over the runner's default ~22 GB free.
+
+### Fix in this PR
+
+Add the same `jlumbroso/free-disk-space@main` step to `docker-build-test`, with the same `with:` block already used in `docker-build-push`:
+
+```yaml
+- name: Free disk space
+  uses: jlumbroso/free-disk-space@main
+  with:
+    tool-cache: false
+    android: true
+    dotnet: true
+    haskell: true
+    large-packages: true
+    docker-images: true
+    swap-storage: true
+```
+
+Captured logs: [`ci-logs/docker-build-test-job-73466319389.txt`](./ci-logs/docker-build-test-job-73466319389.txt).
+
 ## Files
 
-* [`ci-logs/failed-25073172386.txt`](./ci-logs/failed-25073172386.txt) — full failed-step logs, all 52 jobs.
-* [`ci-logs/run-25073172386-summary.json`](./ci-logs/run-25073172386-summary.json) — run-level metadata.
+* [`ci-logs/failed-25073172386.txt`](./ci-logs/failed-25073172386.txt) — full failed-step logs from the original `release.yml` PAT-expiry incident, all 52 jobs.
+* [`ci-logs/run-25073172386-summary.json`](./ci-logs/run-25073172386-summary.json) — run-level metadata for the original incident.
+* [`ci-logs/docker-build-test-job-73466319389.txt`](./ci-logs/docker-build-test-job-73466319389.txt) — log capture of the follow-up `docker-build-test` disk-exhaustion failure on PR run `25075335426`.

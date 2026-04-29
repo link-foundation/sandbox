@@ -417,6 +417,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Fix for issue #82: Free disk space before building 13+ language images
+      # in sequence. Without this, the runner runs out of disk space during the
+      # full-box COPY --from=*-stage steps (observed at ruby-stage on run
+      # 25075335426: "no space left on device", 0 MB free). Mirrors the
+      # disk-cleanup already used in docker-build-push (issue #41).
+      # See: docs/case-studies/issue-82/CASE-STUDY.md
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false  # Keep tool cache for setup-* action compatibility
+          android: true      # Free ~14 GB
+          dotnet: true       # Free ~2.7 GB
+          haskell: true      # Free ~0 GB (not pre-installed on ubuntu-24.04)
+          large-packages: true  # Free ~5.3 GB
+          docker-images: true   # Clean existing Docker images
+          swap-storage: true    # Free ~4 GB
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
