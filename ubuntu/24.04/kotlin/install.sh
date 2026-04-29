@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Kotlin installation via SDKMAN
 # Usage: curl -fsSL <url> | bash  OR  bash install.sh
-# Requires: SDKMAN (install java first, or SDKMAN will be installed here)
+# Kotlin requires a JVM at runtime (kotlinc is a shell wrapper around `java`),
+# so this script also installs Java 21 LTS via SDKMAN if it is not already
+# present. The standalone box-kotlin image must be runnable on its own.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SCRIPT_DIR/../common.sh" ]; then
@@ -38,6 +40,25 @@ if [ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]; then
   set +u
   source "$SDKMAN_DIR/bin/sdkman-init.sh"
   set -u
+
+  # Kotlin runtime needs Java; install it first if missing.
+  if ! command_exists java; then
+    log_info "Installing Java 21 LTS (Temurin) via SDKMAN (required by Kotlin)..."
+    set +u
+    sdk install java 21-tem < /dev/null || {
+      log_warning "Eclipse Temurin installation failed, trying default OpenJDK..."
+      sdk install java 21-open < /dev/null || true
+    }
+    set -u
+
+    if command -v java &>/dev/null; then
+      log_success "Java installed: $(java -version 2>&1 | head -n1)"
+    else
+      log_warning "Java installation did not produce a usable java binary."
+    fi
+  else
+    log_info "Java already installed."
+  fi
 
   if ! command_exists kotlin; then
     log_info "Installing Kotlin via SDKMAN..."
