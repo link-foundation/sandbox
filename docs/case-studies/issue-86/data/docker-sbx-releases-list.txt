@@ -1,0 +1,20 @@
+Nightly build @7fca84a	Pre-release	nightly	2026-05-10T04:39:17Z
+dev-bad9503	Pre-release	dev-bad9503	2026-05-06T17:11:22Z
+dev-921c1c7	Pre-release	dev-921c1c7	2026-05-06T14:21:55Z
+dev-2631810	Pre-release	dev-2631810	2026-05-06T11:27:00Z
+dev-438ebd7	Pre-release	dev-438ebd7	2026-05-06T11:20:28Z
+dev-ad0ca5e	Pre-release	dev-ad0ca5e	2026-05-05T19:34:54Z
+v0.28.3	Latest	v0.28.3	2026-04-29T21:08:34Z
+v0.28.2		v0.28.2	2026-04-29T15:32:48Z
+dev-ebc3fbe	Pre-release	dev-ebc3fbe	2026-04-29T09:08:48Z
+v0.28.1		v0.28.1	2026-04-28T16:34:21Z
+v0.28.0	Pre-release	v0.28.0	2026-04-27T17:01:15Z
+dev-e54ee33	Pre-release	dev-e54ee33	2026-04-27T16:23:21Z
+dev-a5207e0	Pre-release	dev-a5207e0	2026-04-22T12:57:05Z
+dev-8fc2763	Pre-release	dev-8fc2763	2026-04-21T16:22:43Z
+dev-c13a59d	Pre-release	dev-c13a59d	2026-04-21T15:06:48Z
+dev-c7702ef	Pre-release	dev-c7702ef	2026-04-21T13:49:59Z
+v0.27.0		v0.27.0	2026-04-20T18:25:53Z
+v0.26.1		v0.26.1	2026-04-17T11:19:29Z
+v0.25.0		v0.25.0	2026-04-13T20:36:40Z
+v0.24.2		v0.24.2	2026-04-08T17:55:23Z
