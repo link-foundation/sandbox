@@ -1,0 +1,11 @@
+content/manuals/ai/sandboxes/_index.md
+content/manuals/ai/sandboxes/agents
+content/manuals/ai/sandboxes/architecture.md
+content/manuals/ai/sandboxes/customize
+content/manuals/ai/sandboxes/docker-desktop.md
+content/manuals/ai/sandboxes/faq.md
+content/manuals/ai/sandboxes/get-started.md
+content/manuals/ai/sandboxes/images
+content/manuals/ai/sandboxes/security
+content/manuals/ai/sandboxes/troubleshooting.md
+content/manuals/ai/sandboxes/usage.md

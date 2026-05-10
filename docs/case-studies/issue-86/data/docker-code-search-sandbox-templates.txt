@@ -1,0 +1,38 @@
+docker/docs:content/manuals/ai/sandboxes/agents/copilot.md: Template: `docker/sandbox-templates:copilot`
+docker/docker-agent:docs/configuration/sandbox/index.md: | `--template`  | `docker/sandbox-templates:docker-agent`      | OCI image used as the sandbox template. Passed to `docker sandbox create -t` / `sbx create -t`.           |
+docker/docs:content/manuals/ai/sandboxes/customize/kits.md: image: "docker/sandbox-templates:claude-code-docker"
+docker/docs:content/manuals/ai/sandboxes/customize/kits.md: Build on top of `docker/sandbox-templates:shell-docker` to get these for
+docker/sbx-kits-contrib:openclaw/spec.yaml: image: "docker/sandbox-templates:shell-docker"
+docker/docker-agent:cmd/root/run.go: cmd.PersistentFlags().StringVar(&flags.sandboxTemplate, "template", "docker/sandbox-templates:docker-agent", "Template image for the sandbox (passed to docker sandbox create -t)")
+docker/docs:content/manuals/ai/sandboxes/agents/docker-agent.md: The sandbox uses `docker/sandbox-templates:docker-agent` and launches Docker
+docker/sbx-kits-contrib:tck/suite.go: DefaultShellImage = "docker/sandbox-templates:shell-docker"
+docker/sbx-kits-contrib:tck/suite.go: "shell":        "docker/sandbox-templates:shell-docker",
+docker/sbx-kits-contrib:tck/suite.go: "claude":       "docker/sandbox-templates:claude-code-docker",
+docker/docker-agent:docs/features/cli/index.md: | `--template <image>`                    | Template image for the sandbox (default: `docker/sandbox-templates:docker-agent`)                                                         |
+docker/docs:content/manuals/ai/sandboxes/customize/templates.md: `docker/sandbox-templates:<variant>`. They are based on Ubuntu and run as a
+docker/docs:content/manuals/ai/sandboxes/customize/templates.md: $ sbx run claude --template docker.io/docker/sandbox-templates:claude-code
+docker/sbx-kits-contrib:trivy/spec.yaml: image: "docker/sandbox-templates:shell-docker"
+docker/docs:data/cli/sandbox/docker_sandbox_inspect.yaml: "template": "docker/sandbox-templates:claude-code",
+docker/docs:content/manuals/ai/sandboxes/docker-desktop.md: FROM docker/sandbox-templates:claude-code
+docker/sbx-kits-contrib:opencode-model-runner/spec.yaml: image: "docker/sandbox-templates:opencode-docker"
+docker/docs:content/manuals/ai/sandboxes/agents/codex.md: Template: `docker/sandbox-templates:codex`
+docker/sbx-kits-contrib:nanoclaw/spec.yaml: image: "docker/sandbox-templates:claude-code-docker"
+docker/docs:content/manuals/ai/sandboxes/customize/build-an-agent.md: - `docker/sandbox-templates:shell`. Generic base with no pre-installed
+docker/docs:content/manuals/ai/sandboxes/customize/build-an-agent.md: - `docker/sandbox-templates:shell-docker`. Same, with Docker Engine inside
+docker/docs:content/manuals/ai/sandboxes/agents/droid.md: Template: `docker/sandbox-templates:droid-docker`
+docker/sbx-kits-contrib:amp/spec.yaml: image: "docker/sandbox-templates:shell-docker"
+docker/go-sdk:image/pull_unit_test.go: imageName := "docker/sandbox-templates:shell-docker"
+docker/docs:content/manuals/ai/sandboxes/agents/gemini.md: Template: `docker/sandbox-templates:gemini`
+docker/sbx-kits-contrib:claude-ollama/spec.yaml: image: "docker/sandbox-templates:claude-code-docker"
+docker/docs:content/manuals/ai/sandboxes/agents/cursor.md: Template: `docker/sandbox-templates:cursor-agent-docker`
+docker/docs:content/manuals/ai/sandboxes/customize/kit-examples.md: image: "docker/sandbox-templates:claude-code-docker"
+docker/docs:content/manuals/ai/sandboxes/agents/opencode.md: Template: `docker/sandbox-templates:opencode`
+docker/docs:content/manuals/ai/sandboxes/agents/kiro.md: Template: `docker/sandbox-templates:kiro`
+docker/sbx-kits-contrib:pi/spec.yaml: image: "docker/sandbox-templates:shell-docker"
+docker/docs:content/manuals/ai/sandboxes/agents/claude-code.md: The sandbox uses `docker/sandbox-templates:claude-code` and launches Claude Code
+docker/sbx-kits-contrib:nanobot/spec.yaml: image: "docker/sandbox-templates:shell-docker"
+docker/docs:content/manuals/ai/sandboxes/faq.md: image: "docker/sandbox-templates:claude-code-docker"
+docker/sbx-kits-contrib:tck/tck_test.go: require.Equal(t, "docker/sandbox-templates:claude-code-docker", img)
+docker/sbx-kits-contrib:tck/tck_test.go: require.Equal(t, "docker/sandbox-templates:shell-docker", suite.Image)
+docker/sbx-kits-contrib:spec/validate_test.go: Template:      "docker/sandbox-templates:shell-docker",
+docker/sbx-kits-contrib:spec/testdata/sample-agent/spec.yaml: image: "docker/sandbox-templates:shell-docker"
